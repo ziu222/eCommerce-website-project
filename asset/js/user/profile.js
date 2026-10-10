@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // ── Auth guard ────────────────────────────────────────
     var session = getCurrentUser();
     if (!session || session.role !== "customer") {
-        window.location.href = "login.html?next=profile.html";
+        UI.requireLogin();
         return;
     }
 
@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
         fullUser = await Api.profile.get();
     } catch (e) {
-        window.location.href = "login.html?next=profile.html";
+        UI.requireLogin();
         return;
     }
 

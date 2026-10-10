@@ -18,7 +18,7 @@ function renderUser() {
     userContent.className = "user-content-pill";
     userContent.innerHTML = `<span class="ms">person</span><span class="user-guest-label">Sign in</span>`;
     if (userMenu) { userMenu.classList.add("hidden"); userMenu.style.display = ""; }
-    userBtn.onclick = () => { window.location.href = "login.html"; };
+    userBtn.onclick = () => { UI.openAuth("login"); };
     return;
   }
 
@@ -98,66 +98,5 @@ async function logout() {
   await Api.auth.logout();
   location.reload();
 }
-
-// ===== Login form (login.html) =====
-
-// Where to go after signing in: ?next=cart.html, only a plain page next to this one.
-function nextPage() {
-  const next = new URLSearchParams(location.search).get("next") || "";
-  return /^[a-z-]+\.html(\?[\w=&.-]*)?$/.test(next) ? next : "home.html";
-}
-
-function showAuthError(message) {
-  const el = document.getElementById("authError");
-  if (!el) return;
-  el.textContent = message;
-  el.hidden = false;
-  el.classList.remove("shake");
-  void el.offsetWidth; // restart the animation for a repeated error
-  el.classList.add("shake");
-}
-
-const loginForm = document.getElementById("loginForm");
-
-if (loginForm) {
-  loginForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const username = document.getElementById("loginUser").value.trim();
-    const password = document.getElementById("loginPass").value;
-    if (!username || !password) {
-      showAuthError("Enter your username and password.");
-      return;
-    }
-
-    const submit = document.getElementById("authSubmit");
-    submit.disabled = true;
-    try {
-      await Api.auth.login(username, password);
-    } catch (err) {
-      const blocked = {
-        pending: "Your shop is waiting for admin approval.",
-        suspended: "This account is suspended.",
-        banned: "This account has been banned."
-      };
-      showAuthError(blocked[err.message] || "Wrong username or password.");
-      submit.disabled = false;
-      return;
-    }
-    window.location.href = nextPage();
-  });
-}
-
-// Show / hide password
-document.querySelectorAll(".pass-toggle").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const input = btn.parentElement.querySelector("input");
-    const reveal = input.type === "password";
-    input.type = reveal ? "text" : "password";
-    btn.setAttribute("aria-pressed", String(reveal));
-    btn.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
-    btn.firstElementChild.textContent = reveal ? "visibility_off" : "visibility";
-  });
-});
 
 document.addEventListener("DOMContentLoaded", renderUser);

@@ -1,63 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create account - EC SHOP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/ui.css">
-    <link rel="stylesheet" href="../asset/css/user-login.css">
+    <meta http-equiv="refresh" content="0;url=home.html?auth=signup">
+    <script>location.replace("home.html?auth=signup" + (location.search ? "&" + location.search.slice(1) : ""));</script>
 </head>
-
-<body class="auth-page">
-    <main class="auth">
-        <aside class="auth-aside" aria-hidden="true">
-            <a class="brand" href="home.html" tabindex="-1"><span class="brand-mark">EC</span>EC SHOP</a>
-            <p class="auth-aside-line">One cart. Many sellers. Real support.</p>
-        </aside>
-
-        <section class="auth-panel">
-            <a class="brand auth-brand" href="home.html"><span class="brand-mark" aria-hidden="true">EC</span>EC SHOP</a>
-            <h1>Create your account</h1>
-            <p class="muted">It takes a minute. You can add money to your wallet later.</p>
-
-            <form id="signupForm" class="auth-form" novalidate>
-                <div class="field">
-                    <label for="suName">Full name</label>
-                    <input class="input" type="text" id="suName" autocomplete="name" autofocus>
-                </div>
-                <div class="field">
-                    <label for="suUser">Username</label>
-                    <input class="input" type="text" id="suUser" autocomplete="username">
-                </div>
-                <div class="field">
-                    <label for="suEmail">Email</label>
-                    <input class="input" type="email" id="suEmail" autocomplete="email">
-                </div>
-                <div class="field">
-                    <label for="suPass">Password</label>
-                    <div class="pass-wrap">
-                        <input class="input" type="password" id="suPass" autocomplete="new-password">
-                        <button type="button" class="pass-toggle" aria-label="Show password" aria-pressed="false"><span class="ms">visibility</span></button>
-                    </div>
-                    <p class="hint">At least 6 characters.</p>
-                </div>
-                <p class="auth-error" id="authError" role="alert" hidden></p>
-                <button type="submit" class="btn btn-primary btn-lg btn-block" id="authSubmit">Create account</button>
-            </form>
-
-            <p class="auth-switch">Already have an account? <a href="login.html">Sign in</a></p>
-        </section>
-    </main>
-
-    <script src="../asset/js/api/client.js"></script>
-    <script src="../asset/js/api/auth.js"></script>
-    <script src="../asset/js/user/ui.js"></script>
-    <script src="../asset/js/user/user-signup.js"></script>
+<body>
+    <p><a href="home.html?auth=signup">Continue to create account</a></p>
 </body>
-
 </html>
