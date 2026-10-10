@@ -1,0 +1,225 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  customer
+  shop
+  admin
+}
+
+enum AdminRole {
+  super_admin
+  pm
+  ba
+  staff
+}
+
+enum ShopStatus {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+enum ProductStatus {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  shipped
+  delivered
+  cancelled
+}
+
+enum PaymentMethod {
+  cod
+  wallet
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  refunded
+}
+
+enum CouponType {
+  percent
+  fixed
+}
+
+enum WalletTxType {
+  topup
+  payment
+  refund
+}
+
+model User {
+  id              Int         @id @default(autoincrement())
+  name            String
+  username        String      @unique
+  email           String      @unique
+  passwordHash    String
+  role            Role
+  adminRole       AdminRole?
+  status          String      @default("active")
+  avatar          String?
+  shopName        String?
+  shopDescription String?
+  shopStatus      ShopStatus?
+  walletBalance   Decimal     @default(0) @db.Decimal(12, 2)
+  createdAt       DateTime    @default(now())
+
+  products           Product[]
+  ordersAsCustomer   Order[]             @relation("OrderCustomer")
+  ordersAsShop       Order[]             @relation("OrderShop")
+  coupons            Coupon[]
+  cartItems          CartItem[]
+  walletTransactions WalletTransaction[]
+  notificationReads  NotificationRead[]
+}
+
+model Product {
+  id          Int           @id @default(autoincrement())
+  shopId      Int
+  shop        User          @relation(fields: [shopId], references: [id])
+  name        String
+  price       Decimal       @db.Decimal(12, 2)
+  oldPrice    Decimal?      @db.Decimal(12, 2)
+  imageUrl    String
+  category    String
+  rating      Float         @default(0)
+  reviewCount Int           @default(0)
+  stock       Int           @default(0)
+  description String        @default("")
+  specs       Json?
+  adminStatus ProductStatus @default(pending)
+  adminNote   String        @default("")
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  @@index([adminStatus, category])
+  @@index([shopId])
+}
+
+model Order {
+  id            Int           @id @default(autoincrement())
+  customerId    Int
+  customer      User          @relation("OrderCustomer", fields: [customerId], references: [id])
+  shopId        Int
+  shop          User          @relation("OrderShop", fields: [shopId], references: [id])
+  subtotal      Decimal       @db.Decimal(12, 2)
+  discount      Decimal       @default(0) @db.Decimal(12, 2)
+  total         Decimal       @db.Decimal(12, 2)
+  couponCode    String?
+  status        OrderStatus   @default(pending)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(pending)
+  createdAt     DateTime      @default(now())
+
+  items   OrderItem[]
+  history OrderStatusHistory[]
+
+  @@index([customerId])
+  @@index([shopId, status])
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  qty       Int
+  price     Decimal @db.Decimal(12, 2)
+}
+
+model OrderStatusHistory {
+  id        Int         @id @default(autoincrement())
+  orderId   Int
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  changedBy String
+  changedAt DateTime    @default(now())
+}
+
+model Coupon {
+  id         Int        @id @default(autoincrement())
+  code       String     @unique
+  type       CouponType
+  value      Decimal    @db.Decimal(12, 2)
+  minOrder   Decimal    @default(0) @db.Decimal(12, 2)
+  usageLimit Int        @default(0)
+  usedCount  Int        @default(0)
+  expiresAt  DateTime
+  isActive   Boolean    @default(true)
+  shopId     Int?
+  shop       User?      @relation(fields: [shopId], references: [id])
+  createdAt  DateTime   @default(now())
+}
+
+model CartItem {
+  userId    Int
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId Int
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  qty       Int
+
+  @@id([userId, productId])
+}
+
+model Notification {
+  id         Int      @id @default(autoincrement())
+  targetRole Role?
+  targetId   Int?
+  orderId    Int?
+  type       String
+  title      String
+  message    String
+  sentBy     String
+  source     String   @default("manual")
+  batchId    String?
+  createdAt  DateTime @default(now())
+
+  reads NotificationRead[]
+
+  @@index([targetRole, targetId])
+}
+
+model NotificationRead {
+  notificationId Int
+  notification   Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+  userId         Int
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([notificationId, userId])
+}
+
+model WalletTransaction {
+  id           Int          @id @default(autoincrement())
+  userId       Int
+  user         User         @relation(fields: [userId], references: [id])
+  type         WalletTxType
+  amount       Decimal      @db.Decimal(12, 2)
+  balanceAfter Decimal      @db.Decimal(12, 2)
+  orderId      Int?
+  gateway      String?
+  createdAt    DateTime     @default(now())
+
+  @@index([userId, createdAt])
+}
