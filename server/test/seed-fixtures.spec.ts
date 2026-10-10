@@ -42,7 +42,7 @@ describe('legacy seed fixtures', () => {
 
   it('uses the shop statuses and admin roles the schema knows', () => {
     expect(users.filter((u) => u.role === 'shop').every((u) => ['pending', 'active', 'suspended'].includes(u.shopStatus!))).toBe(true);
-    expect(users.filter((u) => u.role === 'admin').every((u) => ['super_admin', 'pm', 'ba', 'hr', 'staff'].includes(u.adminRole!))).toBe(true);
+    expect(users.filter((u) => u.role === 'admin').every((u) => ['super_admin', 'pm', 'ba', 'hr', 'staff', 'support'].includes(u.adminRole!))).toBe(true);
   });
 
   it('has no notification with the string "all" as a target', () => {

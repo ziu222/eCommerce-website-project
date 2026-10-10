@@ -196,5 +196,17 @@
     "shopPhone": "0901000010",
     "shopAvatar": "",
     "shopStatus": "pending"
+  },
+  {
+    "id": 15,
+    "name": "Support Agent",
+    "username": "cskh_user",
+    "email": "cskh@ecshop.com",
+    "password": "123",
+    "role": "admin",
+    "status": "active",
+    "avatar": "",
+    "createdAt": "2025-01-03",
+    "adminRole": "support"
   }
 ]

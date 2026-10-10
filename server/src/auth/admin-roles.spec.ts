@@ -15,13 +15,21 @@ describe('admin role table', () => {
     expect(hasPermission('staff', 'users.manage')).toBe(false);
   });
 
+  it('gives customer support only the support inbox and the dashboard', () => {
+    expect(hasPermission('support', 'support.view')).toBe(true);
+    expect(hasPermission('support', 'support.reply')).toBe(true);
+    expect(hasPermission('support', 'orders.manage')).toBe(false);
+    expect(hasPermission('support', 'users.view')).toBe(false);
+    expect(hasPermission('ba', 'support.reply')).toBe(false);
+  });
+
   it('denies unknown roles and missing roles', () => {
     expect(hasPermission('ghost', 'orders.view')).toBe(false);
     expect(hasPermission(undefined, 'orders.view')).toBe(false);
     expect(permissionsFor(undefined)).toEqual([]);
   });
 
-  it('defines exactly the five roles the UI knows', () => {
-    expect(Object.keys(ADMIN_ROLES).sort()).toEqual(['ba', 'hr', 'pm', 'staff', 'super_admin']);
+  it('defines exactly the six roles the UI knows', () => {
+    expect(Object.keys(ADMIN_ROLES).sort()).toEqual(['ba', 'hr', 'pm', 'staff', 'super_admin', 'support']);
   });
 });

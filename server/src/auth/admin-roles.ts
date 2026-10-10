@@ -29,6 +29,10 @@ export const ADMIN_ROLES: Record<string, { label: string; permissions: string[] 
       'notifications.send', 'notifications.view',
     ],
   },
+  support: {
+    label: 'CSKH',
+    permissions: ['dashboard.view', 'support.view', 'support.reply'],
+  },
   staff: {
     label: 'Staff',
     permissions: [

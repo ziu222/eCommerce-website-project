@@ -40,7 +40,7 @@ describe('admin users and shops', () => {
   describe('users', () => {
     it('lists every account without password data, and filters by role', async () => {
       const all = (await (await hr()).get('/api/admin/users').expect(200)).body;
-      expect(all).toHaveLength(14);
+      expect(all).toHaveLength(15);
       expect(JSON.stringify(all)).not.toMatch(/passwordHash|argon2|"password"/);
       expect(all.find((u: { id: number }) => u.id === 11)).toMatchObject({ role: 'shop', shopStatus: 'pending', shopName: 'Flagship Store' });
       const shops = (await (await hr()).get('/api/admin/users?role=shop').expect(200)).body;
