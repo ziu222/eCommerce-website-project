@@ -8,6 +8,8 @@ export class CheckoutDto {
   @IsArray() @ArrayMinSize(1) @ArrayMaxSize(50) @ValidateNested({ each: true }) @Type(() => CartLineDto) items!: CartLineDto[];
   @IsIn(['cod', 'wallet']) paymentMethod!: 'cod' | 'wallet';
   @IsOptional() @IsString() @Matches(/^[A-Za-z0-9_-]{1,30}$/) couponCode?: string;
+  /** one of the customer's saved addresses; copied onto the order */
+  @IsOptional() @IsInt() @Min(1) addressId?: number;
 }
 
 export class UpdateOrderStatusDto {

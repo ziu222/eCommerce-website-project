@@ -47,6 +47,14 @@ export class AuthController {
     res.clearCookie(COOKIE_NAME, { path: '/' });
   }
 
+  /** Signs out every other device; this browser gets a new session so the person stays signed in here. */
+  @Post('logout-all')
+  @HttpCode(204)
+  @UseGuards(AuthGuard)
+  async logoutAll(@CurrentUser() user: SessionUser, @Res({ passthrough: true }) res: Response): Promise<void> {
+    this.setCookie(res, await this.auth.signOutEverywhere(user.id));
+  }
+
   @Get('me')
   @UseGuards(AuthGuard)
   me(@CurrentUser() user: SessionUser): SessionUser {

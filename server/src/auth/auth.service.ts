@@ -43,7 +43,7 @@ export class AuthService {
         role: 'customer',
       },
     });
-    return { session: toSessionUser(user), token: await this.sign(user.id) };
+    return { session: toSessionUser(user), token: await this.sign(user.id, user.tokenVersion) };
   }
 
   async registerShop(dto: RegisterShopDto): Promise<void> {
@@ -76,15 +76,16 @@ export class AuthService {
     if (dto.portal === 'admin' && user.role !== 'admin') {
       throw new ForbiddenException('Not an admin account');
     }
-    return { session: toSessionUser(user), token: await this.sign(user.id) };
+    await this.prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    return { session: toSessionUser(user), token: await this.sign(user.id, user.tokenVersion) };
   }
 
   /** Resolves the session for a token; null when the token is invalid or the account may no longer enter. */
   async sessionFromToken(token: string): Promise<SessionUser | null> {
     try {
-      const { sub } = await this.jwt.verifyAsync<{ sub: number }>(token);
+      const { sub, v } = await this.jwt.verifyAsync<{ sub: number; v?: number }>(token);
       const user = await this.prisma.user.findUnique({ where: { id: sub } });
-      if (!user) return null;
+      if (!user || (v ?? 0) !== user.tokenVersion) return null;
       this.assertMayEnter(user);
       return toSessionUser(user);
     } catch {
@@ -99,7 +100,13 @@ export class AuthService {
     }
   }
 
-  private sign(userId: number): Promise<string> {
-    return this.jwt.signAsync({ sub: userId });
+  /** Every session of this user, on every device, stops working; the caller gets a fresh one. */
+  async signOutEverywhere(userId: number): Promise<string> {
+    const user = await this.prisma.user.update({ where: { id: userId }, data: { tokenVersion: { increment: 1 } } });
+    return this.sign(user.id, user.tokenVersion);
+  }
+
+  private sign(userId: number, version: number): Promise<string> {
+    return this.jwt.signAsync({ sub: userId, v: version });
   }
 }
