@@ -3,22 +3,38 @@
 var allProducts = [];
 var filteredProducts = [];
 var currentCategory = "all";
+var currentQuery = "";
+var loadSeq = 0;
+var searchTimer = null;
 var hasShownPromotionPopup = false;
 
 
 // -- Init (khởi tạo) --------------------------------------------
 
-function initializeApp() {
-    // Customer pages chỉ hiển thị products đã được admin approve (adminStatus="approved").
-    allProducts = Store.getApprovedProducts ? Store.getApprovedProducts() : Store.getProducts();
-    filteredProducts = allProducts.slice();
-
+async function initializeApp() {
     showPromotionPopup();
-    renderProducts(allProducts);
     initializeEventListeners();
+    await loadProducts();
+}
 
-    console.log("ShopHub E-Commerce initialized successfully!");
-    console.log("Total products: " + allProducts.length);
+// Customer pages only get products an admin approved; the API enforces that.
+async function loadProducts() {
+    var seq = ++loadSeq;
+    try {
+        var page = await Api.products.list({
+            category: currentCategory === "all" ? undefined : currentCategory,
+            q: currentQuery,
+            limit: 24
+        });
+        if (seq !== loadSeq) return; // a newer request superseded this one
+        allProducts = page.items;
+        filteredProducts = page.items;
+        renderProducts(filteredProducts);
+    } catch (e) {
+        if (seq !== loadSeq) return;
+        var container = document.getElementById("productContainer");
+        if (container) container.innerHTML = '<div class="no-products"><h4>Could not load products</h4><p>' + Api.escapeHtml(e.message) + '</p></div>';
+    }
 }
 
 
@@ -118,10 +134,10 @@ function renderProducts(products) {
                 '</button>' +
             '</div>' +
             '<div class="product-image-wrapper">' +
-                '<img src="' + product.image + '" alt="' + product.name + '" class="product-card-img product-card-img-crop" onerror="handleProductImageError(this)">' +
+                '<img src="' + Api.escapeHtml(product.image) + '" alt="' + Api.escapeHtml(product.name) + '" class="product-card-img product-card-img-crop" onerror="handleProductImageError(this)">' +
             '</div>' +
             '<div class="product-card-body">' +
-                '<h6 class="product-name">' + product.name + '</h6>' +
+                '<h6 class="product-name">' + Api.escapeHtml(product.name) + '</h6>' +
                 '<div class="product-price-section">' +
                     '<span class="product-price-new">$' + formatPrice(product.price) + '</span>' +
                     (product.oldPrice ? '<span class="product-price-old">$' + formatPrice(product.oldPrice) + '</span>' : '') +
@@ -142,29 +158,13 @@ function renderProducts(products) {
 
 function filterProducts(category) {
     currentCategory = category;
-
-    if (category === "all") {
-        filteredProducts = allProducts.slice();
-    } else {
-        filteredProducts = Store.getProductsByCategory(category);
-    }
-
-    renderProducts(filteredProducts);
+    loadProducts();
 }
 
 function searchProducts(query) {
-    var results = Store.searchProducts(query);
-
-    if (currentCategory !== "all") {
-        var filtered = [];
-        for (var i = 0; i < results.length; i++) {
-            if (results[i].category === currentCategory) filtered.push(results[i]);
-        }
-        results = filtered;
-    }
-
-    filteredProducts = results;
-    renderProducts(filteredProducts);
+    currentQuery = (query || "").trim();
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(loadProducts, 250);
 }
 
 
