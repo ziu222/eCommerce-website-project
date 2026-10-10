@@ -1,4 +1,5 @@
 import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import { centsToString, toCents } from '../common/money.js';
 import { loadEnv } from '../config/env.js';
 import type { Prisma, WalletTransaction } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -7,10 +8,6 @@ type Tx = Prisma.TransactionClient;
 
 export const MAX_TOPUP = 1000;
 export const MAX_TOPUP_PER_DAY = 5000;
-
-/** Money is handled in integer cents and written to NUMERIC columns as exact strings. */
-export const centsToString = (cents: number): string => (cents / 100).toFixed(2);
-export const toCents = (value: number | string | { toString(): string }): number => Math.round(Number(value.toString()) * 100);
 
 export interface WalletTransactionDto {
   id: number;

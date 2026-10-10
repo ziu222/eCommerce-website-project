@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { HealthController } from './health/health.controller.js';
 import { AuthModule } from './auth/auth.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { CouponsModule } from './coupons/coupons.module.js';
 import { WalletModule } from './wallet/wallet.module.js';
 import { ProductsModule } from './products/products.module.js';
 
@@ -19,7 +20,7 @@ const serveStatic =
       ];
 
 @Module({
-  imports: [PrismaModule, AuthModule, ProductsModule, WalletModule, ...serveStatic],
+  imports: [PrismaModule, AuthModule, ProductsModule, WalletModule, CouponsModule, ...serveStatic],
   controllers: [HealthController],
 })
 export class AppModule {}
