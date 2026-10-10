@@ -15,14 +15,13 @@ function renderCart() {
 
     if (cart.length === 0) {
         container.innerHTML = `
-            <div class="cart-empty">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <p>Giỏ hàng của bạn đang trống</p>
-                <button class="btn-shop" onclick="window.location.href='product.html'">
-                    Tiếp tục mua sắm
-                </button>
+            <div class="empty card">
+                <span class="ms">shopping_bag</span>
+                <h3>Your cart is empty</h3>
+                <p>Find something you like and it will wait for you here.</p>
+                <a class="btn btn-primary" href="product.html">Start shopping</a>
             </div>`;
-        if (countLabel) countLabel.textContent = "0 sản phẩm";
+        if (countLabel) countLabel.textContent = "0 items";
         document.getElementById("total-items").textContent = "0";
         document.getElementById("total-price").textContent = "$0";
         return;
@@ -34,7 +33,7 @@ function renderCart() {
         return cartItem(item);
     }).join("");
 
-    if (countLabel) countLabel.textContent = totalItems + " sản phẩm";
+    if (countLabel) countLabel.textContent = totalItems + (totalItems === 1 ? " item" : " items");
     document.getElementById("total-items").textContent = totalItems;
 
     var finalDisplay = Math.max(0, totalPrice - discountAmount);
@@ -60,26 +59,30 @@ async function refreshCoupon() {
 }
 
 function cartItem(item) {
+    var known = getProducts().filter(function (p) { return p.id === item.id; })[0];
+    var category = known ? known.category : "smartphone";
+    var name = Api.escapeHtml(item.name);
     return `
-    <div class="cart-item">
-        <img src="${Api.escapeHtml(item.image)}" class="cart-item-img" onerror="this.onerror=null;this.src='../asset/img/404.png'" />
-        <div class="cart-item-info">
-            <div class="cart-item-name">${Api.escapeHtml(item.name)}</div>
-            <div class="cart-item-price">$${Number(item.price).toLocaleString("en-US")}</div>
+    <article class="cart-line">
+        <img src="${Api.escapeHtml(item.image)}" alt="" class="cart-line-img${UI.isPlaceholder(item.image) ? " is-ph" : ""}" data-category="${Api.escapeHtml(category)}">
+        <div class="cart-line-info">
+            <a class="cart-line-name" href="product-detail.html?id=${item.id}">${name}</a>
+            <div class="cart-line-price">${UI.money(item.price)} each</div>
         </div>
-        <div class="qty-controls">
-            <button class="qty-btn dec" data-id="${item.id}">−</button>
-            <span class="qty-display">${item.quantity}</span>
-            <button class="qty-btn inc" data-id="${item.id}">+</button>
+        <div class="cart-line-controls">
+            <div class="line-qty" role="group" aria-label="Quantity of ${name}">
+                <button type="button" class="dec" data-id="${item.id}" aria-label="Decrease quantity">−</button>
+                <output>${item.quantity}</output>
+                <button type="button" class="inc" data-id="${item.id}" aria-label="Increase quantity">+</button>
+            </div>
+            <span class="line-total">${UI.money(item.price * item.quantity)}</span>
+            <button type="button" class="line-remove remove" data-id="${item.id}" aria-label="Remove ${name}"><span class="ms">delete</span></button>
         </div>
-        <button class="remove-btn remove" data-id="${item.id}" title="Xóa">
-            <i class="fa-solid fa-trash-can"></i>
-        </button>
-    </div>`;
+    </article>`;
 }
 
 document.getElementById("cart-items").addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
+    const btn = e.target.closest("button[data-id]");
     if (!btn) return;
 
     const id = Number(btn.dataset.id);
@@ -152,6 +155,11 @@ function initCheckout() {
     const user = getCurrentUser();
 
     if (user) loadWalletBalance();
+    else {
+        document.getElementById("pmWallet").disabled = true;
+        document.getElementById("walletBalanceDisplay").textContent = "Sign in to use";
+        document.getElementById("btnCheckout").lastChild.textContent = "Sign in to check out";
+    }
 
     // Validate balance when switching to wallet
     document.querySelectorAll("input[name='payMethod']").forEach(r => {
@@ -231,7 +239,7 @@ async function handleCheckout() {
         showOrderModal(result.orders.map(o => o.id), method, result.total);
     } catch (e) {
         if (e.status === 401 || e.status === 403) { window.location.href = "login.html"; return; }
-        alert(e.message || "Checkout failed");
+        UI.toast(e.message || "Checkout failed. Please try again.", "error");
     } finally {
         validatePaymentMethod();
     }
@@ -239,7 +247,7 @@ async function handleCheckout() {
 
 function showOrderModal(orderIds, method, total) {
     document.getElementById("modalOrderId").textContent = "#" + orderIds.join(", #");
-    document.getElementById("modalPayMethod").textContent = method === "wallet" ? "Wallet" : "Cash on Delivery";
+    document.getElementById("modalPayMethod").textContent = method === "wallet" ? "Wallet" : "Cash on delivery";
     document.getElementById("modalTotal").textContent = "$" + Number(total).toLocaleString("en-US");
     document.getElementById("orderModal").classList.add("is-open");
 }
@@ -247,6 +255,4 @@ function showOrderModal(orderIds, method, total) {
 document.addEventListener("DOMContentLoaded", () => {
     renderCart();
     initCheckout();
-    const cartBtn = document.getElementById("cart-btn");
-    if (cartBtn) cartBtn.addEventListener("click", () => window.location.href = "cart.html");
 });
