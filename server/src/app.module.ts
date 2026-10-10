@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
 import { CouponsModule } from './coupons/coupons.module.js';
 import { NotificationsModule } from './notifications/notifications.module.js';
 import { OrdersModule } from './orders/orders.module.js';
+import { UploadsModule } from './uploads/uploads.module.js';
 import { UsersModule } from './users/users.module.js';
 import { WalletModule } from './wallet/wallet.module.js';
 import { ProductsModule } from './products/products.module.js';
@@ -24,7 +25,7 @@ const serveStatic =
       ];
 
 @Module({
-  imports: [PrismaModule, AuthModule, ProductsModule, WalletModule, CouponsModule, OrdersModule, NotificationsModule, AdminModule, UsersModule, ...serveStatic],
+  imports: [PrismaModule, AuthModule, ProductsModule, WalletModule, CouponsModule, OrdersModule, NotificationsModule, AdminModule, UsersModule, UploadsModule, ...serveStatic],
   controllers: [HealthController],
 })
 export class AppModule {}
