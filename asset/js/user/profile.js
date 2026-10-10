@@ -214,7 +214,9 @@ function renderCoverPhoto(user) {
 function renderBalance(userId) {
     var balance = walletSnapshot.balance || 0;
     var el = document.getElementById("profileBalance");
-    if (el) el.textContent = "$" + Number(balance).toLocaleString("en-US", { minimumFractionDigits: 2 });
+    if (el) UI.countTo(el, Number(balance), {
+        format: function (n) { return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    });
 }
 
 function validateForm(fullUser) {

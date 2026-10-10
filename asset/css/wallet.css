@@ -49,3 +49,7 @@
     .wallet-layout { grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr); gap: 28px; }
     .history { min-height: 100%; }
 }
+
+/* a row that has just arrived slides in and its highlight fades */
+@keyframes fresh { from { background: var(--brand-soft); transform: translateX(-12px); opacity: 0; } 30% { opacity: 1; } to { background: transparent; transform: none; } }
+.tx-item.fresh { animation: fresh 2s var(--ease); border-radius: var(--r-sm); }

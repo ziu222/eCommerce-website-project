@@ -5,6 +5,20 @@ var discountAmount = 0;
 var walletBalance  = 0;
 var couponSeq      = 0;
 
+// The total counts up or down to its new value.
+function setTotal(value) {
+    UI.countTo(document.getElementById("total-price"), value, {
+        format: function (n) { return "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 }); }
+    });
+}
+
+// The quantity number pops after a change.
+function tickQty(id) {
+    const btn = document.querySelector('.cart-line .inc[data-id="' + id + '"]');
+    const out = btn && btn.parentNode.querySelector("output");
+    if (out) out.classList.add("tick");
+}
+
 function renderCart() {
     const cart = getCart();
     const container = document.getElementById("cart-items");
@@ -23,7 +37,7 @@ function renderCart() {
             </div>`;
         if (countLabel) countLabel.textContent = "0 items";
         document.getElementById("total-items").textContent = "0";
-        document.getElementById("total-price").textContent = "$0";
+        setTotal(0);
         return;
     }
 
@@ -37,7 +51,7 @@ function renderCart() {
     document.getElementById("total-items").textContent = totalItems;
 
     var finalDisplay = Math.max(0, totalPrice - discountAmount);
-    document.getElementById("total-price").textContent = "$" + finalDisplay.toLocaleString("en-US");
+    setTotal(finalDisplay);
 
     // The server re-checks the coupon against the current cart (quantities may have changed)
     if (activeCoupon) refreshCoupon();
@@ -55,7 +69,7 @@ async function refreshCoupon() {
         clearCoupon();
     }
     var rawTotal = getCart().reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
-    document.getElementById("total-price").textContent = "$" + Math.max(0, rawTotal - discountAmount).toLocaleString("en-US");
+    setTotal(Math.max(0, rawTotal - discountAmount));
 }
 
 function cartItem(item) {
@@ -104,12 +118,24 @@ document.getElementById("cart-items").addEventListener("click", (e) => {
     }
 
     if (btn.classList.contains("remove")) {
+        const line = btn.closest(".cart-line");
+        if (line && UI.motion() === "full") {
+            // the line folds away first, then the cart is saved and drawn again
+            line.classList.add("leaving");
+            setTimeout(function () {
+                saveCart(getCart().filter(i => i.id !== id));
+                renderCart();
+                updateCartBadge();
+            }, 300);
+            return;
+        }
         cart = cart.filter(i => i.id !== id);
     }
 
     saveCart(cart);
     renderCart();
     updateCartBadge();
+    tickQty(id);
 });
 
 function updateDiscountUI(code, discount) {
@@ -143,7 +169,7 @@ async function applyCoupon() {
         fb.className    = "coupon-feedback success";
         // Refresh total display
         var rawTotal = getCart().reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
-        document.getElementById("total-price").textContent = "$" + Math.max(0, rawTotal - discountAmount).toLocaleString("en-US");
+        setTotal(Math.max(0, rawTotal - discountAmount));
     } else {
         clearCoupon();
         fb.textContent = result.message;
@@ -252,6 +278,7 @@ function showOrderModal(orderIds, method, total) {
     document.getElementById("modalPayMethod").textContent = method === "wallet" ? "Wallet" : "Cash on delivery";
     document.getElementById("modalTotal").textContent = "$" + Number(total).toLocaleString("en-US");
     document.getElementById("orderModal").classList.add("is-open");
+    UI.confetti();
 }
 
 document.addEventListener("DOMContentLoaded", () => {

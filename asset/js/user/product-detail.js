@@ -62,13 +62,18 @@
         var val = document.getElementById("qtyVal");
         var dec = document.getElementById("qtyDec");
         var inc = document.getElementById("qtyInc");
-        function show() {
+        function show(animate) {
             val.textContent = qty;
+            if (animate) {
+                val.classList.remove("tick");
+                void val.offsetWidth;
+                val.classList.add("tick");
+            }
             dec.disabled = qty <= 1;
             inc.disabled = qty >= p.stock;
         }
-        dec.addEventListener("click", function () { if (qty > 1) { qty--; show(); } });
-        inc.addEventListener("click", function () { if (qty < p.stock) { qty++; show(); } });
+        dec.addEventListener("click", function () { if (qty > 1) { qty--; show(true); } });
+        inc.addEventListener("click", function () { if (qty < p.stock) { qty++; show(true); } });
         show();
 
         function add() {
@@ -76,6 +81,9 @@
         }
         document.getElementById("btnAddCart").addEventListener("click", function () {
             add();
+            var self = this;
+            self.innerHTML = '<span class="ms">check</span>Added';
+            setTimeout(function () { self.innerHTML = '<span class="ms">add_shopping_cart</span>Add to cart'; }, 1400);
             UI.toast(qty > 1 ? qty + " items added to your cart" : "Added to your cart");
         });
         document.getElementById("btnBuyNow").addEventListener("click", function () {

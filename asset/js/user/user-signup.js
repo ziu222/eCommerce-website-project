@@ -10,6 +10,9 @@ if (signupForm) {
       const el = document.getElementById("authError");
       el.textContent = message;
       el.hidden = false;
+      el.classList.remove("shake");
+      void el.offsetWidth;
+      el.classList.add("shake");
     };
 
     if (!value("suName") || !value("suUser") || !value("suEmail") || !value("suPass")) {

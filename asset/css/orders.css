@@ -7,9 +7,15 @@
 .order-head .muted { margin-top: 2px; font-size: 14px; }
 
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
-.steps li { padding-top: 12px; border-top: 4px solid var(--line); color: var(--ink-3); font-size: 13px; font-weight: 600; }
-.steps li.done { border-color: var(--brand); color: var(--ink-2); }
-.steps li.now { border-color: var(--brand); color: var(--brand-2); }
+.steps li { position: relative; padding-top: 14px; color: var(--ink-3); font-size: 13px; font-weight: 600; }
+.steps li::before, .steps li::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 4px; border-radius: 2px; background: var(--line); }
+.steps li::after { background: var(--brand); transform: scaleX(0); transform-origin: left; }
+.steps li.done { color: var(--ink-2); }
+.steps li.now { color: var(--brand-2); }
+/* the bars fill one after another once the order card has finished appearing */
+.order:not([data-reveal]) .steps li.done::after, .order:not([data-reveal]) .steps li.now::after { animation: bar-fill 0.7s var(--ease) calc(var(--k) * 0.18s + 0.2s) forwards; }
+@keyframes bar-fill { to { transform: scaleX(1); } }
+html[data-motion="reduced"] .steps li.done::after, html[data-motion="reduced"] .steps li.now::after { transform: scaleX(1); animation: none; }
 
 .order-items { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
 .order-items li { display: grid; grid-template-columns: 56px 1fr auto; align-items: center; gap: 14px; }

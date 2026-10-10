@@ -6,6 +6,21 @@ var UI = (function () {
 
     var esc = function (s) { return Api.escapeHtml(s); };
 
+    // Motion setting: follows the system's "reduce motion" unless the visitor turned full animations on (footer switch).
+    var MOTION_KEY = "ecshop_motion";
+    var systemReduces = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function motionMode() {
+        var saved = null;
+        try { saved = localStorage.getItem(MOTION_KEY); } catch (e) { /* private mode */ }
+        return saved === "full" || !systemReduces.matches ? "full" : "reduced";
+    }
+
+    function applyMotion() {
+        document.documentElement.dataset.motion = motionMode();
+    }
+    applyMotion();
+
     var CATEGORIES = [
         { key: "smartphone", label: "Smartphones", icon: "smartphone" },
         { key: "laptops", label: "Laptops", icon: "laptop_mac" },
@@ -102,6 +117,39 @@ var UI = (function () {
         setTimeout(function () { t.remove(); }, 2800);
     }
 
+    // Counts a number from where it was to its new value (money by default). Instant under "reduce motion".
+    function countTo(el, to, opts) {
+        opts = opts || {};
+        var fmt = opts.format || money;
+        var from = opts.from !== undefined ? opts.from : Number(el.dataset.value || 0);
+        el.dataset.value = String(to);
+        if (motionMode() === "reduced" || from === to) { el.textContent = fmt(to); return; }
+        var dur = opts.duration || 800;
+        var start = null;
+        el.textContent = fmt(from);
+        function step(t) {
+            if (start === null) start = t;
+            var p = Math.min(1, (t - start) / dur);
+            el.textContent = fmt(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+            if (p < 1) requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+        setTimeout(function () { el.textContent = fmt(to); }, dur + 250); // in case frames were paused
+    }
+
+    // A short burst of confetti over the page, for a moment worth celebrating. Skipped under "reduce motion".
+    function confetti() {
+        if (motionMode() === "reduced") return;
+        var layer = document.createElement("div");
+        layer.className = "confetti";
+        layer.setAttribute("aria-hidden", "true");
+        layer.setAttribute("data-lottie", "confetti");
+        layer.setAttribute("data-cover", "");
+        layer.setAttribute("data-speed", "0.7");
+        document.body.appendChild(layer);
+        setTimeout(function () { layer.remove(); }, 2600);
+    }
+
     // The round button turns into a green check for a moment.
     function confirmAdd(btn) {
         var icon = btn.querySelector(".ms");
@@ -157,7 +205,8 @@ var UI = (function () {
             '<li><a href="#" data-open-support>Chat with support</a></li></ul></div>' +
             '<div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="wallet.html">Wallet</a></li>' +
             '<li><a href="cart.html">Cart</a></li><li><a href="login.html">Sign in</a></li></ul></div></div>' +
-            '<div class="container footer-base"><span>© 2026 EC SHOP</span><span>Prices in USD</span></div>';
+            '<div class="container footer-base"><span>© 2026 EC SHOP</span><span>Prices in USD</span>' +
+            '<button type="button" class="motion-toggle" id="motionToggle" hidden></button></div>';
     }
 
     function mount() {
@@ -182,6 +231,19 @@ var UI = (function () {
         if (f) {
             f.className = "site-footer";
             f.innerHTML = footer();
+            var mt = f.querySelector("#motionToggle");
+            var syncMt = function () {
+                var full = document.documentElement.dataset.motion === "full";
+                mt.hidden = !systemReduces.matches;
+                mt.textContent = full ? "Full animations: on" : "Full animations: off";
+                mt.setAttribute("aria-pressed", String(full));
+            };
+            mt.addEventListener("click", function () {
+                try { localStorage.setItem(MOTION_KEY, document.documentElement.dataset.motion === "full" ? "system" : "full"); } catch (e) { /* private mode */ }
+                applyMotion();
+                syncMt();
+            });
+            syncMt();
         }
     }
 
@@ -217,9 +279,11 @@ var UI = (function () {
         if (el.hasAttribute("data-lottie-ready")) return;
         el.setAttribute("data-lottie-ready", "");
         // under "reduce motion" a loop plays once instead of repeating
-        var loop = el.hasAttribute("data-loop") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var loop = el.hasAttribute("data-loop") && motionMode() === "full";
+        var fit = el.hasAttribute("data-cover") ? ' preserveAspectRatio="xMidYMid slice"' : "";
+        var speed = el.dataset.speed || "1";
         loadPlayer().then(function () {
-            el.innerHTML = '<lottie-player src="../asset/lottie/' + el.dataset.lottie + '.json" background="transparent" speed="1"' +
+            el.innerHTML = '<lottie-player src="../asset/lottie/' + el.dataset.lottie + '.json" background="transparent" speed="' + speed + '"' + fit +
                 (loop ? " loop" : "") + " autoplay></lottie-player>";
         }).catch(function () { /* the fallback icon stays */ });
     }
@@ -233,7 +297,7 @@ var UI = (function () {
     // Elements that match REVEAL rise in as they scroll into view. The marker is removed once the
     // animation is done so hover effects on the same element work normally. Under "reduce motion" the CSS keeps only the fade.
 
-    var REVEAL = ".page-head, main > section:not(.hero), .card, .pcard, .promise li, .how li, .facts li, .cat-tile, .order, .help-band, .detail-media, .detail-info > *";
+    var REVEAL = ".page-head, main > section:not(.hero), .card, .pcard, .promise li, .how li, .facts li, .cat-tile, .order, .help-band, .detail-media, .detail-info > *, .auth-panel > *";
 
     function initMotion() {
         var header = document.getElementById("site-header");
@@ -289,6 +353,6 @@ var UI = (function () {
         });
     }).observe(document.body, { childList: true, subtree: true });
 
-    return { isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
+    return { motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 
 })();

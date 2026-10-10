@@ -30,9 +30,12 @@
             if (e.status === 401 || e.status === 403) { window.location.href = "login.html?next=wallet.html"; return; }
             UI.toast(e.message, "error");
         }
-        document.getElementById("walletBalance").textContent = fmt(snapshot.balance);
+        UI.countTo(document.getElementById("walletBalance"), snapshot.balance, { format: fmt });
         renderHistory();
     }
+
+    var seenTx = null; // keys of the rows already on screen, so a new one can be highlighted
+    function txKey(tx) { return tx.date + "|" + tx.amount + "|" + tx.description; }
 
     var TX_ICON = { deposit: "arrow_downward", refund: "undo" };
 
@@ -40,17 +43,21 @@
         var list = document.getElementById("txList");
         var txs = snapshot.transactions;
         if (!txs || !txs.length) {
-            list.innerHTML = '<div class="empty"><span class="ms">receipt_long</span>No transactions yet</div>';
+            list.innerHTML = '<div class="empty"><span class="anim" data-lottie="empty-box" data-loop style="--size:140px"><span class="ms">receipt_long</span></span>No transactions yet</div>';
+            seenTx = {};
             return;
         }
         list.innerHTML = txs.slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); }).map(function (tx) {
             var credit = tx.type === "deposit" || tx.type === "refund";
             var tone = tx.type === "refund" ? "refund" : credit ? "credit" : "debit";
-            return '<div class="tx-item">' +
+            var fresh = seenTx !== null && !seenTx[txKey(tx)];
+            return '<div class="tx-item' + (fresh ? " fresh" : "") + '">' +
                 '<span class="tx-icon ' + tone + '"><span class="ms">' + (TX_ICON[tx.type] || "arrow_upward") + "</span></span>" +
                 '<div><div class="tx-desc">' + esc(tx.description) + '</div><div class="tx-date">' + esc(fmtDate(tx.date)) + "</div></div>" +
                 '<div class="tx-amount ' + (credit ? "credit" : "") + '">' + (credit ? "+" : "−") + fmt(tx.amount) + "</div></div>";
         }).join("");
+        seenTx = {};
+        txs.forEach(function (tx) { seenTx[txKey(tx)] = true; });
     }
 
     // ── Amount ────────────────────────────────────────────────
@@ -126,6 +133,7 @@
             resetDeposit();
             btn.disabled = false;
             UI.toast(fmt(added) + " added to your wallet");
+            UI.confetti();
         });
     }
 

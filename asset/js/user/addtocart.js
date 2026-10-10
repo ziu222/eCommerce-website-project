@@ -53,6 +53,12 @@ function updateCartBadge() {
         badge.classList.remove("bump");
         void badge.offsetWidth; // restart the animation if it is already running
         badge.classList.add("bump");
+        const link = document.getElementById("cart-btn");
+        if (link) {
+            link.classList.remove("wiggle");
+            void link.offsetWidth;
+            link.classList.add("wiggle");
+        }
     }
 }
 

@@ -112,6 +112,9 @@ function showAuthError(message) {
   if (!el) return;
   el.textContent = message;
   el.hidden = false;
+  el.classList.remove("shake");
+  void el.offsetWidth; // restart the animation for a repeated error
+  el.classList.add("shake");
 }
 
 const loginForm = document.getElementById("loginForm");

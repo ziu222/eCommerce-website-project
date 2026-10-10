@@ -114,7 +114,7 @@ var SupportChat = (function () {
 
         turns.push({ role: "user", content: text });
         bubble("", esc(text), true);
-        var thinking = bubble("EC SHOP Assistant", "…", false);
+        var thinking = bubble("EC SHOP Assistant", '<span class="typing" role="status">Typing</span>', false);
 
         try {
             var messages = turns.slice(-MAX_SENT).map(function (t) {

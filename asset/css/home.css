@@ -107,3 +107,9 @@
 }
 
 .promise li:hover { transform: translateY(-3px); box-shadow: var(--shadow-1); }
+
+/* the banner picture floats and the round shape behind it drifts, only while its slide is showing */
+@keyframes float { 50% { translate: 0 -10px; } }
+@keyframes drift { to { translate: -24px 18px; scale: 1.06; } }
+.slide.is-active .slide-art { animation: float 7s ease-in-out 1.2s infinite; }
+.slide.is-active::before { animation: drift 14s ease-in-out infinite alternate; }

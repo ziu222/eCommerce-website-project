@@ -340,14 +340,32 @@ html.js-reveal [data-reveal].in { opacity: 1; transform: none; transition: opaci
 .modal-backdrop.is-open, .modal-backdrop.show { animation: fade-in 0.2s ease-out; }
 @keyframes fade-in { from { opacity: 0; } }
 
-/* "Reduce motion" removes things that travel (sliding, zooming, lifting) and keeps fades and colour changes,
-   so the site still reacts to the pointer. It does not switch animation off altogether. */
-@media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    html.js-reveal [data-reveal] { transform: none; }
-    .slide-copy > *, .slide-art { transform: none !important; }
-    .pcard:hover, .btn:hover:not(:disabled), .promise li:hover, .how li:hover, .hero-tile:hover { transform: none; }
-    .pcard:hover .pcard-media img, .cat-tile:hover .ms, .cart-link:hover .ms, .link-more:hover .ms { transform: none; }
-    .pcard-add.added, .cart-count.bump { animation: none; }
-    ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.12s; }
-}
+/* Reduce motion (the system setting, unless full animations are switched on in the footer) removes what travels
+   (sliding, zooming, lifting, floating) and keeps fades and colour changes, so the site still reacts to the pointer. */
+html[data-motion="reduced"] { scroll-behavior: auto; }
+html[data-motion="reduced"].js-reveal [data-reveal] { transform: none; }
+html[data-motion="reduced"] :is(.slide-copy > *, .slide-art) { transform: none !important; }
+html[data-motion="reduced"] :is(.pcard, .btn, .promise li, .how li):hover { transform: none; }
+html[data-motion="reduced"] :is(.pcard:hover .pcard-media img, .cat-tile:hover .ms, .cart-link:hover .ms, .link-more:hover .ms, .detail-media:hover img) { transform: none; }
+html[data-motion="reduced"] :is(.pcard-add.added, .cart-count.bump, .cart-link.wiggle .ms, .slide.is-active .slide-art, .slide.is-active::before, .user-menu, .sc-msg, .auth-error.shake, .line-qty output.tick, .tx-item.fresh) { animation: none; }
+html[data-motion="reduced"] ::view-transition-old(root), html[data-motion="reduced"] ::view-transition-new(root) { animation-duration: 0.12s; }
+
+/* ---------- More motion ---------- */
+
+@keyframes menu-in { from { opacity: 0; transform: translateY(-6px) scale(0.98); } }
+.user-menu { transform-origin: top right; animation: menu-in 0.18s var(--ease); }
+@keyframes wiggle { 20% { transform: rotate(-14deg); } 45% { transform: rotate(10deg); } 70% { transform: rotate(-5deg); } }
+.cart-link.wiggle .ms { animation: wiggle 0.6s var(--ease); }
+@keyframes shake { 20% { transform: translateX(-7px); } 45% { transform: translateX(6px); } 70% { transform: translateX(-3px); } }
+.auth-error.shake { animation: shake 0.45s var(--ease); }
+@keyframes tick { 40% { transform: scale(1.35); } }
+.line-qty output.tick, .qty output.tick { display: inline-block; animation: tick 0.35s var(--ease); }
+@keyframes msg-in { from { opacity: 0; transform: translateY(8px) scale(0.97); } }
+.sc-msg { animation: msg-in 0.3s var(--ease); }
+.detail-media { overflow: hidden; }
+.detail-media img { transition: transform 0.7s var(--ease); }
+.detail-media:hover img { transform: scale(1.07); }
+.confetti { position: fixed; inset: 0; z-index: 3500; pointer-events: none; }
+.confetti lottie-player { width: 100%; height: 100%; }
+.motion-toggle { padding: 0; border: 0; background: transparent; color: #c9d2d0; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.motion-toggle:hover { color: #fff; }

@@ -16,7 +16,7 @@
         if (order.status === "cancelled") return "";
         var at = STEPS.indexOf(order.status);
         return '<ol class="steps" aria-label="Order progress">' + STEPS.map(function (s, i) {
-            return '<li class="' + (i < at ? "done" : i === at ? "now" : "") + '"' + (i === at ? ' aria-current="step"' : "") + ">" + STEP_LABEL[s] + "</li>";
+            return '<li style="--k:' + i + '" class="' + (i < at ? "done" : i === at ? "now" : "") + '"' + (i === at ? ' aria-current="step"' : "") + ">" + STEP_LABEL[s] + "</li>";
         }).join("") + "</ol>";
     }
 

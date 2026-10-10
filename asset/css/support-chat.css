@@ -181,31 +181,12 @@
     .sc-panel { right: 0; bottom: 0; width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh; border: 0; border-radius: 0; }
     .sc-launcher { right: 12px; bottom: 12px; }
 }
-@media (prefers-reduced-motion: no-preference) {
-    .sc-panel.sc-open { animation: sc-in 0.18s ease-out; }
-    @keyframes sc-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-}
+.sc-panel.sc-open { animation: sc-in 0.18s ease-out; }
+@keyframes sc-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+html[data-motion="reduced"] .sc-panel.sc-open { animation: none; }
 
-/* Staff tab */
-.sc-threads { display: flex; flex-direction: column; gap: 8px; }
-.sc-thread {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid var(--line, #e3e0d8);
-    border-radius: 12px;
-    background: var(--surface, #fff);
-    color: inherit;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-}
-.sc-thread:hover { border-color: var(--brand, #0b6b66); }
-.sc-thread:focus-visible { outline: 3px solid #f2a516; outline-offset: 2px; }
-.sc-thread-main { display: flex; flex: 1; flex-direction: column; min-width: 0; }
-.sc-thread-last { overflow: hidden; color: var(--ink-3, #5f6a67); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-.sc-thread-meta { flex-shrink: 0; color: var(--ink-3, #5f6a67); font-size: 12px; text-align: right; }
-.sc-error { margin: 0; color: var(--danger, #b3261e); font-size: 14px; }
-.sc-error[hidden], .sc-badge[hidden], .sc-tabs[hidden] { display: none; }
+/* "Typing" with dots that count up while the assistant is answering (text, so it stays calm and readable) */
+.typing { color: var(--ink-3, #5f6a67); font-size: 14px; font-style: italic; }
+.typing::after { content: "."; animation: typing-dots 1.2s steps(1) infinite; }
+@keyframes typing-dots { 33% { content: ".."; } 66% { content: "..."; } }
+html[data-motion="reduced"] .typing::after { animation: none; content: "..."; }
