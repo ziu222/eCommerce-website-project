@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { HealthController } from './health/health.controller.js';
 import { AuthModule } from './auth/auth.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
+import { ProductsModule } from './products/products.module.js';
 
 // In development the repo root (static storefront) is served by Nest so pages and API share an origin.
 const serveStatic =
@@ -17,7 +18,7 @@ const serveStatic =
       ];
 
 @Module({
-  imports: [PrismaModule, AuthModule, ...serveStatic],
+  imports: [PrismaModule, AuthModule, ProductsModule, ...serveStatic],
   controllers: [HealthController],
 })
 export class AppModule {}
