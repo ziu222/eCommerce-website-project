@@ -42,7 +42,7 @@ export class CreateProductDto {
   @IsNumber({ maxDecimalPlaces: 2 }) @IsPositive() price!: number;
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @IsPositive() oldPrice?: number;
   /** An https link (e.g. from the upload endpoint) or a path under the site's own asset folder. */
-  @IsString() @Length(1, 500) @Matches(/^(https:\/\/\S+|\.\.\/asset\/\S+)$/) imageUrl!: string;
+  @IsString() @Length(1, 500) @Matches(/^(https:\/\/\S+|\.\.\/asset\/\S+)$/, { message: 'imageUrl must be an https:// link or a path under ../asset/' }) imageUrl!: string;
   @IsIn(CATEGORIES) category!: (typeof CATEGORIES)[number];
   @IsInt() @Min(0) stock!: number;
   @IsOptional() @IsString() @MaxLength(5000) description?: string;
