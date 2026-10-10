@@ -51,6 +51,10 @@ var Auth = (function () {
                 "notifications.send", "notifications.view"
             ]
         },
+        support: {
+            label:       "CSKH",
+            permissions: ["dashboard.view", "support.view", "support.reply"]
+        },
         staff: {
             label:       "Staff",
             permissions: [
