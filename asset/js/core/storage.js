@@ -560,6 +560,21 @@ var Store = (function () {
         return updateUser(shopId, { shopStatus: newStatus });
     }
 //register user
+    // Transitional: mirrors an API-registered user into the local store (same id) so pages
+    // that still read users from LocalStorage keep working. Removed together with the store.
+    function ensureUser(session) {
+        if (getUserById(session.id)) return;
+        var users = getUsers();
+        users.push({
+            id: session.id, name: session.name, username: session.username, email: session.email,
+            password: "", role: session.role, avatar: session.avatar || "",
+            createdAt: new Date().toISOString().split("T")[0],
+            walletBalance: 0, walletTransactions: [],
+            shopName: session.shopName || "", shopStatus: session.shopStatus || undefined
+        });
+        _set(KEYS.users, users);
+    }
+
     function addUser(data) {
         var users = getUsers();
         var newUser = {
@@ -1324,6 +1339,7 @@ var Store = (function () {
         getUserByEmail:       getUserByEmail,
         getUserByUsername:    getUserByUsername,
         addUser:              addUser,
+        ensureUser:           ensureUser,
         updateUser:           updateUser,
         deleteUser:           deleteUser,
 

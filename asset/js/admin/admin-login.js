@@ -28,7 +28,7 @@ toggleBtn.addEventListener("click", function () {
 var loginForm = document.getElementById("loginForm");
 var loginError = document.getElementById("loginError");
 
-loginForm.addEventListener("submit", function (e) {
+loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     var identifier = document.getElementById("identifier").value.trim();
@@ -38,17 +38,12 @@ loginForm.addEventListener("submit", function (e) {
     loginError.classList.remove("show");
 
 
-    var result = Auth.authenticate(identifier, password);
+    var result = await Auth.authenticate(identifier, password, "admin");
 
     if (result.error) {
-        loginError.textContent = "Wrong username/email or password. Please try again.";
-        loginError.classList.add("show");
-        return;
-    }
-
-    if (result.session.role !== "admin") {
-        Auth.logout("admin-login.html");
-        loginError.textContent = "You do not have admin access.";
+        loginError.textContent = result.error === "Not an admin account"
+            ? "You do not have admin access."
+            : "Wrong username/email or password. Please try again.";
         loginError.classList.add("show");
         return;
     }

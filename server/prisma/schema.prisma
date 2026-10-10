@@ -17,13 +17,13 @@ enum AdminRole {
   super_admin
   pm
   ba
+  hr
   staff
 }
 
 enum ShopStatus {
   pending
-  approved
-  rejected
+  active
   suspended
 }
 
@@ -76,6 +76,9 @@ model User {
   avatar          String?
   shopName        String?
   shopDescription String?
+  shopAddress     String?
+  shopPhone       String?
+  shopAvatar      String?
   shopStatus      ShopStatus?
   walletBalance   Decimal     @default(0) @db.Decimal(12, 2)
   createdAt       DateTime    @default(now())

@@ -160,8 +160,8 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("btnNewCoupon").addEventListener("click", function () { openModal(null); });
     document.getElementById("btnSaveCoupon").addEventListener("click", saveModal);
 
-    document.getElementById("logoutBtn").addEventListener("click", function () {
-        localStorage.removeItem("ecshop_currentUser");
+    document.getElementById("logoutBtn").addEventListener("click", async function () {
+        await Api.auth.logout();
         window.location.href = "../admin/admin-login.html";
     });
 

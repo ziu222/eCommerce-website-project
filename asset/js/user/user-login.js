@@ -94,8 +94,8 @@ document.addEventListener("click", (e) => {
   }
 });
 
-function logout() {
-  localStorage.removeItem("ecshop_currentUser");
+async function logout() {
+  await Api.auth.logout();
   location.reload();
 }
 
@@ -221,40 +221,37 @@ if (signupTab && loginTab) {
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
-  loginForm.addEventListener("submit", function (e) {
+  loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const inputs = loginForm.querySelectorAll("input");
-
     const username = inputs[0].value.trim();
     const password = inputs[1].value.trim();
 
-    let users = getUsers();
-    console.log(users);
+    try {
+      await Api.auth.login(username, password);
+    } catch (err) {
+      const blocked = {
+        pending: "Shop của bạn đang chờ admin duyệt.",
+        suspended: "Tài khoản đã bị tạm khóa.",
+        banned: "Tài khoản đã bị khóa."
+      };
+      alert(blocked[err.message] || err.message || "Sai tên hoặc mật khẩu!");
+      return;
+    }
 
-    const user = users.find(
-      user => user.username === username && user.password === password
-    );
-
-    if (user) {
-      // Lưu session (save currentUser)
-      localStorage.setItem("ecshop_currentUser", JSON.stringify(user));
-
-      var shown = CustomerModal.open({
-        title: "Đăng nhập thành công",
-        message: "Chào mừng bạn quay lại. Đang chuyển đến trang chủ...",
-        buttonText: "Ở lại",
-        autoCloseMs: 1250,
-        onAutoClose: function () {
-          window.location.href = "home.html";
-        }
-      });
-
-      if (!shown) {
+    var shown = CustomerModal.open({
+      title: "Đăng nhập thành công",
+      message: "Chào mừng bạn quay lại. Đang chuyển đến trang chủ...",
+      buttonText: "Ở lại",
+      autoCloseMs: 1250,
+      onAutoClose: function () {
         window.location.href = "home.html";
       }
-    } else {
-      alert("Sai tên hoặc mật khẩu!");
+    });
+
+    if (!shown) {
+      window.location.href = "home.html";
     }
   });
 }
