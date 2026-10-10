@@ -70,6 +70,8 @@ cp .env.example .env
 npm install
 npm run db:generate
 npm run db:migrate               # apply migrations
+npm run db:seed                  # load users, products, orders, coupons (idempotent)
+npm run db:test:setup            # create the isolated test database used by e2e tests
 npm run start:dev                # http://localhost:3000  (pages) and /api/health
 npm test && npm run test:e2e
 ```
