@@ -16,7 +16,7 @@ function renderUser() {
     userBtn.classList.remove("user-btn--logged-in");
     userBtn.classList.add("user-btn--guest");
     userContent.className = "user-content-pill";
-    userContent.innerHTML = `<span class="material-symbols-outlined">person</span><span class="user-guest-label">Login</span>`;
+    userContent.innerHTML = `<span class="ms">person</span><span class="user-guest-label">Sign in</span>`;
     if (userMenu) { userMenu.classList.add("hidden"); userMenu.style.display = ""; }
     userBtn.onclick = () => { window.location.href = "login.html"; };
     return;
@@ -24,11 +24,12 @@ function renderUser() {
 
   userBtn.classList.remove("user-btn--guest");
 
-  const displayName = user.name || user.username || "User";
-  const initial     = displayName.charAt(0).toUpperCase();
+  const displayName = Api.escapeHtml(user.name || user.username || "User");
+  const email       = Api.escapeHtml(user.email || user.username || "");
+  const initial     = (user.name || user.username || "U").charAt(0).toUpperCase();
 
   const avatarInner = user.avatar
-    ? `<img src="${user.avatar}" alt="${initial}" />`
+    ? `<img src="${Api.escapeHtml(user.avatar)}" alt="" />`
     : initial;
 
   userBtn.classList.add("user-btn--logged-in");
@@ -37,7 +38,7 @@ function renderUser() {
   userContent.innerHTML = `
     <span class="user-avatar">${avatarInner}</span>
     <span class="user-display-name">${displayName}</span>
-    <span class="material-symbols-outlined user-chevron" id="userChevron">expand_more</span>`;
+    <span class="ms user-chevron" id="userChevron">expand_more</span>`;
 
   if (userMenu) {
     userMenu.style.display = "";
@@ -49,7 +50,7 @@ function renderUser() {
         </div>
         <div class="udm-info">
           <div class="udm-name">${displayName}</div>
-          <div class="udm-email">${user.email || user.username || ""}</div>
+          <div class="udm-email">${email}</div>
         </div>
       </div>
       <div class="udm-divider"></div>
