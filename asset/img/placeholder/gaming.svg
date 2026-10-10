@@ -1,5 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Gaming product photo coming soon">
-  <rect width="400" height="400" fill="#ece9e1"/>
-  <g fill="none" stroke="#6b7673" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M130 150h140a42 42 0 0 1 41 50l-12 55a22 22 0 0 1-38 9l-14-22h-54l-14 22a22 22 0 0 1-38-9l-12-55a42 42 0 0 1 41-50z"/><path d="M150 190v28M136 204h28"/><circle cx="246" cy="196" r="5" fill="#6b7673" stroke="none"/><circle cx="264" cy="214" r="5" fill="#6b7673" stroke="none"/></g>
-  <text x="200" y="338" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#5f6a67">Photo coming soon</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Gaming photo coming soon">
+  <rect width="400" height="400" fill="#ebe7f2"/>
+  <rect x="110" y="40" width="180" height="180" rx="30" fill="#ffffff" fill-opacity="0.65" stroke="#0b6b66" stroke-width="4" stroke-dasharray="12 9"/>
+  <path d="M90 54q1.7999999999999998 8.2 10 10q-8.2 1.7999999999999998-10 10q-1.7999999999999998-8.2-10-10q8.2-1.7999999999999998 10-10z" fill="#f2a516"/>
+  <path d="M310 54q1.7999999999999998 8.2 10 10q-8.2 1.7999999999999998-10 10q-1.7999999999999998-8.2-10-10q8.2-1.7999999999999998 10-10z" fill="#f2a516"/>
+  <g transform="translate(200 130) scale(0.52) translate(-200 -170)" stroke="#0b6b66" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M130 104h140a52 52 0 0 1 51 63l-13 60a26 26 0 0 1-45 10l-17-24h-92l-17 24a26 26 0 0 1-45-10l-13-60a52 52 0 0 1 51-63z" fill="#cfe9e5"/><path d="M146 146v40M126 166h40"/><circle cx="252" cy="152" r="9" fill="#0b6b66" stroke="none"/><circle cx="274" cy="176" r="9" fill="#0b6b66" stroke="none"/><circle cx="230" cy="176" r="9" fill="#ffffff"/></g>
+  <text x="200" y="260" text-anchor="middle" font-family="'Be Vietnam Pro', system-ui, sans-serif" font-size="21" font-weight="700" fill="#44504d">Photo coming soon</text>
+  <g transform="translate(152 296)">
+    <line x1="48" y1="14" x2="48" y2="4" stroke="#151b1a" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="48" cy="4" r="5" fill="#f2a516"/>
+    <rect x="-6" y="40" width="10" height="22" rx="5" fill="#084f4b"/>
+    <rect x="92" y="40" width="10" height="22" rx="5" fill="#084f4b"/>
+    <rect x="0" y="14" width="96" height="104" rx="30" fill="#0b6b66"/>
+    <rect x="12" y="26" width="72" height="54" rx="16" fill="#e9f4f2"/>
+    <ellipse cx="34" cy="46" rx="5" ry="6" fill="#151b1a"/>
+    <ellipse cx="62" cy="46" rx="5" ry="6" fill="#151b1a"/>
+    <circle cx="36" cy="43" r="1.6" fill="#ffffff"/><circle cx="64" cy="43" r="1.6" fill="#ffffff"/>
+    <circle cx="23" cy="62" r="4" fill="#f4a58a"/><circle cx="73" cy="62" r="4" fill="#f4a58a"/>
+    <path d="M40 63q8 6 16 0" fill="none" stroke="#151b1a" stroke-width="3" stroke-linecap="round"/>
+  </g>
 </svg>
