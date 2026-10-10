@@ -9,6 +9,7 @@ import {
   IsPositive,
   IsString,
   Length,
+  Matches,
   Max,
   MaxLength,
   Min,
@@ -40,7 +41,8 @@ export class CreateProductDto {
   @IsString() @Length(1, 200) name!: string;
   @IsNumber({ maxDecimalPlaces: 2 }) @IsPositive() price!: number;
   @IsOptional() @IsNumber({ maxDecimalPlaces: 2 }) @IsPositive() oldPrice?: number;
-  @IsString() @Length(1, 500) imageUrl!: string;
+  /** An https link (e.g. from the upload endpoint) or a path under the site's own asset folder. */
+  @IsString() @Length(1, 500) @Matches(/^(https:\/\/\S+|\.\.\/asset\/\S+)$/) imageUrl!: string;
   @IsIn(CATEGORIES) category!: (typeof CATEGORIES)[number];
   @IsInt() @Min(0) stock!: number;
   @IsOptional() @IsString() @MaxLength(5000) description?: string;
