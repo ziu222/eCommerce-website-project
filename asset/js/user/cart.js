@@ -252,7 +252,8 @@ async function handleCheckout() {
 
     // One submit at a time; the server prices the cart, applies the coupon and charges the wallet.
     const btn = document.getElementById("btnCheckout");
-    if (btn) btn.disabled = true;
+    const label = btn ? btn.innerHTML : "";
+    if (btn) { btn.disabled = true; btn.innerHTML = UI.loader(24, "Placing your order") + "Placing your order"; }
     try {
         const result = await Api.orders.checkout(cart, method, activeCoupon ? activeCoupon.code : null);
 
@@ -267,6 +268,7 @@ async function handleCheckout() {
         if (e.status === 401 || e.status === 403) { UI.requireLogin(); return; }
         UI.toast(e.message || "Checkout failed. Please try again.", "error");
     } finally {
+        if (btn) btn.innerHTML = label;
         validatePaymentMethod();
     }
 }
