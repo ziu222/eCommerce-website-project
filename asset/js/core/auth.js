@@ -83,35 +83,14 @@ var Auth = (function () {
 
     // ── Public API ───────────────────────────────────────────
 
-    // Đăng nhập — trả về { success, session } hoặc { error }
-    function authenticate(identifier, password) {
-        if (typeof Store === "undefined") return { error: "Store not available" };
-
-        var user = Store.getUserByEmail(identifier) || Store.getUserByUsername(identifier);
-        if (!user)                      return { error: "Tài khoản không tồn tại" };
-        if (user.password !== password) return { error: "Mật khẩu không đúng" };
-
-    // Shop: check shopStatus trước khi cho login
-        if (user.role === "shop") {
-            if (user.shopStatus === "pending")   return { error: "pending" };
-            if (user.shopStatus === "suspended") return { error: "suspended" };
+    // Đăng nhập qua API — trả về { success, session } hoặc { error }
+    async function authenticate(identifier, password, portal) {
+        try {
+            var session = await Api.auth.login(identifier, password, portal);
+            return { success: true, session: session };
+        } catch (e) {
+            return { error: e.message || "Login failed" };
         }
-
-        var session = {
-            id:         user.id,
-            username:   user.username,
-            name:       user.name,
-            email:      user.email,
-            role:       user.role,
-            adminLevel: user.adminLevel  || 1,
-            adminRole:  user.role === "admin" ? _resolveAdminRole(user) : null,
-            shopId:     user.shopId      || null,
-            shopStatus: user.shopStatus  || null,
-            loginAt:    new Date().toISOString()
-        };
-
-        _writeSession(session);
-        return { success: true, session: session };
     }
 
     // Lấy user hiện tại (current session)
@@ -120,9 +99,9 @@ var Auth = (function () {
     }
 
     // Đăng xuất + auto redirect về đúng login page theo role
-    function logout(redirectPath) {
+    async function logout(redirectPath) {
         var user = getCurrentUser();
-        localStorage.removeItem(CURRENT_USER_KEY);
+        await Api.auth.logout();
 
         if (redirectPath) {
             window.location.href = redirectPath;
@@ -166,10 +145,12 @@ var Auth = (function () {
     function hasPermission(perm) {
         var user = getCurrentUser();
         if (!user || user.role !== "admin") return false;
-        var role = user.adminRole || _resolveAdminRole(user);
-        var roleConfig = ADMIN_ROLES[role];
-        if (!roleConfig) return false;
-        var perms = roleConfig.permissions;
+        var perms = user.permissions;
+        if (!perms) {
+            var roleConfig = ADMIN_ROLES[user.adminRole || _resolveAdminRole(user)];
+            if (!roleConfig) return false;
+            perms = roleConfig.permissions;
+        }
         for (var i = 0; i < perms.length; i++) {
             if (perms[i] === "*" || perms[i] === perm) return true;
         }
@@ -204,44 +185,26 @@ var Auth = (function () {
         return ADMIN_ROLES;
     }
 
-    // Đăng ký customer — auto login sau khi tạo (better UX)
-    function registerCustomer(data) {
-        if (typeof Store === "undefined") return { error: "Store not available" };
-        if (Store.getUserByEmail(data.email))       return { error: "Email đã được sử dụng" };
-        if (Store.getUserByUsername(data.username)) return { error: "Username đã được sử dụng" };
-        if (!data.password || data.password.length < 6) return { error: "Mật khẩu tối thiểu 6 ký tự" };
-
-        Store.addUser({
-            name:     data.name,
-            email:    data.email,
-            username: data.username,
-            password: data.password,
-            role:     "customer",
-            status:   "active"
-        });
-
-        return authenticate(data.username, data.password);
+    // Đăng ký customer — server tạo tài khoản và đăng nhập luôn
+    async function registerCustomer(data) {
+        try {
+            var session = await Api.auth.register({
+                name: data.name, username: data.username, email: data.email, password: data.password
+            });
+            return { success: true, session: session };
+        } catch (e) {
+            return { error: e.message };
+        }
     }
 
     // Đăng ký shop — KHÔNG auto login, chờ admin duyệt
-    function registerShop(data) {
-        if (typeof Store === "undefined") return { error: "Store not available" };
-        if (Store.getUserByEmail(data.email))       return { error: "Email đã được sử dụng" };
-        if (Store.getUserByUsername(data.username)) return { error: "Username đã được sử dụng" };
-        if (!data.shopName)                         return { error: "Tên shop không được trống" };
-        if (!data.password || data.password.length < 6) return { error: "Mật khẩu tối thiểu 6 ký tự" };
-
-        Store.addUser({
-            name:       data.name,
-            email:      data.email,
-            username:   data.username,
-            password:   data.password,
-            role:       "shop",
-            shopName:   data.shopName,
-            shopStatus: "pending"
-        });
-
-        return { success: true, pending: true };
+    async function registerShop(data) {
+        try {
+            await Api.auth.registerShop(data);
+            return { success: true, pending: true };
+        } catch (e) {
+            return { error: e.message };
+        }
     }
 
     // Tạo admin mới — chỉ Super Admin hoặc HR được gọi
