@@ -31,7 +31,7 @@ var AuthSheet = (function () {
         '<rect x="12" y="34" width="8" height="16" rx="4" fill="#084f4b"/><rect x="76" y="34" width="8" height="16" rx="4" fill="#084f4b"/>' +
         '<rect x="17" y="14" width="62" height="54" rx="20" fill="#0b6b66"/>' +
         '<rect class="v-screen" x="25" y="23" width="46" height="35" rx="12" fill="#e9f4f2"/>' +
-        '<g class="v-brows"><path d="M31 31l9 3M65 31l-9 3" stroke="#151b1a" stroke-width="2.4" stroke-linecap="round"/></g>' +
+        '<g class="v-brows"><path d="M31 33l9-3.5M65 33l-9-3.5" stroke="#151b1a" stroke-width="2.4" stroke-linecap="round"/></g>' +
         '<g class="volt-glance"><g class="v-eyes volt-eyes"><g class="v-look"><ellipse cx="38" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/><ellipse cx="58" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/></g></g></g>' +
         '<g class="v-joy"><path d="M33 39q5-6 10 0M53 39q5-6 10 0" fill="none" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/></g>' +
         '<circle cx="31" cy="46" r="2.8" fill="#f4a58a"/><circle cx="65" cy="46" r="2.8" fill="#f4a58a"/>' +

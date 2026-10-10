@@ -36,8 +36,8 @@ html.as-lock { overflow: hidden; }
 .as-volt { width: 100%; height: 100%; overflow: hidden; }
 .as-volt .v-look { transition: transform 0.25s var(--ease); }
 .as-volt .v-hand { transition: transform 0.45s var(--ease); }
-.as-volt .v-hand--l { transform: translate(-14px, 46px) rotate(-20deg); }
-.as-volt .v-hand--r { transform: translate(14px, 46px) rotate(20deg); }
+.as-volt .v-hand--l { transform: translate(-10px, 70px); }
+.as-volt .v-hand--r { transform: translate(10px, 70px); }
 .as-volt[data-mood="shy"] .v-hand--l, .as-volt[data-mood="shy"] .v-hand--r { transform: none; }
 .as-volt[data-mood="peek"] .v-hand--l { transform: none; }
 .as-volt[data-mood="peek"] .v-hand--r { transform: translate(8px, 16px) rotate(18deg); }
