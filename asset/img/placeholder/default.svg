@@ -1,5 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Product photo coming soon">
-  <rect width="400" height="400" fill="#ece9e1"/>
-  <g fill="none" stroke="#6b7673" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"><path d="M200 105l95 50v90l-95 50-95-50v-90z"/><path d="M105 155l95 50 95-50M200 205v90"/></g>
-  <text x="200" y="338" text-anchor="middle" font-family="system-ui,sans-serif" font-size="22" font-weight="600" fill="#5f6a67">Photo coming soon</text>
+  <rect width="400" height="400" fill="#eeebe3"/>
+  <rect x="110" y="40" width="180" height="180" rx="30" fill="#ffffff" fill-opacity="0.65" stroke="#0b6b66" stroke-width="4" stroke-dasharray="12 9"/>
+  <path d="M90 54q1.7999999999999998 8.2 10 10q-8.2 1.7999999999999998-10 10q-1.7999999999999998-8.2-10-10q8.2-1.7999999999999998 10-10z" fill="#f2a516"/>
+  <path d="M310 54q1.7999999999999998 8.2 10 10q-8.2 1.7999999999999998-10 10q-1.7999999999999998-8.2-10-10q8.2-1.7999999999999998 10-10z" fill="#f2a516"/>
+  <g transform="translate(200 130) scale(0.52) translate(-200 -170)" stroke="#0b6b66" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M200 72l96 48v100l-96 48-96-48V120z" fill="#cfe9e5"/><path d="M104 120l96 48 96-48M200 168v100"/><path d="M152 96l96 48" opacity="0.5"/></g>
+  <text x="200" y="260" text-anchor="middle" font-family="'Be Vietnam Pro', system-ui, sans-serif" font-size="21" font-weight="700" fill="#44504d">Photo coming soon</text>
+  <g transform="translate(152 296)">
+    <line x1="48" y1="14" x2="48" y2="4" stroke="#151b1a" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="48" cy="4" r="5" fill="#f2a516"/>
+    <rect x="-6" y="40" width="10" height="22" rx="5" fill="#084f4b"/>
+    <rect x="92" y="40" width="10" height="22" rx="5" fill="#084f4b"/>
+    <rect x="0" y="14" width="96" height="104" rx="30" fill="#0b6b66"/>
+    <rect x="12" y="26" width="72" height="54" rx="16" fill="#e9f4f2"/>
+    <ellipse cx="34" cy="46" rx="5" ry="6" fill="#151b1a"/>
+    <ellipse cx="62" cy="46" rx="5" ry="6" fill="#151b1a"/>
+    <circle cx="36" cy="43" r="1.6" fill="#ffffff"/><circle cx="64" cy="43" r="1.6" fill="#ffffff"/>
+    <circle cx="23" cy="62" r="4" fill="#f4a58a"/><circle cx="73" cy="62" r="4" fill="#f4a58a"/>
+    <path d="M40 63q8 6 16 0" fill="none" stroke="#151b1a" stroke-width="3" stroke-linecap="round"/>
+  </g>
 </svg>
