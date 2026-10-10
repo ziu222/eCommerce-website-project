@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { resolve } from 'node:path';
 import { HealthController } from './health/health.controller.js';
+import { AdminModule } from './admin/admin.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { CouponsModule } from './coupons/coupons.module.js';
@@ -22,7 +23,7 @@ const serveStatic =
       ];
 
 @Module({
-  imports: [PrismaModule, AuthModule, ProductsModule, WalletModule, CouponsModule, OrdersModule, NotificationsModule, ...serveStatic],
+  imports: [PrismaModule, AuthModule, ProductsModule, WalletModule, CouponsModule, OrdersModule, NotificationsModule, AdminModule, ...serveStatic],
   controllers: [HealthController],
 })
 export class AppModule {}
