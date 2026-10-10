@@ -131,6 +131,16 @@ Api.orders = (function () {
         }
     }
 
-    return { checkout: checkout, adminList: adminList, adminSetStatus: adminSetStatus };
+    // The signed-in customer's own orders, newest first.
+    async function mine() {
+        return (await Api.request("GET", "/orders")).map(toLegacy);
+    }
+
+    // Only a pending order can be cancelled; the server refunds a wallet payment.
+    async function cancel(id) {
+        return toLegacy(await Api.request("POST", "/orders/" + encodeURIComponent(id) + "/cancel"));
+    }
+
+    return { checkout: checkout, mine: mine, cancel: cancel, adminList: adminList, adminSetStatus: adminSetStatus };
 
 })();

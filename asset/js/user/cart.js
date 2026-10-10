@@ -60,7 +60,7 @@ async function refreshCoupon() {
 
 function cartItem(item) {
     var known = getProducts().filter(function (p) { return p.id === item.id; })[0];
-    var category = known ? known.category : "smartphone";
+    var category = known ? known.category : "";
     var name = Api.escapeHtml(item.name);
     return `
     <article class="cart-line">

@@ -129,7 +129,7 @@ button { cursor: pointer; }
 /* ---------- Forms ---------- */
 
 .field { display: grid; gap: 6px; }
-.field > label, .label { font-size: 14px; font-weight: 600; color: var(--ink); }
+.field > label, .label, .label-row label { font-size: 14px; font-weight: 600; color: var(--ink); }
 .field .hint { font-size: 13px; color: var(--ink-3); }
 .field .error { font-size: 13px; color: var(--danger); }
 .input, .select, .textarea {

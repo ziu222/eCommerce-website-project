@@ -43,12 +43,13 @@ var UI = (function () {
 
     // Product photos that no longer load fall back to the category picture.
     function fallbackFor(category) {
-        return "../asset/img/placeholder/" + encodeURIComponent(category) + ".svg";
+        var known = CATEGORIES.some(function (c) { return c.key === category; });
+        return "../asset/img/placeholder/" + (known ? category : "default") + ".svg";
     }
 
     document.addEventListener("error", function (e) {
         var img = e.target;
-        if (!img || img.tagName !== "IMG" || !img.dataset.category || img.dataset.fellBack) return;
+        if (!img || img.tagName !== "IMG" || img.dataset.category === undefined || img.dataset.fellBack) return;
         img.dataset.fellBack = "1";
         img.classList.add("is-ph");
         img.src = fallbackFor(img.dataset.category);

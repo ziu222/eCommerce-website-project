@@ -55,16 +55,20 @@ function renderUser() {
       </div>
       <div class="udm-divider"></div>
       <button class="udm-item" onclick="window.location.href='profile.html'">
-        <span class="material-symbols-outlined udm-icon">account_circle</span>
+        <span class="ms udm-icon">account_circle</span>
         View Profile
       </button>
+      <button class="udm-item" onclick="window.location.href='orders.html'">
+        <span class="ms udm-icon">receipt_long</span>
+        My Orders
+      </button>
       <button class="udm-item" onclick="window.location.href='wallet.html'">
-        <span class="material-symbols-outlined udm-icon">account_balance_wallet</span>
+        <span class="ms udm-icon">account_balance_wallet</span>
         Wallet
       </button>
       <div class="udm-divider"></div>
       <button class="udm-item udm-item--danger" onclick="logout()">
-        <span class="material-symbols-outlined udm-icon">logout</span>
+        <span class="ms udm-icon">logout</span>
         Sign Out
       </button>`;
     userMenu.classList.add("hidden");

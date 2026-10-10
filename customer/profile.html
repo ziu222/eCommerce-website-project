@@ -1,194 +1,128 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile - EC SHOP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>My account - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/main.css">
+    <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/profile.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="profile"></header>
 
-    <!-- ── Navbar ──────────────────────────────────────────── -->
-    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 font-headline no-underline hover:no-underline flex items-center gap-3" href="home.html">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="home.html">Home</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="product.html">Product</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="about.html">About</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="contact.html">Contact</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <el-dropdown class="inline-block relative">
-                    <button id="userBtn" class="p-2 text-teal-900 hover:bg-teal-50/50 rounded-full transition-all duration-300 active:scale-95">
-                        <span id="userContent" class="material-symbols-outlined">person</span>
-                    </button>
-                    <div id="userMenu" class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50"></div>
-                </el-dropdown>
-                <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    <span>Cart</span>
-                    <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                </button>
-            </div>
+    <main id="main" class="container">
+        <div class="page-head">
+            <h1>My account</h1>
         </div>
-    </nav>
 
-    <main class="profile-main">
-        <div class="profile-wrapper">
-
-            <!-- ── LEFT: Profile form ──────────────────────── -->
-            <div class="profile-card">
-
-                <!-- Cover photo -->
-                <div class="profile-cover" id="profileCover">
-                    <div class="profile-cover-edit">
-                        <span class="material-symbols-outlined">add_a_photo</span>
-                        <span class="cover-edit-label">Change Cover</span>
-                    </div>
-                    <input type="file" id="coverInput" accept="image/*" />
-                </div>
-
-                <!-- Avatar + identity -->
-                <div class="profile-avatar-row">
-                    <div class="profile-avatar-wrap" id="avatarWrap">
-                        <div class="profile-avatar" id="profileAvatar">?</div>
-                        <div class="profile-avatar-edit">
-                            <span class="material-symbols-outlined">photo_camera</span>
-                            <span class="label">CHANGE</span>
+        <div class="profile-layout">
+            <div class="profile-main">
+                <section class="card identity" aria-label="Profile photo and name">
+                    <button type="button" class="cover" id="profileCover" aria-label="Change cover photo">
+                        <span class="cover-hint"><span class="ms">photo_camera</span>Change cover</span>
+                    </button>
+                    <input type="file" id="coverInput" accept="image/*" hidden>
+                    <div class="identity-row">
+                        <button type="button" class="avatar-btn" id="avatarWrap" aria-label="Change profile photo">
+                            <span class="avatar" id="profileAvatar">?</span>
+                            <span class="avatar-edit"><span class="ms">photo_camera</span></span>
+                        </button>
+                        <input type="file" id="avatarInput" accept="image/*" hidden>
+                        <div>
+                            <h2 id="profileDisplayName">—</h2>
+                            <p class="muted" id="profileDisplayUsername">@—</p>
                         </div>
-                        <input type="file" id="avatarInput" accept="image/*" />
                     </div>
-                    <div class="profile-identity">
-                        <h2 id="profileDisplayName">—</h2>
-                        <div class="profile-username" id="profileDisplayUsername">@—</div>
-                    </div>
-                </div>
+                </section>
 
                 <form id="profileForm" novalidate>
+                    <section class="card block" aria-labelledby="personalTitle">
+                        <h2 id="personalTitle">Personal information</h2>
 
-                    <!-- Personal info -->
-                    <div class="profile-section-title">Personal Information</div>
-
-                    <div class="profile-field">
-                        <label for="inputName">Full Name</label>
-                        <input class="profile-input" type="text" id="inputName" placeholder="Your full name" autocomplete="name" />
-                        <div class="profile-field-error" id="errorName"></div>
-                    </div>
-
-                    <div class="profile-field">
-                        <div class="profile-field-label-row">
-                            <label for="inputEmail">Email</label>
-                            <button type="button" class="profile-edit-btn" id="emailEditBtn">
-                                <span class="material-symbols-outlined">edit</span> Edit
-                            </button>
+                        <div class="field">
+                            <label for="inputName">Full name</label>
+                            <input class="input profile-input" type="text" id="inputName" placeholder="Your full name" autocomplete="name">
+                            <div class="profile-field-error error" id="errorName"></div>
                         </div>
-                        <input class="profile-input profile-input--readonly" type="email" id="inputEmail" placeholder="your@email.com" autocomplete="off" readonly />
-                        <div class="profile-field-error" id="errorEmail"></div>
-                    </div>
 
-                    <div class="profile-field">
-                        <label for="inputUsername">Username</label>
-                        <input class="profile-input profile-input--readonly" type="text" id="inputUsername" placeholder="username" autocomplete="off" readonly />
-                        <p class="profile-field-hint">Username cannot be changed.</p>
-                    </div>
+                        <div class="field">
+                            <div class="label-row">
+                                <label for="inputEmail">Email</label>
+                                <button type="button" class="link-btn" id="emailEditBtn"><span class="ms">edit</span>Edit</button>
+                            </div>
+                            <input class="input profile-input profile-input--readonly" type="email" id="inputEmail" placeholder="you@example.com" autocomplete="email" readonly>
+                            <div class="profile-field-error error" id="errorEmail"></div>
+                        </div>
 
-                    <!-- Change password -->
-                    <div class="profile-section-title">Change Password</div>
-                    <div class="profile-field">
-                        <label for="inputCurrentPw">Current Password</label>
-                        <input class="profile-input" type="password" id="inputCurrentPw" placeholder="Enter current password" autocomplete="off" />
-                        <div class="profile-field-error" id="errorCurrentPw"></div>
-                    </div>
+                        <div class="field">
+                            <label for="inputUsername">Username</label>
+                            <input class="input profile-input profile-input--readonly" type="text" id="inputUsername" autocomplete="username" readonly>
+                            <p class="hint">Your username cannot be changed.</p>
+                        </div>
+                    </section>
 
-                    <div class="profile-field">
-                        <label for="inputNewPw">New Password</label>
-                        <input class="profile-input" type="password" id="inputNewPw" placeholder="At least 6 characters" autocomplete="off" />
-                        <div class="profile-field-error" id="errorNewPw"></div>
-                    </div>
+                    <section class="card block" aria-labelledby="passwordTitle">
+                        <h2 id="passwordTitle">Change password</h2>
+                        <p class="hint">Leave these empty to keep your current password.</p>
 
-                    <div class="profile-field">
-                        <label for="inputConfirmPw">Confirm New Password</label>
-                        <input class="profile-input" type="password" id="inputConfirmPw" placeholder="Repeat new password" autocomplete="off" />
-                        <div class="profile-field-error" id="errorConfirmPw"></div>
-                    </div>
+                        <div class="field">
+                            <label for="inputCurrentPw">Current password</label>
+                            <input class="input profile-input" type="password" id="inputCurrentPw" autocomplete="current-password">
+                            <div class="profile-field-error error" id="errorCurrentPw"></div>
+                        </div>
+                        <div class="field">
+                            <label for="inputNewPw">New password</label>
+                            <input class="input profile-input" type="password" id="inputNewPw" placeholder="At least 6 characters" autocomplete="new-password">
+                            <div class="profile-field-error error" id="errorNewPw"></div>
+                        </div>
+                        <div class="field">
+                            <label for="inputConfirmPw">Confirm new password</label>
+                            <input class="input profile-input" type="password" id="inputConfirmPw" autocomplete="new-password">
+                            <div class="profile-field-error error" id="errorConfirmPw"></div>
+                        </div>
+                    </section>
 
-                    <button type="submit" class="profile-save-btn">
-                        <span class="material-symbols-outlined">save</span>
-                        Save Changes
-                    </button>
-
+                    <button type="submit" class="btn btn-primary btn-lg save-btn"><span class="ms">save</span>Save changes</button>
                 </form>
             </div>
 
-            <!-- ── RIGHT: Sidebar ──────────────────────────── -->
-            <div class="profile-sidebar">
+            <aside class="profile-side">
+                <section class="balance" aria-label="Wallet balance">
+                    <p class="balance-label">Wallet balance</p>
+                    <p class="balance-amount" id="profileBalance">$0.00</p>
+                    <a class="btn btn-sm balance-btn" href="wallet.html">Add money</a>
+                </section>
 
-                <!-- Wallet balance -->
-                <div class="profile-balance-card">
-                    <div class="profile-balance-label">Wallet Balance</div>
-                    <div class="profile-balance-amount" id="profileBalance">$0.00</div>
-                    <div class="profile-balance-sub">Available to spend</div>
-                </div>
+                <section class="card block meta" aria-label="Membership">
+                    <div class="meta-row"><span class="ms">calendar_month</span><span>Member since</span><strong id="metaMember">—</strong></div>
+                    <div class="meta-row"><span class="ms">workspace_premium</span><span>Rank</span><span class="rank-badge rank-normal" id="profileRank">Normal</span></div>
+                </section>
 
-                <!-- Meta info -->
-                <div class="profile-meta-card">
-                    <div class="profile-meta-row">
-                        <span class="material-symbols-outlined">calendar_month</span>
-                        <span class="profile-meta-label">Member since</span>
-                        <span class="profile-meta-value" id="metaMember">—</span>
-                    </div>
-                    <div class="profile-meta-row">
-                        <span class="material-symbols-outlined">workspace_premium</span>
-                        <span class="profile-meta-label">Rank</span>
-                        <span class="rank-badge rank-normal" id="profileRank">Normal</span>
-                    </div>
-                </div>
-
-                <!-- Quick actions -->
-                <div class="profile-actions-card">
-                    <div class="profile-actions-title">Quick Actions</div>
-                    <a href="wallet.html" class="profile-quick-link">
-                        <span class="material-symbols-outlined">account_balance_wallet</span>
-                        Go to Wallet
-                    </a>
-                    <a href="cart.html" class="profile-quick-link">
-                        <span class="material-symbols-outlined">shopping_cart</span>
-                        My Cart
-                    </a>
-                    <button class="profile-quick-link" disabled style="opacity:0.5;cursor:not-allowed;">
-                        <span class="material-symbols-outlined">receipt_long</span>
-                        My Orders
-                        <span class="link-soon">Soon</span>
-                    </button>
-                </div>
-
-            </div>
+                <nav class="card block quick" aria-label="Quick links">
+                    <a href="orders.html"><span class="ms">receipt_long</span>My orders<span class="ms chev">chevron_right</span></a>
+                    <a href="wallet.html"><span class="ms">account_balance_wallet</span>Wallet<span class="ms chev">chevron_right</span></a>
+                    <a href="cart.html"><span class="ms">shopping_bag</span>My cart<span class="ms chev">chevron_right</span></a>
+                    <a href="#" data-open-support><span class="ms">forum</span>Support messages<span class="ms chev">chevron_right</span></a>
+                </nav>
+            </aside>
         </div>
     </main>
 
-    <!-- Toast -->
-    <div class="profile-toast" id="profileToast">
-        <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
-        <span class="toast-msg"></span>
-    </div>
+    <footer id="site-footer"></footer>
 
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/admin.js"></script>
     <script src="../asset/js/api/commerce.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
     <script src="../asset/js/user/profile.js"></script>
