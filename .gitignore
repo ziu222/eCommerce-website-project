@@ -55,3 +55,9 @@ asset/css/tailwind-built.css
 .vercel
 .env*.local
 .claude
+
+# Backend
+server/src/generated/
+server/dist/
+!server/package-lock.json
+*.tsbuildinfo

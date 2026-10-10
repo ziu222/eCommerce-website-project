@@ -58,3 +58,20 @@ Remote metadata in `package.json`: [FE-review](https://github.com/ziu222/FE-revi
 ## License
 
 ISC (see `package.json`).
+
+## Backend (`server/`)
+
+NestJS + Prisma + PostgreSQL. In development the backend also serves the static storefront, so pages and API share one origin.
+
+```bash
+docker compose up -d db          # PostgreSQL 16 with pgvector on :5432
+cd server
+cp .env.example .env
+npm install
+npm run db:generate
+npm run db:migrate               # apply migrations
+npm run start:dev                # http://localhost:3000  (pages) and /api/health
+npm test && npm run test:e2e
+```
+
+`server/` is excluded from the Vercel output through `.vercelignore`.
