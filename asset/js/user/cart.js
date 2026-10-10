@@ -180,8 +180,9 @@ async function applyCoupon() {
 function initCheckout() {
     const user = getCurrentUser();
 
-    if (user) loadWalletBalance();
+    if (user) { loadWalletBalance(); CartAddress.load(); }
     else {
+        document.getElementById("deliverTo").hidden = true;
         document.getElementById("pmWallet").disabled = true;
         document.getElementById("walletBalanceDisplay").textContent = "Sign in to use";
         document.getElementById("btnCheckout").lastChild.textContent = "Sign in to check out";
@@ -242,6 +243,11 @@ async function handleCheckout() {
     const cart = getCart();
     if (!cart.length) return;
 
+    if (!CartAddress.require()) {
+        UI.toast("Add a delivery address first", "error");
+        return;
+    }
+
     const method = document.querySelector("input[name='payMethod']:checked")?.value || "cod";
     const total  = cart.reduce((s, i) => s + i.price * i.quantity, 0);
 
@@ -255,7 +261,7 @@ async function handleCheckout() {
     const label = btn ? btn.innerHTML : "";
     if (btn) { btn.disabled = true; btn.innerHTML = UI.loader(24, "Placing your order") + "Placing your order"; }
     try {
-        const result = await Api.orders.checkout(cart, method, activeCoupon ? activeCoupon.code : null);
+        const result = await Api.orders.checkout(cart, method, activeCoupon ? activeCoupon.code : null, CartAddress.selected());
 
         saveCart([]);
         clearCoupon();

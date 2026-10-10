@@ -84,6 +84,77 @@ var UI = (function () {
 
     function isPlaceholder(src) { return String(src).indexOf("/placeholder/") !== -1; }
 
+    // ---------- saved products (wishlist)
+    // The ids are fetched once for a signed-in customer; every heart on the page shows whether its product is saved.
+
+    var saved = null;
+
+    function isCustomer() {
+        try { var u = JSON.parse(localStorage.getItem("ecshop_currentUser")); return !!u && u.role === "customer"; } catch (e) { return false; }
+    }
+
+    function heart(id, name, cls) {
+        return '<button type="button" class="heart ' + (cls || "") + '" data-save="' + id + '" aria-pressed="false" aria-label="Save ' + esc(name) + '"><span class="ms">favorite</span></button>';
+    }
+
+    function markSaved(root) {
+        if (!saved || !root.querySelectorAll) return;
+        [].forEach.call(root.querySelectorAll("[data-save]"), function (b) {
+            b.setAttribute("aria-pressed", String(saved.has(Number(b.dataset.save))));
+        });
+    }
+
+    function loadSaved() {
+        if (!isCustomer() || !Api.account) return;
+        Api.account.wishlist.ids().then(function (ids) {
+            saved = new Set(ids);
+            markSaved(document);
+        }).catch(function () { /* signed out meanwhile */ });
+    }
+
+    document.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-save]");
+        if (!btn) return;
+        e.preventDefault();
+        if (!isCustomer()) { openAuth("login"); return; }
+        if (!saved) saved = new Set();
+        var id = Number(btn.dataset.save);
+        var on = !saved.has(id);
+        // show it at once, undo if the server says no
+        if (on) saved.add(id); else saved.delete(id);
+        markSaved(document);
+        btn.classList.remove("pop");
+        void btn.offsetWidth;
+        btn.classList.add("pop");
+        (on ? Api.account.wishlist.save(id) : Api.account.wishlist.unsave(id)).then(function () {
+            toast(on ? "Saved to your wishlist" : "Removed from your wishlist");
+            document.dispatchEvent(new CustomEvent("wishlist:change", { detail: { id: id, saved: on } }));
+        }).catch(function (err) {
+            if (on) saved.delete(id); else saved.add(id);
+            markSaved(document);
+            toast(err.message || "Could not update your wishlist", "error");
+        });
+    });
+
+    // ---------- notification bell (customers)
+
+    function loadBell() {
+        var bell = document.getElementById("navBell");
+        if (!bell || !isCustomer() || !Api.account) return;
+        bell.hidden = false;
+        Api.account.notifications.unread().then(function (r) { setBell(r.count); }).catch(function () { /* ignore */ });
+    }
+
+    function setBell(n) {
+        var count = document.getElementById("bellCount");
+        var bell = document.getElementById("navBell");
+        if (!count || !bell) return;
+        count.textContent = n > 9 ? "9+" : String(n);
+        count.style.display = n ? "inline-block" : "none";
+        bell.setAttribute("aria-label", n ? "Notifications, " + n + " unread" : "Notifications");
+        bell.classList.toggle("ring", n > 0);
+    }
+
     // ---------- product card (home, catalogue, related)
 
     function productCard(p) {
@@ -95,6 +166,7 @@ var UI = (function () {
             '<a class="pcard-media" href="' + href + '" tabindex="-1" aria-hidden="true">' +
             '<img loading="lazy" src="' + esc(p.image) + '" alt=""' + (isPlaceholder(p.image) ? ' class="is-ph"' : "") + ' data-category="' + esc(p.category) + '">' +
             (off ? '<span class="badge badge-sale">-' + off + "%</span>" : "") + "</a>" +
+            heart(p.id, p.name, "pcard-heart") +
             '<div class="pcard-body">' +
             '<p class="pcard-cat">' + esc(categoryLabel(p.category)) + shop + "</p>" +
             '<h3 class="pcard-name"><a href="' + href + '">' + esc(p.name) + "</a></h3>" +
@@ -224,6 +296,8 @@ var UI = (function () {
             '<form class="nav-search" action="product.html" role="search"><span class="ms" aria-hidden="true">search</span>' +
             '<input type="search" name="q" placeholder="Search products" aria-label="Search products" autocomplete="off"></form>' +
             '<div class="nav-actions">' +
+            '<a id="navBell" class="cart-link bell-link" href="profile.html#notifications" aria-label="Notifications" hidden><span class="ms">notifications</span>' +
+            '<span id="bellCount" class="cart-count" style="display:none">0</span></a>' +
             '<div class="user-wrap"><button type="button" id="userBtn" class="user-btn" aria-haspopup="true"><span id="userContent"></span></button>' +
             '<div id="userMenu" class="user-menu hidden"></div></div>' +
             '<a id="cart-btn" class="cart-link" href="cart.html" aria-label="Cart"><span class="ms">shopping_bag</span>' +
@@ -432,6 +506,8 @@ var UI = (function () {
                 [].forEach.call(r.addedNodes, function (n) { if (n.nodeType === 1) scan(n); });
             });
         }).observe(document.body, { childList: true, subtree: true });
+    loadSaved();
+    loadBell();
     }
 
     if (!document.querySelector('link[rel="icon"]')) {
@@ -451,10 +527,12 @@ var UI = (function () {
     mountAnimations(document.body);
     new MutationObserver(function (records) {
         records.forEach(function (r) {
-            [].forEach.call(r.addedNodes, function (n) { if (n.nodeType === 1) mountAnimations(n); });
+            [].forEach.call(r.addedNodes, function (n) { if (n.nodeType === 1) { mountAnimations(n); markSaved(n); } });
         });
     }).observe(document.body, { childList: true, subtree: true });
+    loadSaved();
+    loadBell();
 
-    return { loader: loader, skeletonList: skeletonList, mascot: mascot, errorState: errorState, openAuth: openAuth, requireLogin: requireLogin, preloadAuth: preloadAuth, motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
+    return { heart: heart, setBell: setBell, isSaved: function (id) { return !!saved && saved.has(id); }, loader: loader, skeletonList: skeletonList, mascot: mascot, errorState: errorState, openAuth: openAuth, requireLogin: requireLogin, preloadAuth: preloadAuth, motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 
 })();

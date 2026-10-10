@@ -29,6 +29,21 @@
 .summary-rows .total dt { color: var(--ink); font-weight: 700; }
 .summary-rows .total dd { font-weight: 800; }
 
+.deliver { display: grid; gap: 10px; }
+.deliver[hidden] { display: none; }
+.deliver-head { display: flex; align-items: center; justify-content: space-between; }
+.deliver-head .label { font-size: 14px; font-weight: 600; }
+.deliver-card, .deliver-option { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--line-2); border-radius: var(--r); font-size: 14px; }
+.deliver-card > div, .deliver-option > div { display: grid; gap: 2px; }
+.deliver-card .ms { color: var(--brand); }
+.deliver-list { display: grid; gap: 8px; }
+.deliver-option { cursor: pointer; transition: border-color 0.18s, background-color 0.18s; }
+.deliver-option:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
+.deliver-option input { margin-top: 3px; accent-color: var(--brand); }
+.deliver-form { display: grid; gap: 12px; }
+.deliver-actions { display: flex; gap: 8px; }
+.link-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 8px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--brand); font-size: 14px; font-weight: 600; }
+.link-btn:hover { background: var(--brand-soft); }
 .pay { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; }
 .pay legend { margin-bottom: 8px; padding: 0; font-size: 14px; font-weight: 600; }
 .pay-option { position: relative; display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 0 14px; border: 1px solid var(--line-2); border-radius: var(--r); cursor: pointer; transition: border-color 0.18s, background-color 0.18s; }
@@ -70,3 +85,4 @@
 
 .cart-line.leaving { max-height: 0; margin-top: 0; padding-block: 0; border-width: 0; opacity: 0; transform: translateX(32px); }
 html[data-motion="reduced"] .cart-line.leaving { transform: none; }
+.deliver-card .badge, .deliver-option .badge { justify-self: start; }

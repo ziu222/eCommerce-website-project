@@ -33,6 +33,7 @@
             '<span class="badge ' + (BADGE[o.status] || "") + '">' + esc(o.status.charAt(0).toUpperCase() + o.status.slice(1)) + "</span></header>" +
             tracker(o) +
             '<ul class="order-items">' + items + "</ul>" +
+            (o.shipping ? '<p class="order-ship"><span class="ms">location_on</span>' + esc(o.shipping.name) + " · " + esc(o.shipping.phone) + " · " + esc(o.shipping.address) + "</p>" : "") +
             '<footer class="order-foot"><div class="muted">' + esc(PAY[o.paymentMethod] || o.paymentMethod) + " · " + paid +
             (o.discount > 0 ? " · saved " + UI.money(o.discount) : "") + "</div>" +
             '<div class="order-total"><span>Total</span><strong>' + UI.money(o.total) + "</strong></div>" +

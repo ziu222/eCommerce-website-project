@@ -289,6 +289,16 @@ button { cursor: pointer; }
 .pcard-name a:hover { color: var(--brand); }
 .pcard-rating { display: flex; align-items: center; gap: 6px; color: var(--ink-3); font-size: 13px; }
 .pcard-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 8px; }
+.heart { display: grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.92); color: var(--ink-3); box-shadow: var(--shadow-1); transition: color 0.2s, background-color 0.2s; }
+.heart:hover { color: var(--accent); }
+.heart[aria-pressed="true"] { color: var(--accent); }
+.heart[aria-pressed="true"] .ms { font-variation-settings: "FILL" 1, "wght" 400; }
+.heart.pop .ms { animation: heart-pop 0.45s var(--ease); }
+@keyframes heart-pop { 30% { transform: scale(1.35); } 60% { transform: scale(0.9); } }
+.pcard-heart { position: absolute; top: 10px; right: 10px; z-index: 2; }
+.bell-link.ring .ms { transform-origin: 50% 0; animation: bell-ring 1.2s var(--ease) 0.6s 2; }
+@keyframes bell-ring { 10%, 30% { rotate: 14deg; } 20%, 40% { rotate: -12deg; } 50% { rotate: 0deg; } }
+html[data-motion="reduced"] .heart.pop .ms, html[data-motion="reduced"] .bell-link.ring .ms { animation: none; }
 .pcard-add { position: relative; z-index: 2; display: grid; place-items: center; flex: none; width: 44px; height: 44px; border: 1px solid var(--line-2); border-radius: 50%; background: var(--surface); color: var(--ink); transition: background-color 0.18s, color 0.18s, border-color 0.18s; }
 .pcard-add:hover:not(:disabled) { background: var(--brand); border-color: var(--brand); color: #fff; }
 .pcard-add:disabled { opacity: 0.4; cursor: not-allowed; }
