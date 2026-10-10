@@ -2,270 +2,77 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>About Us — EC SHOP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="../asset/css/main.css" />
-    <link rel="stylesheet" href="../asset/css/about.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
+    <link rel="stylesheet" href="../asset/css/about.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="about"></header>
 
-    <!-- ── Navbar ─────────────────────────────────────────────── -->
-    <nav class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 dark:text-teal-400 font-headline no-underline hover:no-underline flex items-center gap-3" href="home.html">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="home.html">Home</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="product.html">Product</a>
-                    <a class="about-nav-active text-sm font-medium tracking-wide no-underline hover:no-underline" href="about.html">About</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="contact.html">Contact</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <el-dropdown class="inline-block relative">
-                    <button id="userBtn" class="p-2 text-teal-900 dark:text-teal-400 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 rounded-full transition-all duration-300 active:scale-95">
-                        <span id="userContent" class="material-symbols-outlined">person</span>
-                    </button>
-                    <div id="userMenu" class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50">
-                        <button onclick="logout()" class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">Đăng xuất</button>
-                        <button class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">Tài khoản</button>
-                        <button class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">Hỗ trợ</button>
+    <main id="main">
+        <section class="container about-intro">
+            <h1>A shop that answers when you ask.</h1>
+            <p>EC SHOP brings phones, laptops, audio, cameras and gaming gear from independent sellers into one cart. We review every seller and every listing, and we keep a team on hand for the moment something is unclear.</p>
+        </section>
+
+        <section class="container section" aria-labelledby="howTitle">
+            <div class="section-head"><h2 id="howTitle">How it works</h2></div>
+            <ol class="how">
+                <li>
+                    <span class="how-n">1</span>
+                    <h3>Sellers are reviewed</h3>
+                    <p>A shop is approved by our admins before it can sell, and each product is checked before it appears in the catalogue.</p>
+                </li>
+                <li>
+                    <span class="how-n">2</span>
+                    <h3>One cart, many shops</h3>
+                    <p>Buy from several sellers in a single checkout. Each seller gets their own order, so you can follow and cancel them separately.</p>
+                </li>
+                <li>
+                    <span class="how-n">3</span>
+                    <h3>Pay your way</h3>
+                    <p>Use your wallet balance or pay on delivery. Prices are confirmed again at checkout, and a cancelled wallet order is refunded.</p>
+                </li>
+            </ol>
+        </section>
+
+        <section class="container section" aria-labelledby="supportTitle">
+            <div class="support-split">
+                <div>
+                    <h2 id="supportTitle">Support, in two steps</h2>
+                    <p>Start with the assistant. It answers from our shipping, returns and payment policies, and can compare two products side by side. If it cannot help, leave a message for our staff and they reply in the same chat.</p>
+                    <p class="muted">We answer in English and Tiếng Việt.</p>
+                    <div class="about-cta">
+                        <button type="button" class="btn btn-primary btn-lg" data-open-support>Open chat</button>
+                        <a class="btn btn-ghost btn-lg" href="contact.html">Contact us</a>
                     </div>
-                </el-dropdown>
-                <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    <span>Cart</span>
-                    <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="about-main">
-
-        <!-- ═══════════════════════════════════════════════════
-             01 — HERO
-             ═══════════════════════════════════════════════════ -->
-        <section class="about-hero" id="about-hero">
-            <video class="about-hero__video" autoplay muted loop playsinline>
-                <source src="../asset/img/about/Introducing iPhone 17  Apple - 4RMD (1080p, h264).mp4" type="video/mp4" />
-            </video>
-            <div class="about-hero__overlay"></div>
-            <div class="about-hero__content">
-                <p class="about-section-number" data-anim="fade-up" data-delay="1">01 —</p>
-                <h1 class="about-hero__title" data-anim="fade-up" data-delay="2">
-                    We Are<br /><span class="about-hero__accent">EC SHOP</span>
-                </h1>
-                <p class="about-hero__sub" data-anim="fade-up" data-delay="3">
-                    Vietnam's premier destination for curated electronics.<br />
-                    Where technology meets intentional living.
-                </p>
-            </div>
-            <div class="about-scroll-indicator" aria-hidden="true">
-                <span class="about-scroll-indicator__line"></span>
-                <span class="about-scroll-indicator__label">Scroll</span>
+                </div>
+                <ul class="facts">
+                    <li><span class="ms">verified</span><div><h3>Verified sellers</h3><p>Admin-approved shops only.</p></div></li>
+                    <li><span class="ms">local_shipping</span><div><h3>Free delivery</h3><p>No shipping fee at checkout.</p></div></li>
+                    <li><span class="ms">autorenew</span><div><h3>30-day returns</h3><p>Change your mind within a month.</p></div></li>
+                    <li><span class="ms">forum</span><div><h3>Real replies</h3><p>Staff answer inside the chat.</p></div></li>
+                </ul>
             </div>
         </section>
-
-        <!-- ═══════════════════════════════════════════════════
-             02 — OUR STORY
-             ═══════════════════════════════════════════════════ -->
-        <section class="about-story" id="about-story">
-            <div class="about-story__container">
-                <div class="about-story__text" data-anim="fade-right" data-delay="1">
-                    <p class="about-section-number">02 —</p>
-                    <h2 class="about-section-heading">Our Story</h2>
-                    <p class="about-story__body">
-                        Founded in 2022 in the heart of Ho Chi Minh City, EC SHOP was born from a single conviction: Vietnamese consumers deserve access to world-class electronics without compromise — in quality, in price, or in experience.
-                    </p>
-                    <p class="about-story__body">
-                        What started as a small storefront has grown into a trusted platform serving tens of thousands of customers across Vietnam, guided by an unrelenting obsession with curation, authenticity, and service.
-                    </p>
-                    <div class="about-story__rule" aria-hidden="true"></div>
-                </div>
-                <div class="about-story__image-wrap" data-anim="fade-left" data-delay="2">
-                    <img src="../asset/img/about/hero1.png" alt="EC SHOP — Our beginning" class="about-story__image" loading="lazy" />
-                    <div class="about-story__image-accent" aria-hidden="true"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════
-             03 — STATS
-             ═══════════════════════════════════════════════════ -->
-        <section class="about-stats" id="about-stats">
-            <div class="about-stats__container">
-                <div class="about-stat" data-anim="fade-up" data-delay="1">
-                    <span class="about-stat__number" data-count="5000">0</span><span class="about-stat__suffix">+</span>
-                    <p class="about-stat__label">Products</p>
-                </div>
-                <div class="about-stat" data-anim="fade-up" data-delay="2">
-                    <span class="about-stat__number" data-count="48000">0</span><span class="about-stat__suffix">+</span>
-                    <p class="about-stat__label">Customers</p>
-                </div>
-                <div class="about-stat" data-anim="fade-up" data-delay="3">
-                    <span class="about-stat__number" data-count="98">0</span><span class="about-stat__suffix">%</span>
-                    <p class="about-stat__label">Satisfaction</p>
-                </div>
-                <div class="about-stat" data-anim="fade-up" data-delay="4">
-                    <span class="about-stat__number" data-count="4">0</span><span class="about-stat__suffix">+</span>
-                    <p class="about-stat__label">Years</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════
-             04 — MISSION STATEMENT
-             ═══════════════════════════════════════════════════ -->
-        <section class="about-mission" id="about-mission">
-            <div class="about-mission__overlay"></div>
-            <div class="about-mission__content">
-                <p class="about-section-number" data-anim="fade-up" data-delay="1">04 —</p>
-                <div class="about-mission__quote-mark" aria-hidden="true">"</div>
-                <blockquote class="about-mission__quote" data-anim="fade-up" data-delay="2">
-                    To make premium technology accessible to every Vietnamese household — through honest pricing, expert curation, and service that goes beyond the transaction.
-                </blockquote>
-                <p class="about-mission__attribution" data-anim="fade-up" data-delay="3">— EC SHOP Mission, 2022</p>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════
-             05 — OUR VALUES
-             ═══════════════════════════════════════════════════ -->
-        <section class="about-values" id="about-values">
-            <div class="about-values__container">
-                <div class="about-values__header">
-                    <p class="about-section-number" data-anim="fade-up" data-delay="1">05 —</p>
-                    <h2 class="about-section-heading" data-anim="fade-up" data-delay="2">Our Values</h2>
-                    <p class="about-values__sub" data-anim="fade-up" data-delay="3">The principles that drive every decision we make.</p>
-                </div>
-                <div class="about-values__grid">
-
-                    <article class="about-value-card" data-anim="scale-in" data-delay="1">
-                        <div class="about-value-card__icon-wrap">
-                            <span class="material-symbols-outlined">verified</span>
-                        </div>
-                        <h3 class="about-value-card__title">Authenticity</h3>
-                        <p class="about-value-card__body">Every product on EC SHOP is sourced directly from authorised distributors. Zero counterfeits. Zero compromise.</p>
-                        <img src="../asset/img/about/iphone17.jpg" alt="" class="about-value-card__img" aria-hidden="true" loading="lazy" />
-                    </article>
-
-                    <article class="about-value-card" data-anim="scale-in" data-delay="2">
-                        <div class="about-value-card__icon-wrap">
-                            <span class="material-symbols-outlined">auto_awesome</span>
-                        </div>
-                        <h3 class="about-value-card__title">Curation</h3>
-                        <p class="about-value-card__body">Our team of specialists hand-picks every SKU. If it doesn't meet our standards for build quality and long-term value, it doesn't earn a place in the catalogue.</p>
-                        <img src="../asset/img/home/sonyWH.png" alt="" class="about-value-card__img" aria-hidden="true" loading="lazy" />
-                    </article>
-
-                    <article class="about-value-card" data-anim="scale-in" data-delay="3">
-                        <div class="about-value-card__icon-wrap">
-                            <span class="material-symbols-outlined">groups</span>
-                        </div>
-                        <h3 class="about-value-card__title">Community</h3>
-                        <p class="about-value-card__body">We exist to serve the Vietnamese tech community — offering local language support, domestic warranties, and prices that respect your budget.</p>
-                        <img src="../asset/img/about/switchgame.avif" alt="" class="about-value-card__img" aria-hidden="true" loading="lazy" />
-                    </article>
-
-                </div>
-            </div>
-        </section>
-
-        <!-- ═══════════════════════════════════════════════════
-             06 — CTA
-             ═══════════════════════════════════════════════════ -->
-        <section class="about-cta" id="about-cta">
-            <div class="about-cta__glow about-cta__glow--left" aria-hidden="true"></div>
-            <div class="about-cta__glow about-cta__glow--right" aria-hidden="true"></div>
-            <div class="about-cta__container">
-                <p class="about-section-number" data-anim="fade-up" data-delay="1">06 —</p>
-                <h2 class="about-cta__heading" data-anim="fade-up" data-delay="2">
-                    Ready to experience<br />the difference?
-                </h2>
-                <p class="about-cta__sub" data-anim="fade-up" data-delay="3">
-                    Browse our curated collection of premium electronics, delivered to your door.
-                </p>
-                <a href="product.html" class="about-cta__btn" data-anim="scale-in" data-delay="4">
-                    <span>Shop Now</span>
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                </a>
-            </div>
-        </section>
-
     </main>
 
-    <!-- ── Footer ─────────────────────────────────────────────── -->
-    <footer class="site-footer">
-        <div class="footer-top">
-            <div class="footer-brand-col">
-                <div class="footer-brand-name">EC SHOP</div>
-                <p class="footer-brand-desc">Elevating the standard of personal electronics through intentional design and curated collections.</p>
-                <div class="footer-socials">
-                    <button class="footer-social-btn" title="Website"><span class="material-symbols-outlined">public</span></button>
-                    <button class="footer-social-btn" title="Email"><span class="material-symbols-outlined">alternate_email</span></button>
-                    <button class="footer-social-btn" title="Chat"><span class="material-symbols-outlined">chat_bubble</span></button>
-                </div>
-            </div>
-            <div>
-                <div class="footer-col-title">Company</div>
-                <ul class="footer-links">
-                    <li><a href="about.html">About Us</a></li>
-                    <li><a href="#">Sustainability</a></li>
-                    <li><a href="#">Corporate Sales</a></li>
-                    <li><a href="#">Store Locator</a></li>
-                </ul>
-            </div>
-            <div>
-                <div class="footer-col-title">Support</div>
-                <ul class="footer-links">
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Shipping &amp; Returns</a></li>
-                    <li><a href="#">Track My Order</a></li>
-                    <li><a href="#">Repair Status</a></li>
-                </ul>
-            </div>
-            <div>
-                <div class="footer-col-title">Legal</div>
-                <ul class="footer-links">
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Cookie Settings</a></li>
-                </ul>
-            </div>
-            <div>
-                <div class="footer-col-title">Mobile App</div>
-                <div class="footer-qr-wrap">
-                    <img src="../asset/img/home/qrfooter.png" alt="Download QR" class="footer-qr-img">
-                    <p class="footer-qr-label">Scan to download the EC SHOP app and shop on the go.</p>
-                </div>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <p class="footer-copy">© 2026 EC SHOP. All rights reserved.</p>
-            <div class="footer-locale">
-                <span>English (US)</span>
-                <span>USD $</span>
-            </div>
-        </div>
-    </footer>
+    <footer id="site-footer"></footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
-    <script src="../asset/js/user/about.js"></script>
     <script src="../asset/js/api/support.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>
     <script src="../asset/js/user/support-threads.js"></script>

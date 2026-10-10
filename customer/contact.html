@@ -2,185 +2,84 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Us — EC SHOP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="../asset/css/main.css" />
-    <link rel="stylesheet" href="../asset/css/contact.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
+    <link rel="stylesheet" href="../asset/css/contact.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="contact"></header>
 
-    <!-- Navbar -->
-    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 font-headline no-underline hover:no-underline flex items-center gap-3" href="home.html">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="home.html">Home</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="product.html">Product</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="about.html">About</a>
-                    <a class="text-teal-700 font-semibold text-sm tracking-wide no-underline" href="contact.html">Contact</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <el-dropdown class="inline-block relative">
-                    <button id="userBtn" class="p-2 text-teal-900 hover:bg-teal-50/50 rounded-full transition-all duration-300 active:scale-95">
-                        <span id="userContent" class="material-symbols-outlined">person</span>
-                    </button>
-                    <div id="userMenu" class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50">
-                        <button onclick="logout()" class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100">Đăng xuất</button>
-                        <button class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100">Tài khoản</button>
-                        <button class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100">Hỗ trợ</button>
-                    </div>
-                </el-dropdown>
-                <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    <span>Cart</span>
-                    <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="contact-main">
-
-        <div class="contact-header">
-            <h1 class="contact-header__title" data-anim="fade-up" data-delay="1">Contact Us</h1>
-            <p class="contact-header__sub" data-anim="fade-up" data-delay="2">Any question or remarks? Just write us a message!</p>
+    <main id="main" class="container">
+        <div class="page-head">
+            <h1>Contact us</h1>
+            <p>Pick the quickest way to get an answer. Staff reply here on the site, so you do not need to wait by the phone.</p>
         </div>
 
-        <div class="contact-card">
+        <div class="contact-layout">
+            <section class="card contact-form-card" aria-labelledby="formTitle">
+                <h2 id="formTitle">Message our staff</h2>
 
-            <!-- Left: dark info panel -->
-            <div class="contact-info" data-anim="fade-right">
-                <h2 class="contact-info__title">Contact Information</h2>
-                <p class="contact-info__sub">Say something to start a live chat!</p>
-
-                <ul class="contact-detail-list">
-                    <li class="contact-detail">
-                        <div class="contact-detail__icon">
-                            <span class="material-symbols-outlined">call</span>
-                        </div>
-                        <span class="contact-detail__text">+84 012 3456 789</span>
-                    </li>
-                    <li class="contact-detail">
-                        <div class="contact-detail__icon">
-                            <span class="material-symbols-outlined">mail</span>
-                        </div>
-                        <span class="contact-detail__text">contact@ecshop.vn</span>
-                    </li>
-                    <li class="contact-detail">
-                        <div class="contact-detail__icon">
-                            <span class="material-symbols-outlined">location_on</span>
-                        </div>
-                        <span class="contact-detail__text">123 Nguyen Hue Street,<br />Ho Chi Minh City, Vietnam</span>
-                    </li>
-                </ul>
-
-                <div class="contact-socials">
-                    <button class="contact-social-btn" title="X"><i class="fa-brands fa-x-twitter"></i></button>
-                    <button class="contact-social-btn" title="Instagram"><i class="fab fa-instagram"></i></button>
-                    <button class="contact-social-btn" title="Discord"><i class="fab fa-discord"></i></button>
-                </div>
-
-                <!-- decorative blobs -->
-                <div class="contact-blob contact-blob--lg"></div>
-                <div class="contact-blob contact-blob--sm"></div>
-            </div>
-
-            <!-- Right: form panel -->
-            <div class="contact-form-panel" data-anim="fade-left">
                 <form id="contactForm" novalidate>
+                    <fieldset class="topics">
+                        <legend>What is it about?</legend>
+                        <label class="topic"><input type="radio" name="subject" value="General question" checked><span>General</span></label>
+                        <label class="topic"><input type="radio" name="subject" value="Product question"><span>Product</span></label>
+                        <label class="topic"><input type="radio" name="subject" value="Order or delivery"><span>Order &amp; delivery</span></label>
+                        <label class="topic"><input type="radio" name="subject" value="Partnership"><span>Partnership</span></label>
+                    </fieldset>
 
-                    <div class="contact-row">
-                        <div class="contact-field">
-                            <label for="firstName">First Name</label>
-                            <input class="contact-input" type="text" id="firstName" placeholder="John" required />
-                        </div>
-                        <div class="contact-field">
-                            <label for="lastName">Last Name</label>
-                            <input class="contact-input" type="text" id="lastName" placeholder="Doe" />
-                        </div>
+                    <div class="field">
+                        <label for="contactMsg">Your message</label>
+                        <textarea class="textarea" id="contactMsg" rows="6" maxlength="1900" placeholder="Tell us what you need. Add your order number if it is about an order."></textarea>
+                        <p class="error" id="contactError" role="alert" hidden></p>
                     </div>
 
-                    <div class="contact-row">
-                        <div class="contact-field">
-                            <label for="contactEmail">Email</label>
-                            <input class="contact-input" type="email" id="contactEmail" placeholder="john@email.com" required />
-                        </div>
-                        <div class="contact-field">
-                            <label for="contactPhone">Phone Number</label>
-                            <input class="contact-input" type="tel" id="contactPhone" placeholder="+84 012 345 6789" />
-                        </div>
+                    <div class="signin-note" id="signinNote" hidden>
+                        <span class="ms">lock</span>
+                        <p>Please <a href="login.html">sign in</a> so our staff can reply to you here. Or ask the assistant, no account needed.</p>
                     </div>
 
-                    <div class="contact-subject">
-                        <span class="contact-subject__label">Select Subject?</span>
-                        <div class="contact-subject__options">
-                            <label class="contact-radio">
-                                <input type="radio" name="subject" value="general" checked />
-                                <span class="contact-radio__dot"></span>
-                                <span class="contact-radio__text">General Inquiry</span>
-                            </label>
-                            <label class="contact-radio">
-                                <input type="radio" name="subject" value="support" />
-                                <span class="contact-radio__dot"></span>
-                                <span class="contact-radio__text">Product Support</span>
-                            </label>
-                            <label class="contact-radio">
-                                <input type="radio" name="subject" value="order" />
-                                <span class="contact-radio__dot"></span>
-                                <span class="contact-radio__text">Order & Shipping</span>
-                            </label>
-                            <label class="contact-radio">
-                                <input type="radio" name="subject" value="partnership" />
-                                <span class="contact-radio__dot"></span>
-                                <span class="contact-radio__text">Partnership</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="contact-message">
-                        <div class="contact-field">
-                            <label for="contactMsg">Message</label>
-                            <textarea class="contact-textarea" id="contactMsg" placeholder="Write your message..." rows="4" required></textarea>
-                        </div>
-                    </div>
-
-                    <div class="contact-submit-wrap">
-                        <button type="submit" class="contact-submit-btn">
-                            Send Message
-                            <span class="material-symbols-outlined">send</span>
-                        </button>
-                    </div>
-
+                    <button type="submit" class="btn btn-primary btn-lg" id="contactSend"><span class="ms">send</span>Send to staff</button>
+                    <p class="hint" id="contactAvail"></p>
                 </form>
-            </div>
+            </section>
 
+            <aside class="contact-side">
+                <section class="card side-card">
+                    <span class="ms">smart_toy</span>
+                    <h2>Ask the assistant</h2>
+                    <p>Instant answers on shipping, returns and payment, and side-by-side product comparisons.</p>
+                    <button type="button" class="btn btn-ghost" data-open-support>Open chat</button>
+                </section>
+                <section class="card side-card">
+                    <span class="ms">mail</span>
+                    <h2>Email</h2>
+                    <p><a href="mailto:contact@ecshop.vn">contact@ecshop.vn</a></p>
+                    <h2 class="second">Address</h2>
+                    <p>123 Nguyen Hue Street,<br>Ho Chi Minh City, Vietnam</p>
+                </section>
+            </aside>
         </div>
     </main>
 
-    <!-- Toast -->
-    <div class="contact-toast" id="contactToast">
-        <span class="material-symbols-outlined" style="font-size:16px;">check_circle</span>
-        <span>Message sent! We'll get back to you soon.</span>
-    </div>
+    <footer id="site-footer"></footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
-    <script src="../asset/js/user/contact.js"></script>
     <script src="../asset/js/api/support.js"></script>
+    <script src="../asset/js/user/contact.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>
     <script src="../asset/js/user/support-threads.js"></script>
 </body>
