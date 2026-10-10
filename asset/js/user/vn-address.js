@@ -1,6 +1,8 @@
 // vn-address.js — the Vietnamese part of an address form: country, +84 phone, and province / ward
 // boxes that suggest real names (34 provinces, 3,321 wards after the July 2025 reorganisation).
 // Typing without accents still finds a match: "sai gon" suggests "Phường Sài Gòn".
+// asset/data/vn-divisions.json comes from the v2 API of provinces.open-api.vn (MIT), which follows
+// the General Statistics Office of Vietnam.
 
 var VNAddress = (function () {
 
