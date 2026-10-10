@@ -1,447 +1,103 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EC Shop - Customer Home</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="../asset/css/main.css">
+    <title>EC SHOP - Electronics from verified sellers</title>
+    <meta name="description" content="Phones, laptops, audio, cameras and gaming from verified sellers, with support that answers.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
+    <link rel="stylesheet" href="../asset/css/home.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
-<body class="text-on-surface selection:bg-primary-container selection:text-on-primary-container">
-    <nav class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 dark:text-teal-400 font-headline no-underline hover:no-underline flex items-center gap-3"
-                    href="#">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="#">Home</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="product.html">Product</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="about.html">About</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="contact.html">Contact</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-6">
-                <div class="relative group hidden xl:block">
-                    <input
-                        class="bg-surface-container-highest border-none rounded-full py-2 pl-10 pr-4 w-64 text-sm focus:ring-2 focus:ring-primary transition-all"
-                        placeholder="Search flagship boutique..." type="text" />
-                    <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 scale-90">search</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <el-dropdown class="inline-block relative">
-                        <button id="userBtn"
-                            class="p-2 text-teal-900 dark:text-teal-400 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 rounded-full transition-all duration-300 active:scale-95">
-                            <span id="userContent" class="material-symbols-outlined">person</span>
-                        </button>
-                        <!-- Dropdown -->
-                        <div id="userMenu"
-                            class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50">
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="home"></header>
 
-                            <button onclick="logout()"
-                                class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
-                                Đăng xuất
-                            </button>
-                            <button 
-                                class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
-                                Tài khoản
-                            </button>
-                            <button 
-                                class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
-                                Hỗ trợ
-                            </button>
-                        </div>
-                    </el-dropdown>
-                    <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng">
-                        <span class="material-symbols-outlined">shopping_cart</span>
-                        <span>Cart</span>
-                        <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                    </button>
+    <main id="main">
+        <section class="hero">
+            <div class="container hero-grid">
+                <div class="hero-copy">
+                    <h1>Electronics worth keeping.</h1>
+                    <p class="hero-sub">Phones, laptops, audio and more from verified sellers. Pay with your wallet or on delivery, and reach a real person when you need one.</p>
+                    <div class="hero-cta">
+                        <a class="btn btn-primary btn-lg" href="product.html">Shop all products</a>
+                        <button type="button" class="btn btn-ghost btn-lg" data-open-support>Ask support</button>
+                    </div>
+                    <ul class="hero-points">
+                        <li><span class="ms">local_shipping</span>Free delivery</li>
+                        <li><span class="ms">verified</span>Verified sellers</li>
+                        <li><span class="ms">lock</span>Secure checkout</li>
+                        <li><span class="ms">support_agent</span>Staff replies in chat</li>
+                    </ul>
                 </div>
-            </div>
-        </div>
-    </nav>
-
-    <main class="pt-[72px]">
-        <div class="hero-section">
-            <div class="hero-container">
-                <div class="categories-sidebar">
-                    <div class="category-item" data-category="smartphone">
-                        <img src="../asset/img/home/categoriesSmartphone.png" alt="Smartphones"
-                            class="category-icon">Smartphones
-                        <i class="fas fa-chevron-right ms-auto"></i>
-                    </div>
-
-                    <div class="category-item" data-category="wearables">
-                        <img src="../asset/img/home/categoriesWearables.png" alt="Wearables"
-                            class="category-icon">Wearables
-                        <i class="fas fa-chevron-right ms-auto"></i>
-                    </div>
-                    <div class="category-item" data-category="laptops">
-                        <img src="../asset/img/home/categoriesLaptop.png" alt="Laptops" class="category-icon">Laptops
-                        <i class="fas fa-chevron-right ms-auto"></i>
-                    </div>
-                    <div class="category-item" data-category="audio">
-                        <img src="../asset/img/home/categoriesAudiopng.png" alt="Audio" class="category-icon">Audio
-                        <i class="fas fa-chevron-right ms-auto"></i>
-                    </div>
-                    <div class="category-item" data-category="cameras">
-                        <img src="../asset/img/home/categoriesCamera.png" alt="Cameras" class="category-icon">Cameras
-                        <i class="fas fa-chevron-right ms-auto"></i>
-                    </div>
-                    <div class="category-item" data-category="gaming">
-                        <img src="../asset/img/home/categoriesGaming.png" alt="Gaming" class="category-icon">Gaming
-                        <i class="fas fa-chevron-right ms-auto"></i>
-                    </div>
-                </div>
-
-                <div class="carousel-wrapper">
-                    <div id="carouselSlider" class="carousel slide carousel-fade" data-bs-ride="carousel"
-                        data-bs-interval="3000">
-                        <div class="carousel-inner">
-                            <div class="carousel-item active">
-                                <img src="../asset/img/home/slider1.webp" class="d-block carousel-img" alt="Slide 1">
-                            </div>
-                            <div class="carousel-item">
-                                <img src="../asset/img/home/slider2.webp" class="d-block carousel-img" alt="Slide 2">
-                            </div>
-                            <div class="carousel-item">
-                                <img src="../asset/img/home/slider3.webp" class="d-block carousel-img" alt="Slide 3">
-                            </div>
-                            <div class="carousel-item">
-                                <img src="../asset/img/home/slider4.webp" class="d-block carousel-img" alt="Slide 4">
-                            </div>
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselSlider"
-                            data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon"></span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carouselSlider"
-                            data-bs-slide="next">
-                            <span class="carousel-control-next-icon"></span>
-                        </button>
-                        <div class="carousel-indicators">
-                            <button type="button" data-bs-target="#carouselSlider" data-bs-slide-to="0"
-                                class="active"></button>
-                            <button type="button" data-bs-target="#carouselSlider" data-bs-slide-to="1"></button>
-                            <button type="button" data-bs-target="#carouselSlider" data-bs-slide-to="2"></button>
-                            <button type="button" data-bs-target="#carouselSlider" data-bs-slide-to="3"></button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- modal -->
-        <div class="modal fade" id="promotionModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-            <div class="modal-dialog modal-dialog-centered modal-lg promo-modal-dialog">
-                <div class="modal-content promo-modal-content border-0 overflow-hidden">
-                    <button type="button" class="btn-close promo-modal-close" data-bs-dismiss="modal"
-                        aria-label="Close"></button>
-                    <div class="promo-modal-grid">
-                        <div class="promo-modal-visual">
-                            <img src="../asset/img/home/modal.jpg" alt="Special promotion" class="promo-modal-img">
-                        </div>
-                        <div class="promo-modal-copy">
-                            <span class="promo-badge">Limited Offer</span>
-                            <h2 class="promo-modal-title">Flash Sale Up To 20% OFF</h2>
-                            <p class="promo-modal-text">Unlock extra savings on selected products today. Tap below to
-                                explore handpicked deals.</p>
-                            <div class="promo-modal-actions">
-                                <a href="#" class="btn promo-modal-btn" data-bs-dismiss="modal">
-                                    <i class="fas fa-shopping-bag me-2"></i>Shop The Deals
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- flash sale -->
-        <section id="products" class="py-5 bg-light">
-            <div class="container-fluid px-3 px-lg-5">
-                <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                    <h4 class="fw-bold mb-0">Flash Sale</h4>
-                    <div class="flex items-center gap-4 bg-surface-container-highest px-6 py-3 rounded-md">
-                        <span class="text-sm font-semibold uppercase tracking-wider text-on-surface-variant">Ends
-                            In:</span>
-                        <div id="flash-sale-timer" class="flex gap-4 text-primary font-headline font-bold text-xl">
-                            <span><span id="timer-hours">04</span><small
-                                    class="text-[10px] uppercase ml-1 opacity-60">h</small></span>
-                            <span><span id="timer-minutes">28</span><small
-                                    class="text-[10px] uppercase ml-1 opacity-60">m</small></span>
-                            <span><span id="timer-seconds">55</span><small
-                                    class="text-[10px] uppercase ml-1 opacity-60">s</small></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex gap-2 mb-2 flex-wrap">
-                </div>
-
-                <div id="productContainer">
-                    <div class="col-12 text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="text-center mt-4">
-                    <a href="product.html" class="btn btn-outline-primary">View all products</a>
+                <div class="hero-feature" id="heroFeature" aria-label="Top rated products">
+                    <div class="skel hero-tile"></div><div class="skel hero-tile"></div>
+                    <div class="skel hero-tile"></div><div class="skel hero-tile"></div>
                 </div>
             </div>
         </section>
 
-
-        <!-- Why Shop With Us -->
-        <section class="why-shop-section">
-            <div class="why-shop-container">
-                <div class="why-shop-card">
-                    <div class="why-shop-icon">
-                        <span class="material-symbols-outlined">local_shipping</span>
-                    </div>
-                    <div class="why-shop-text">
-                        <h4>Free Shipping</h4>
-                        <p>On all orders over $50</p>
-                    </div>
-                </div>
-                <div class="why-shop-card">
-                    <div class="why-shop-icon">
-                        <span class="material-symbols-outlined">shield</span>
-                    </div>
-                    <div class="why-shop-text">
-                        <h4>Secure Payment</h4>
-                        <p>100% protected transactions</p>
-                    </div>
-                </div>
-                <div class="why-shop-card">
-                    <div class="why-shop-icon">
-                        <span class="material-symbols-outlined">autorenew</span>
-                    </div>
-                    <div class="why-shop-text">
-                        <h4>Easy Returns</h4>
-                        <p>30-day hassle-free returns</p>
-                    </div>
-                </div>
-                <div class="why-shop-card">
-                    <div class="why-shop-icon">
-                        <span class="material-symbols-outlined">support_agent</span>
-                    </div>
-                    <div class="why-shop-text">
-                        <h4>24/7 Support</h4>
-                        <p>Always here to help you</p>
-                    </div>
-                </div>
-            </div>
+        <section class="container cat-strip" aria-label="Categories">
+            <ul class="cat-list" id="catList"></ul>
         </section>
 
-        <!-- Featured Categories -->
-        <section class="feat-cat-section">
-            <div class="feat-cat-container">
-                <h2 class="feat-cat-heading">Shop by Category</h2>
-                <p class="feat-cat-sub">Browse our curated collection of premium electronics</p>
-                <div class="feat-cat-grid">
-                    <a href="product.html" class="feat-cat-card">
-                        <div class="feat-cat-img-wrap">
-                            <img src="../asset/img/home/categoriesSmartphone.png" alt="Smartphones">
-                        </div>
-                        <span>Smartphones</span>
-                    </a>
-                    <a href="product.html" class="feat-cat-card">
-                        <div class="feat-cat-img-wrap">
-                            <img src="../asset/img/home/categoriesWearables.png" alt="Wearables">
-                        </div>
-                        <span>Wearables</span>
-                    </a>
-                    <a href="product.html" class="feat-cat-card">
-                        <div class="feat-cat-img-wrap">
-                            <img src="../asset/img/home/categoriesLaptop.png" alt="Laptops">
-                        </div>
-                        <span>Laptops</span>
-                    </a>
-                    <a href="product.html" class="feat-cat-card">
-                        <div class="feat-cat-img-wrap">
-                            <img src="../asset/img/home/categoriesAudiopng.png" alt="Audio">
-                        </div>
-                        <span>Audio</span>
-                    </a>
-                    <a href="product.html" class="feat-cat-card">
-                        <div class="feat-cat-img-wrap">
-                            <img src="../asset/img/home/categoriesCamera.png" alt="Cameras">
-                        </div>
-                        <span>Cameras</span>
-                    </a>
-                    <a href="product.html" class="feat-cat-card">
-                        <div class="feat-cat-img-wrap">
-                            <img src="../asset/img/home/categoriesGaming.png" alt="Gaming">
-                        </div>
-                        <span>Gaming</span>
-                    </a>
+        <section class="section container" aria-labelledby="dealsTitle">
+            <div class="section-head">
+                <div>
+                    <h2 id="dealsTitle">Deals this week</h2>
+                    <p>The biggest price drops across the shop.</p>
                 </div>
+                <a class="link-more" href="product.html?sort=price-asc">Browse by price <span class="ms">arrow_forward</span></a>
             </div>
+            <div class="pgrid" id="dealsGrid" aria-live="polite"></div>
         </section>
 
-        <!-- Newsletter Subscription -->
-        <section class="py-24 bg-teal-950 text-white overflow-hidden relative">
-            <div
-                class="absolute top-0 right-0 w-96 h-96 bg-primary opacity-10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2">
-            </div>
-            <div class="max-w-screen-2xl mx-auto px-12 relative z-10">
-                <div class="max-w-3xl mx-auto text-center space-y-8">
-                    <div class="space-y-4">
-                        <span class="text-primary-fixed font-bold tracking-[0.4em] uppercase text-xs">Stay Ahead</span>
-                        <h2 class="text-5xl font-headline font-extrabold tracking-tighter">Join the Inner Circle</h2>
-                        <p class="text-xl text-white/60 font-body">Get exclusive access to pre-orders, private
-                            collections, and the latest technical insights before they go public.</p>
-                    </div>
-                    <form class="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto">
-                        <input
-                            class="flex-1 bg-white/5 border border-white/10 rounded-lg px-6 py-4 text-white focus:outline-none focus:ring-2 focus:ring-primary transition-all backdrop-blur-sm"
-                            placeholder="Your primary email address" type="email" />
-                        <button
-                            class="bg-teal-700 text-white px-10 py-4 rounded-lg font-bold hover:bg-teal-800 transition-all whitespace-nowrap">Subscribe
-                            Now</button>
-                    </form>
-                    <p class="text-[10px] text-white/30 uppercase tracking-widest font-bold">Encrypted &amp; Secure.
-                        No Spam Ever.</p>
+        <section class="section container" aria-labelledby="newTitle">
+            <div class="section-head">
+                <div>
+                    <h2 id="newTitle">New arrivals</h2>
+                    <p>Just listed by our sellers.</p>
                 </div>
+                <a class="link-more" href="product.html?sort=newest">See all new <span class="ms">arrow_forward</span></a>
             </div>
+            <div class="pgrid" id="newGrid" aria-live="polite"></div>
         </section>
 
-        <!-- Brand Marquee -->
-        <section class="brands-section">
-            <p class="brands-label">Strategic Innovation Partners</p>
-            <div class="brands-track-wrap">
-                <div class="brands-track">
-                    <span>NVIDIA</span>
-                    <span>APPLE</span>
-                    <span>SAMSUNG</span>
-                    <span>LENOVO</span>
-                    <span>SONY</span>
-                    <span>INTEL</span>
-                    <span>ASUS</span>
-                    <span>MICROSOFT</span>
-                    <!-- duplicate for seamless loop -->
-                    <span>NVIDIA</span>
-                    <span>APPLE</span>
-                    <span>SAMSUNG</span>
-                    <span>LENOVO</span>
-                    <span>SONY</span>
-                    <span>INTEL</span>
-                    <span>ASUS</span>
-                    <span>MICROSOFT</span>
+        <section class="container" aria-label="Why EC SHOP">
+            <ul class="promise">
+                <li><span class="ms">local_shipping</span><div><h3>Free delivery</h3><p>No shipping fee at checkout, ever.</p></div></li>
+                <li><span class="ms">shield</span><div><h3>Secure payment</h3><p>Pay from your wallet or on delivery.</p></div></li>
+                <li><span class="ms">autorenew</span><div><h3>Easy returns</h3><p>30 days to change your mind.</p></div></li>
+                <li><span class="ms">forum</span><div><h3>Real support</h3><p>Assistant first, then our staff.</p></div></li>
+            </ul>
+        </section>
+
+        <section class="container">
+            <div class="help-band">
+                <div>
+                    <h2>Not sure what to buy?</h2>
+                    <p>Ask the assistant to compare two products, check a policy, or leave a message for our staff. They reply right in the chat.</p>
                 </div>
+                <button type="button" class="btn btn-lg" data-open-support>Open chat</button>
             </div>
         </section>
     </main>
 
+    <footer id="site-footer"></footer>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="footer-top">
-
-            <!-- Brand -->
-            <div class="footer-brand-col">
-                <div class="footer-brand-name">EC SHOP</div>
-                <p class="footer-brand-desc">Elevating the standard of personal electronics through intentional design and curated collections.</p>
-                <div class="footer-socials">
-                    <button class="footer-social-btn" title="Website">
-                        <span class="material-symbols-outlined">public</span>
-                    </button>
-                    <button class="footer-social-btn" title="Email">
-                        <span class="material-symbols-outlined">alternate_email</span>
-                    </button>
-                    <button class="footer-social-btn" title="Chat">
-                        <span class="material-symbols-outlined">chat_bubble</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Company -->
-            <div>
-                <div class="footer-col-title">Company</div>
-                <ul class="footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Sustainability</a></li>
-                    <li><a href="#">Corporate Sales</a></li>
-                    <li><a href="#">Store Locator</a></li>
-                </ul>
-            </div>
-
-            <!-- Support -->
-            <div>
-                <div class="footer-col-title">Support</div>
-                <ul class="footer-links">
-                    <li><a href="#">Help Center</a></li>
-                    <li><a href="#">Shipping &amp; Returns</a></li>
-                    <li><a href="#">Track My Order</a></li>
-                    <li><a href="#">Repair Status</a></li>
-                </ul>
-            </div>
-
-            <!-- Legal -->
-            <div>
-                <div class="footer-col-title">Legal</div>
-                <ul class="footer-links">
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                    <li><a href="#">Cookie Settings</a></li>
-                </ul>
-            </div>
-
-            <!-- QR / App -->
-            <div>
-                <div class="footer-col-title">Mobile App</div>
-                <div class="footer-qr-wrap">
-                    <img src="../asset/img/home/qrfooter.png" alt="Download QR" class="footer-qr-img">
-                    <p class="footer-qr-label">Scan to download the EC SHOP app and shop on the go.</p>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="footer-bottom">
-            <p class="footer-copy">© 2026 EC SHOP. All rights reserved.</p>
-            <div class="footer-locale">
-                <span>English (US)</span>
-                <span>USD $</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Coming Soon Toast -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999;">
-        <div id="comingSoonToast" class="toast align-items-center text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <i class="fa-solid fa-clock-rotate-left me-2"></i> Product details page coming soon!
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/products.js"></script>
-    <script src="../asset/js/main.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
+    <script src="../asset/js/user/addtocart.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
+    <script src="../asset/js/user/home.js"></script>
     <script src="../asset/js/api/support.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>
     <script src="../asset/js/user/support-threads.js"></script>
