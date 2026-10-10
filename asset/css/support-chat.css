@@ -190,3 +190,53 @@ html[data-motion="reduced"] .sc-panel.sc-open { animation: none; }
 .typing::after { content: "."; animation: typing-dots 1.2s steps(1) infinite; }
 @keyframes typing-dots { 33% { content: ".."; } 66% { content: "..."; } }
 html[data-motion="reduced"] .typing::after { animation: none; content: "..."; }
+
+/* ---------- Volt: the mascot in the launcher, the header and next to its messages ---------- */
+
+.sc-face { display: grid; place-items: center; flex: none; }
+.sc-face .volt { width: 100%; height: 100%; overflow: visible; }
+.sc-launcher { gap: 10px; padding: 0 20px 0 6px; min-height: 52px; }
+.sc-launcher .sc-face { width: 40px; height: 40px; border-radius: 50%; background: #e9f4f2; padding: 4px; transition: transform 0.4s var(--ease, ease-out); }
+.sc-launcher:hover .sc-face { transform: rotate(-10deg) scale(1.08); }
+.sc-face--head { width: 44px; height: 44px; padding: 5px; border-radius: 14px; background: #e9f4f2; }
+.sc-header { padding: 14px 10px 14px 14px; background: var(--brand, #0b6b66); }
+.sc-subtitle { color: #cfe7e4; }
+
+/* blinking, and the antenna bulb glowing while Volt thinks */
+.volt-eyes { transform-box: fill-box; transform-origin: center; animation: volt-blink 5s infinite; }
+@keyframes volt-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+.volt-bulb { transition: fill 0.3s; }
+.sc-panel.is-thinking .volt-bulb { animation: volt-glow 0.9s ease-in-out infinite alternate; }
+@keyframes volt-glow { from { fill: #f2a516; } to { fill: #ffe08a; } }
+.sc-panel.is-thinking .sc-face--head .volt-eyes { animation: none; transform: translateY(-2px); }
+
+.sc-messages { padding: 16px 14px; }
+.sc-msg--bot { flex-direction: row; align-items: flex-start; gap: 8px; }
+.sc-ava { flex: none; width: 30px; height: 30px; margin-top: 2px; }
+.sc-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; max-width: calc(100% - 38px); }
+.sc-msg--bot .sc-bubble { max-width: 100%; }
+.sc-bubble { overflow-wrap: break-word; }
+.sc-vi { display: block; margin-top: 6px; color: var(--ink-3, #5f6a67); font-size: 13px; }
+.sc-col .sc-chips { margin: 0; }
+.sc-source { display: flex; align-items: center; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line, #e3e0d8); }
+.sc-source .ms { font-size: 16px; color: var(--brand, #0b6b66); }
+
+/* comparison: its own card, a label column that never splits words, products side by side */
+.sc-compare { margin-top: 0; border-radius: 14px; overflow-wrap: normal; }
+.sc-compare table { table-layout: auto; font-size: 13px; }
+.sc-compare thead th { background: var(--brand-soft, #dcefed); color: var(--ink, #151b1a); font-size: 13px; line-height: 1.3; }
+.sc-compare thead th a { color: inherit; font-weight: 700; text-decoration: none; }
+.sc-compare thead th a:hover { color: var(--brand, #0b6b66); text-decoration: underline; }
+.sc-compare thead td { background: var(--brand-soft, #dcefed); }
+.sc-compare tbody th { position: sticky; left: 0; z-index: 1; width: 1%; white-space: nowrap; background: var(--surface, #fff); color: var(--ink-3, #5f6a67); font-weight: 600; text-align: left; }
+.sc-compare td, .sc-compare th { padding: 9px 10px; min-width: 96px; vertical-align: top; }
+.sc-compare tbody th { min-width: 0; }
+.sc-compare tbody tr:nth-child(even) td, .sc-compare tbody tr:nth-child(even) th { background: #faf9f6; }
+.sc-compare .sc-price { color: var(--ink, #151b1a); font-weight: 800; }
+.sc-compare:focus-visible { outline: 3px solid #f2a516; outline-offset: 2px; }
+
+.sc-send { display: grid; place-items: center; min-width: 48px; padding: 0 12px; }
+.sc-send .ms { font-size: 20px; }
+
+html[data-motion="reduced"] .volt-eyes, html[data-motion="reduced"] .sc-panel.is-thinking .volt-bulb { animation: none; }
+html[data-motion="reduced"] .sc-launcher:hover .sc-face { transform: none; }

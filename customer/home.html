@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,menu_book,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,refresh,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
     <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/home.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
@@ -22,53 +22,22 @@
     <main id="main">
         <section class="container hero" aria-roledescription="carousel" aria-label="Featured offers">
             <div class="carousel" id="carousel" data-theme="teal">
-                <div class="slides" id="slides">
-                    <article class="slide is-active" data-theme="teal" aria-roledescription="slide" aria-label="1 of 4">
-                        <div class="slide-copy">
-                            <p class="slide-tag">Free delivery on every order</p>
-                            <h1>Electronics worth keeping.</h1>
-                            <p class="slide-sub">Phones, laptops, audio and more from verified sellers, with support that answers.</p>
-                            <a class="btn btn-lg slide-btn" href="product.html">Shop all products</a>
-                        </div>
-                        <div class="slide-art"><img src="../asset/img/home/ip15PM.webp" alt="" width="500" height="500"></div>
-                    </article>
-                    <article class="slide" data-theme="orange" aria-roledescription="slide" aria-label="2 of 4">
-                        <div class="slide-copy">
-                            <p class="slide-tag">Flash sale · this week</p>
-                            <h2>Up to 25% off headphones and speakers</h2>
-                            <p class="slide-sub">Studio sound at street prices. While stock lasts.</p>
-                            <a class="btn btn-lg slide-btn" href="product.html?category=audio">Shop audio</a>
-                        </div>
-                        <div class="slide-art"><img src="../asset/img/home/sonyWH.png" alt="" width="500" height="500"></div>
-                    </article>
-                    <article class="slide" data-theme="ink" aria-roledescription="slide" aria-label="3 of 4">
-                        <div class="slide-copy">
-                            <p class="slide-tag">New in gaming</p>
-                            <h2>Level up your setup</h2>
-                            <p class="slide-sub">Consoles, controllers and handhelds, ready to ship.</p>
-                            <a class="btn btn-lg slide-btn" href="product.html?category=gaming">Shop gaming</a>
-                        </div>
-                        <div class="slide-art"><img src="../asset/img/home/ps5Slim.jpg" alt="" width="500" height="500"></div>
-                    </article>
-                    <article class="slide" data-theme="sand" aria-roledescription="slide" aria-label="4 of 4">
-                        <div class="slide-copy">
-                            <p class="slide-tag">For creators</p>
-                            <h2>Shoot like a pro</h2>
-                            <p class="slide-sub">Mirrorless cameras and action cams from the brands you know.</p>
-                            <a class="btn btn-lg slide-btn" href="product.html?category=cameras">Shop cameras</a>
-                        </div>
-                        <div class="slide-art"><img src="../asset/img/home/canonEOS.jpg" alt="" width="500" height="500"></div>
-                    </article>
-                </div>
-                <div class="carousel-ctrl">
-                    <button type="button" class="ctrl-btn" id="carPlay" aria-label="Pause slideshow"><span class="ms">pause</span></button>
-                    <div class="dots" id="carDots"></div>
-                    <div class="ctrl-arrows">
-                        <button type="button" class="ctrl-btn" id="carPrev" aria-label="Previous slide"><span class="ms">chevron_left</span></button>
-                        <button type="button" class="ctrl-btn" id="carNext" aria-label="Next slide"><span class="ms">chevron_right</span></button>
-                    </div>
+                <div class="slides" id="slides" aria-live="off">
+                    <a class="slide slide--image is-active" href="product.html?category=laptops" data-theme="sand" data-tag="Laptops" data-title="Lenovo Yoga" aria-roledescription="slide" aria-label="1 of 4">
+                        <img src="../asset/img/home/slider1.webp" alt="Lenovo Yoga laptops from 27.99 million dong, with up to 4 million off a trade-in">
+                    </a>
+                    <a class="slide slide--image" href="product.html?category=smartphone" data-theme="ink" data-tag="Smartphones" data-title="Galaxy S26 Ultra" aria-roledescription="slide" aria-label="2 of 4">
+                        <img src="../asset/img/home/slider2.webp" alt="Samsung Galaxy S26 Ultra with double storage and a 12-month one-for-one warranty" loading="lazy">
+                    </a>
+                    <a class="slide slide--image" href="product.html?category=laptops" data-theme="teal" data-tag="New in" data-title="MacBook Neo" aria-roledescription="slide" aria-label="3 of 4">
+                        <img src="../asset/img/home/slider3.webp" alt="MacBook Neo, from 13.99 million dong with up to 2.5 million off" loading="lazy">
+                    </a>
+                    <a class="slide slide--image" href="product.html?category=audio" data-theme="orange" data-tag="Pre-order" data-title="Sony WF-1000X M6" aria-roledescription="slide" aria-label="4 of 4">
+                        <img src="../asset/img/home/slider4.webp" alt="Sony WF-1000X M6 earbuds, pre-order for 7.99 million dong" loading="lazy">
+                    </a>
                 </div>
             </div>
+            <ol class="rail" id="carRail" aria-label="Featured offers"></ol>
         </section>
 
         <section class="container cat-strip" aria-label="Categories">

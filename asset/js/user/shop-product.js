@@ -75,7 +75,7 @@ async function applyFilters() {
     } catch (e) {
         if (seq !== loadSeq) return;
         list.setAttribute("aria-busy", "false");
-        list.innerHTML = `<div class="empty" style="grid-column:1/-1"><span class="ms">cloud_off</span><h3>Could not load products</h3><p>${Api.escapeHtml(e.message)}</p></div>`;
+        list.innerHTML = UI.errorState("Could not load products", e.message);
     }
 }
 

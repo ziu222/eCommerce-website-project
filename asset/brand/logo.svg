@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 48" role="img" aria-label="EC SHOP">
+  <path d="M24 9.5V4.8" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>
+  <circle cx="24" cy="4.4" r="3.6" fill="#f2a516"/>
+  <rect x="3" y="9" width="42" height="36" rx="13" fill="#0b6b66"/>
+  <rect x="8.5" y="14.5" width="31" height="25" rx="8" fill="#e9f4f2"/>
+  <rect x="15.6" y="20.5" width="4.2" height="7" rx="2.1" fill="#151b1a"/>
+  <rect x="28.2" y="20.5" width="4.2" height="7" rx="2.1" fill="#151b1a"/>
+  <path d="M18.5 32q5.5 4.2 11 0" fill="none" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>
+  <path d="M41 4l-4.2 6.2h3l-1.4 5.2 5-7h-3.1z" fill="#c93d14"/>
+  <text x="56" y="37" font-family="'Be Vietnam Pro', system-ui, sans-serif" font-size="27" font-weight="800" letter-spacing="-1" fill="#151b1a">EC</text>
+  <path d="M100 14l-8 12h6l-3 11 10-14h-6l3-9z" fill="#c93d14"/>
+  <text x="110" y="37" font-family="'Be Vietnam Pro', system-ui, sans-serif" font-size="27" font-weight="800" letter-spacing="-1" fill="#151b1a">SHOP</text>
+</svg>

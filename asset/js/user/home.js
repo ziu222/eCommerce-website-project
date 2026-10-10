@@ -3,59 +3,54 @@
 (function () {
 
     // ---------- banner carousel
-    // Each dot carries a progress bar (CSS animation). When the bar finishes the slideshow moves on,
-    // so hovering, focusing or pausing only has to pause that animation.
+    // Next to the banner a rail lists every slide (picture, tag, title). The active item carries a progress bar
+    // (a CSS animation); when it finishes the banner moves on by itself. Hovering or focusing the banner pauses that animation.
 
     var carousel = document.getElementById("carousel");
     var slides = [].slice.call(document.querySelectorAll(".slide"));
-    var dotsBox = document.getElementById("carDots");
-    var playBtn = document.getElementById("carPlay");
+    var rail = document.getElementById("carRail");
     var current = 0;
-    var stopped = false;
 
     slides.forEach(function (s, i) {
-        var d = document.createElement("button");
-        d.type = "button";
-        d.className = "dot";
-        d.setAttribute("aria-label", "Go to slide " + (i + 1));
-        d.addEventListener("click", function () { go(i); });
-        dotsBox.appendChild(d);
+        var li = document.createElement("li");
+        li.innerHTML = '<button type="button" class="rail-item" data-theme="' + s.dataset.theme + '">' +
+            '<img src="' + s.querySelector("img").getAttribute("src") + '" alt="">' +
+            '<span class="rail-text"><span class="rail-tag">' + Api.escapeHtml(s.dataset.tag) + "</span>" +
+            '<span class="rail-title">' + Api.escapeHtml(s.dataset.title) + "</span></span>" +
+            '<span class="rail-bar" aria-hidden="true"></span></button>';
+        li.firstChild.addEventListener("click", function () { go(i); });
+        rail.appendChild(li);
     });
-    var dots = [].slice.call(dotsBox.children);
+    var items = [].slice.call(rail.querySelectorAll(".rail-item"));
 
     function go(i) {
         current = (i + slides.length) % slides.length;
         slides.forEach(function (s, k) { s.classList.toggle("is-active", k === current); });
-        dots.forEach(function (d, k) {
-            if (k === current) d.setAttribute("aria-current", "true"); else d.removeAttribute("aria-current");
-            // restart the progress bar of the dot that just became active
-            if (k === current) { d.style.animation = "none"; void d.offsetWidth; d.style.animation = ""; }
+        items.forEach(function (it, k) {
+            if (k === current) it.setAttribute("aria-current", "true"); else it.removeAttribute("aria-current");
         });
+        // restart the progress bar of the item that just became active
+        var bar = items[current].querySelector(".rail-bar");
+        bar.style.animation = "none";
+        void bar.offsetWidth;
+        bar.style.animation = "";
         carousel.dataset.theme = slides[current].dataset.theme;
+        // keep the active item in view when the rail scrolls sideways on phones
+        if (rail.scrollWidth > rail.clientWidth) rail.scrollTo({ left: items[current].parentNode.offsetLeft - 16, behavior: "smooth" });
     }
 
-    function setStopped(value) {
-        stopped = value;
-        carousel.classList.toggle("is-stopped", stopped);
-        document.getElementById("slides").setAttribute("aria-live", stopped ? "polite" : "off");
-        playBtn.setAttribute("aria-label", stopped ? "Play slideshow" : "Pause slideshow");
-        playBtn.firstElementChild.textContent = stopped ? "play_arrow" : "pause";
-    }
-
-    dotsBox.addEventListener("animationend", function (e) {
-        if (e.animationName === "dot-fill" && !stopped) go(current + 1);
+    rail.addEventListener("animationend", function (e) {
+        if (e.animationName === "dot-fill") go(current + 1);
     });
-    playBtn.addEventListener("click", function () { setStopped(!stopped); });
-    document.getElementById("carPrev").addEventListener("click", function () { go(current - 1); });
-    document.getElementById("carNext").addEventListener("click", function () { go(current + 1); });
 
-    // paused while the pointer is over the banner or focus is inside it
+    // paused while the pointer is over the banner or the rail, or focus is inside them
+    var hero = document.querySelector(".hero");
     function syncPause() {
         setTimeout(function () {
-            carousel.classList.toggle("is-paused", carousel.matches(":hover") || carousel.contains(document.activeElement));
+            hero.classList.toggle("is-paused", hero.matches(":hover") || hero.contains(document.activeElement));
         }, 0);
     }
-    ["mouseenter", "mouseleave", "focusin", "focusout"].forEach(function (ev) { carousel.addEventListener(ev, syncPause); });
+    ["mouseenter", "mouseleave", "focusin", "focusout"].forEach(function (ev) { hero.addEventListener(ev, syncPause); });
 
     // swipe on touch screens
     var startX = null;
@@ -67,7 +62,6 @@
         if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
     });
 
-    setStopped(stopped);
     go(0);
 
     // ---------- products
@@ -81,7 +75,7 @@
 
     function failed(id) {
         document.getElementById(id).innerHTML =
-            '<div class="empty" style="grid-column:1/-1"><span class="ms">cloud_off</span><h3>Could not load products</h3><p>Please refresh the page.</p></div>';
+            UI.errorState("Could not load products");
     }
 
     document.getElementById("catList").innerHTML = UI.CATEGORIES.map(function (c) {

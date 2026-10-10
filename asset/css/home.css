@@ -13,7 +13,7 @@
     display: grid;
     gap: 20px;
     align-items: center;
-    padding: 28px 24px 96px;
+    padding: 28px 24px 84px;
     overflow: hidden;
     background: var(--bg);
     color: var(--ink-on);
@@ -48,31 +48,18 @@
 .slide-art { opacity: 0; transform: translateX(48px) scale(0.94); transition: opacity 0.8s var(--ease), transform 0.9s var(--ease); }
 .slide.is-active .slide-art { opacity: 1; transform: none; transition-delay: 0.2s; }
 
-.carousel-ctrl { position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 3; display: flex; align-items: center; gap: 8px; }
 .ctrl-btn { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: var(--ctrl); transition: background-color 0.18s, transform 0.12s; }
 .carousel[data-theme="sand"] .ctrl-btn { background: rgba(21, 27, 26, 0.1); }
 .ctrl-btn:hover { background: rgba(255, 255, 255, 0.3); }
 .carousel[data-theme="sand"] .ctrl-btn:hover { background: rgba(21, 27, 26, 0.18); }
 .ctrl-btn:active { transform: scale(0.92); }
-.ctrl-arrows { display: flex; gap: 8px; margin-left: auto; }
-.dots { display: flex; }
-.dot { position: relative; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--ctrl); }
-.dot::before, .dot::after { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: currentColor; }
-.dot::before { opacity: 0.3; }
-.dot::after { transform: scaleX(0); transform-origin: left; }
-.dot[aria-current="true"]::after { animation: dot-fill 6s linear forwards; }
-.carousel.is-paused .dot[aria-current="true"]::after { animation-play-state: paused; }
-.carousel.is-stopped .dot[aria-current="true"]::after { animation: none; transform: scaleX(1); }
-@keyframes dot-fill { to { transform: scaleX(1); } }
 
 @media (min-width: 720px) {
-    .carousel-ctrl { left: 32px; right: 32px; bottom: 22px; }
-    .dot { width: 56px; }
-    .slide { grid-template-columns: 1.1fr 1fr; gap: 32px; padding: 44px 40px 96px; min-height: 420px; }
+    .slide { grid-template-columns: 1.1fr 1fr; gap: 32px; padding: 44px 40px 80px; min-height: 420px; }
 }
 @media (min-width: 960px) {
     .hero { padding-block: 28px 12px; }
-    .slide { gap: 40px; padding: 56px 56px 100px; min-height: 480px; }
+    .slide { gap: 40px; padding: 52px 52px 84px; min-height: 480px; }
     .slide-art { width: min(100%, 380px); }
 }
 
@@ -113,3 +100,60 @@
 @keyframes drift { to { translate: -24px 18px; scale: 1.06; } }
 .slide.is-active .slide-art { animation: float 7s ease-in-out 1.2s infinite; }
 .slide.is-active::before { animation: drift 14s ease-in-out infinite alternate; }
+
+/* ---------- The rail beside the banner: every slide listed, the active one in the colour of its slide ---------- */
+
+.hero { display: grid; gap: 12px; }
+.car-play { position: absolute; left: 20px; bottom: 18px; z-index: 3; }
+.rail { display: flex; gap: 10px; margin: 0; padding: 2px; overflow-x: auto; list-style: none; scroll-snap-type: x mandatory; scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+.rail li { flex: none; width: 236px; scroll-snap-align: start; }
+.rail-item {
+    --on: var(--ink);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    height: 100%;
+    padding: 12px 14px 18px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    background: var(--surface);
+    color: var(--on);
+    text-align: left;
+    transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease), color 0.4s var(--ease), transform 0.3s var(--ease);
+}
+.rail-item:hover { border-color: var(--line-2); transform: translateX(-3px); }
+.rail-item img { flex: none; width: 54px; height: 54px; padding: 5px; border-radius: 12px; background: #fff; object-fit: contain; transition: transform 0.4s var(--ease); }
+.rail-item[aria-current] img { transform: rotate(-6deg) scale(1.06); }
+.rail-text { display: grid; gap: 2px; min-width: 0; }
+.rail-tag { overflow: hidden; font-size: 12px; font-weight: 600; opacity: 0.8; text-overflow: ellipsis; white-space: nowrap; }
+.rail-title { display: -webkit-box; overflow: hidden; font-size: 14px; font-weight: 700; line-height: 1.3; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.rail-bar { position: absolute; left: 14px; right: 14px; bottom: 8px; height: 3px; border-radius: 2px; background: color-mix(in srgb, currentColor 18%, transparent); }
+.rail-bar::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; transform: scaleX(0); transform-origin: left; }
+.rail-item[aria-current] .rail-bar::after { animation: dot-fill 6s linear forwards; }
+.hero.is-paused .rail-item[aria-current] .rail-bar::after { animation-play-state: paused; }
+.hero.is-stopped .rail-item[aria-current] .rail-bar::after { animation: none; transform: scaleX(1); }
+@keyframes dot-fill { to { transform: scaleX(1); } }
+.rail-item[aria-current] { --on: #fff; border-color: transparent; background: #0b4f4b; }
+.rail-item[aria-current][data-theme="orange"] { background: #b8370f; }
+.rail-item[aria-current][data-theme="ink"] { background: #151b1a; }
+.rail-item[aria-current][data-theme="sand"] { --on: var(--ink); background: #e8e1d1; }
+html[data-motion="reduced"] .rail-item:hover, html[data-motion="reduced"] .rail-item[aria-current] img { transform: none; }
+
+@media (min-width: 960px) {
+    .hero { grid-template-columns: minmax(0, 1fr) 280px; align-items: stretch; }
+    .rail { flex-direction: column; overflow: visible; padding: 0; }
+    .rail li { flex: 1; width: auto; }
+}
+
+/* banner slides are the shop's own banner pictures; the active one eases out of a slow zoom */
+.slide.slide--image { display: block; padding: 0; min-height: 0; aspect-ratio: 23 / 10; background: #eef0f3; }
+.slide--image::before { display: none; }
+.slide--image img { width: 100%; height: 100%; object-fit: cover; }
+.slide--image.is-active img { animation: banner-zoom 7s var(--ease) both; }
+@keyframes banner-zoom { from { transform: scale(1.06); } }
+.rail-item img { object-fit: cover; padding: 0; }
+html[data-motion="reduced"] .slide--image.is-active img { animation: none; }

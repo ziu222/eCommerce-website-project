@@ -70,6 +70,18 @@ var UI = (function () {
         img.src = fallbackFor(img.dataset.category);
     }, true);
 
+    // Volt, the mascot: "happy" | "sad" | "" (calm). Decorative, so no alt text.
+    function mascot(mood, size) {
+        return '<img class="mascot" src="../asset/brand/mascot' + (mood ? "-" + mood : "") + '.svg" alt="" width="' + (size || 96) + '" height="' + (size || 96) + '">';
+    }
+
+    // A friendly error block with Volt looking sorry and a way to try again.
+    function errorState(title, text) {
+        return '<div class="empty error-state" style="grid-column:1/-1">' + mascot("sad", 104) +
+            "<h3>" + esc(title) + "</h3><p>" + esc(text || "Check your connection and try again.") + "</p>" +
+            '<button type="button" class="btn btn-ghost" onclick="location.reload()"><span class="ms">refresh</span>Try again</button></div>';
+    }
+
     function isPlaceholder(src) { return String(src).indexOf("/placeholder/") !== -1; }
 
     // ---------- product card (home, catalogue, related)
@@ -180,7 +192,7 @@ var UI = (function () {
             return '<a href="' + n.href + '"' + (n.id === active ? ' aria-current="page"' : "") + ">" + n.label + "</a>";
         }).join("");
         return '<div class="site-nav-inner container">' +
-            '<a class="brand" href="home.html"><span class="brand-mark" aria-hidden="true">EC</span>EC SHOP</a>' +
+            '<a class="brand" href="home.html"><img class="brand-logo" src="../asset/brand/logo-mark.svg" alt="" width="36" height="36"><span class="brand-word">EC<svg class="brand-bolt" viewBox="0 0 14 24" aria-hidden="true"><path d="M10 0L2 12h6l-3 11 9-14H8l3-9z"/></svg>SHOP</span></a>' +
             '<nav class="nav-links" id="navLinks" aria-label="Main">' + links + "</nav>" +
             '<form class="nav-search" action="product.html" role="search"><span class="ms" aria-hidden="true">search</span>' +
             '<input type="search" name="q" placeholder="Search products" aria-label="Search products" autocomplete="off"></form>' +
@@ -198,7 +210,7 @@ var UI = (function () {
             return '<li><a href="product.html?category=' + c.key + '">' + c.label + "</a></li>";
         }).join("");
         return '<div class="container footer-grid">' +
-            '<div class="footer-brand"><a class="brand" href="home.html"><span class="brand-mark" aria-hidden="true">EC</span>EC SHOP</a>' +
+            '<div class="footer-brand"><a class="brand" href="home.html"><img class="brand-logo" src="../asset/brand/logo-mark.svg" alt="" width="36" height="36"><span class="brand-word">EC<svg class="brand-bolt" viewBox="0 0 14 24" aria-hidden="true"><path d="M10 0L2 12h6l-3 11 9-14H8l3-9z"/></svg>SHOP</span></a>' +
             "<p>Phones, laptops, audio and more from verified sellers, with support that answers.</p></div>" +
             '<div class="footer-col"><h4>Shop</h4><ul>' + shop + "</ul></div>" +
             '<div class="footer-col"><h4>Help</h4><ul><li><a href="contact.html">Contact us</a></li><li><a href="about.html">About EC SHOP</a></li>' +
@@ -395,6 +407,13 @@ var UI = (function () {
         }).observe(document.body, { childList: true, subtree: true });
     }
 
+    if (!document.querySelector('link[rel="icon"]')) {
+        var icon = document.createElement("link");
+        icon.rel = "icon";
+        icon.type = "image/svg+xml";
+        icon.href = "../asset/brand/logo-mark.svg";
+        document.head.appendChild(icon);
+    }
     mount();
     initMotion();
     if (!signedInCustomer()) {
@@ -409,6 +428,6 @@ var UI = (function () {
         });
     }).observe(document.body, { childList: true, subtree: true });
 
-    return { openAuth: openAuth, requireLogin: requireLogin, preloadAuth: preloadAuth, motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
+    return { mascot: mascot, errorState: errorState, openAuth: openAuth, requireLogin: requireLogin, preloadAuth: preloadAuth, motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 
 })();

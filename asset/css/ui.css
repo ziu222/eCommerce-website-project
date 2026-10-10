@@ -204,6 +204,15 @@ button { cursor: pointer; }
 .site-nav-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; min-height: var(--nav-h); }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 1.2rem; font-weight: 800; letter-spacing: -0.03em; text-decoration: none; }
 .brand:hover { color: var(--ink); }
+.brand-logo { flex: none; width: 36px; height: 36px; transition: transform 0.4s var(--ease); }
+.brand:hover .brand-logo { transform: rotate(-8deg) scale(1.06); }
+.brand-word { display: inline-flex; align-items: center; }
+.brand-bolt { width: 11px; height: 19px; margin: 0 2px; fill: var(--accent); }
+.site-footer .brand-bolt { fill: #f2a516; }
+.mascot { display: block; }
+.error-state .mascot { animation: mascot-sway 3s ease-in-out infinite alternate; transform-origin: 50% 90%; }
+@keyframes mascot-sway { from { rotate: -4deg; } to { rotate: 4deg; } }
+html[data-motion="reduced"] .error-state .mascot { animation: none; }
 .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; background: var(--brand); color: #fff; font-size: 15px; font-weight: 800; letter-spacing: 0; }
 .nav-links { display: none; flex-direction: column; flex-basis: 100%; order: 6; padding-bottom: 8px; }
 .nav-links.is-open { display: flex; }
@@ -255,7 +264,9 @@ button { cursor: pointer; }
     .nav-links a:hover { background: var(--surface-2); }
     .nav-links a[aria-current="page"] { background: var(--brand-soft); }
     .nav-search { flex: 1 1 auto; order: 0; max-width: 360px; margin-left: auto; padding: 0; }
-    .nav-actions { margin-left: 0; }
+    .nav-actions { margin-left: auto; }
+    .nav-search + .nav-actions { margin-left: 0; }
+    .nav-search[hidden] + .nav-actions { margin-left: auto; }
     .user-display-name, .user-chevron { display: inline; }
 }
 

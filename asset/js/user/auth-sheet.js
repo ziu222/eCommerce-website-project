@@ -23,6 +23,65 @@ var AuthSheet = (function () {
         banned: "This account has been banned."
     };
 
+    // Volt watches the form: its eyes follow what you type, it covers them for the password,
+    // peeks when the password is shown, looks sorry at an error and cheers when you are in.
+    var VOLT = '<svg class="as-volt" viewBox="0 0 96 84" aria-hidden="true">' +
+        '<line x1="48" y1="14" x2="48" y2="7" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>' +
+        '<circle class="v-bulb" cx="48" cy="6" r="4" fill="#f2a516"/>' +
+        '<rect x="12" y="34" width="8" height="16" rx="4" fill="#084f4b"/><rect x="76" y="34" width="8" height="16" rx="4" fill="#084f4b"/>' +
+        '<rect x="17" y="14" width="62" height="54" rx="20" fill="#0b6b66"/>' +
+        '<rect class="v-screen" x="25" y="23" width="46" height="35" rx="12" fill="#e9f4f2"/>' +
+        '<g class="v-brows"><path d="M31 31l9 3M65 31l-9 3" stroke="#151b1a" stroke-width="2.4" stroke-linecap="round"/></g>' +
+        '<g class="v-eyes"><g class="v-look"><ellipse cx="38" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/><ellipse cx="58" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/></g></g>' +
+        '<g class="v-joy"><path d="M33 39q5-6 10 0M53 39q5-6 10 0" fill="none" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/></g>' +
+        '<circle cx="31" cy="46" r="2.8" fill="#f4a58a"/><circle cx="65" cy="46" r="2.8" fill="#f4a58a"/>' +
+        '<path class="v-smile" d="M42 47q6 4.6 12 0" fill="none" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>' +
+        '<path class="v-frown" d="M42 50q6-4.4 12 0" fill="none" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>' +
+        '<path class="v-grin" d="M41 46h14q-1.2 7-7 7t-7-7z" fill="#151b1a"/>' +
+        '<g class="v-hand v-hand--l"><rect x="22" y="28" width="26" height="20" rx="10" fill="#084f4b"/><rect x="26" y="26" width="5" height="9" rx="2.5" fill="#084f4b"/><rect x="33" y="25" width="5" height="9" rx="2.5" fill="#084f4b"/><rect x="40" y="26" width="5" height="9" rx="2.5" fill="#084f4b"/></g>' +
+        '<g class="v-hand v-hand--r"><rect x="48" y="28" width="26" height="20" rx="10" fill="#084f4b"/><rect x="51" y="26" width="5" height="9" rx="2.5" fill="#084f4b"/><rect x="58" y="25" width="5" height="9" rx="2.5" fill="#084f4b"/><rect x="65" y="26" width="5" height="9" rx="2.5" fill="#084f4b"/></g>' +
+        "</svg>";
+
+    var volt = null;
+    var moodTimer = null;
+
+    function setMood(mood) {
+        if (!volt) return;
+        volt.dataset.mood = mood || "";
+    }
+
+    // Eyes slide from left to right as the text in the focused field grows, and look down at the form.
+    function lookAt(input) {
+        if (!volt) return;
+        var look = volt.querySelector(".v-look");
+        if (!input) { look.style.transform = ""; return; }
+        var ratio = Math.min(1, (input.value.length || 0) / 28);
+        look.style.transform = "translate(" + (-4 + ratio * 8).toFixed(1) + "px, 3px)";
+    }
+
+    function watchForm() {
+        volt = root.querySelector(".as-volt");
+        root.addEventListener("focusin", function (e) {
+            var input = e.target.closest("input");
+            if (!input) return;
+            clearTimeout(moodTimer);
+            if (input.type === "password") setMood("shy");
+            else if (input.closest(".as-pass")) setMood("peek");
+            else { setMood(""); lookAt(input); }
+        });
+        root.addEventListener("input", function (e) {
+            var input = e.target.closest("input");
+            if (input && input.type !== "password" && !input.closest(".as-pass")) lookAt(input);
+        });
+        root.addEventListener("focusout", function () {
+            setTimeout(function () {
+                if (root.contains(document.activeElement) && document.activeElement.tagName === "INPUT") return;
+                if (volt.dataset.mood === "shy" || volt.dataset.mood === "peek") setMood("");
+                lookAt(null);
+            }, 0);
+        });
+    }
+
     function html() {
         function pass(id, label, auto, hint) {
             return '<div class="field as-item"><label for="' + id + '">' + label + '</label><div class="as-pass">' +
@@ -41,7 +100,7 @@ var AuthSheet = (function () {
             '<section class="as-sheet" role="dialog" aria-modal="true" aria-labelledby="asTitle">' +
             '<div class="as-grab" aria-hidden="true"><span></span></div>' +
             '<button type="button" class="as-x" aria-label="Close" data-as-close><span class="ms">close</span></button>' +
-            '<div class="as-head"><span class="brand-mark" style="--n:0" aria-hidden="true">EC</span><h2 id="asTitle" style="--n:1"></h2><p class="muted" id="asSub" style="--n:2"></p></div>' +
+            '<div class="as-head"><span class="as-volt-wrap" style="--n:0">' + VOLT + "</span>" + '<h2 id="asTitle" style="--n:1"></h2><p class="muted" id="asSub" style="--n:2"></p></div>' +
             '<div class="as-tabs" role="tablist" data-mode="login"><span class="as-ind" aria-hidden="true"></span>' +
             '<button type="button" role="tab" class="as-tab" id="asTabLogin" data-mode="login" aria-selected="true" aria-controls="asLogin">Sign in</button>' +
             '<button type="button" role="tab" class="as-tab" id="asTabSignup" data-mode="signup" aria-selected="false" aria-controls="asSignup">Create account</button></div>' +
@@ -89,11 +148,14 @@ var AuthSheet = (function () {
                 btn.setAttribute("aria-pressed", String(show));
                 btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
                 btn.firstElementChild.textContent = show ? "visibility_off" : "visibility";
+                setMood(show ? "peek" : "shy");
+                input.focus();
             });
         });
         root.querySelector("#asLogin").addEventListener("submit", onLogin);
         root.querySelector("#asSignup").addEventListener("submit", onSignup);
         root.addEventListener("keydown", onKey);
+        watchForm();
         dragToClose();
 
         // the box around the panels follows the height of the one that is showing
@@ -145,6 +207,7 @@ var AuthSheet = (function () {
         signedIn = false;
         busy = false;
         sheet.classList.remove("is-done");
+        setMood("");
         setMode(startMode === "signup" ? "signup" : "login", true);
         root.classList.add("as-fresh");
         document.documentElement.classList.add("as-lock");
@@ -243,6 +306,9 @@ var AuthSheet = (function () {
         void el.offsetWidth; // restart the shake when the same error comes twice
         el.classList.add("shake");
         fit();
+        setMood("sad");
+        clearTimeout(moodTimer);
+        moodTimer = setTimeout(function () { setMood(""); }, 2200);
     }
 
     function setBusy(form, on) {
@@ -289,6 +355,7 @@ var AuthSheet = (function () {
     // The sheet turns into a welcome with a drawn check, then slides away and the page picks up where it was.
     function succeed() {
         signedIn = true;
+        setMood("happy");
         var user = null;
         try { user = JSON.parse(localStorage.getItem("ecshop_currentUser")); } catch (e) { /* storage blocked */ }
         var name = user && (user.name || user.username) ? Api.escapeHtml(user.name || user.username) : "";
