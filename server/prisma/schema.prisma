@@ -91,6 +91,8 @@ model User {
   coupons            Coupon[]
   walletTransactions WalletTransaction[]
   notificationReads  NotificationRead[]
+  supportThreads     SupportThread[]     @relation("ThreadCustomer")
+  assignedThreads    SupportThread[]     @relation("ThreadAgent")
 }
 
 model Product {
@@ -228,4 +230,46 @@ model PolicyChunk {
   search     Unsupported("tsvector")?
 
   @@index([search], type: Gin)
+}
+
+enum SupportStatus {
+  open // waiting for staff
+  answered // staff replied, waiting for the customer
+  closed
+}
+
+enum SupportAuthor {
+  customer
+  agent
+}
+
+// A customer's conversation with the support staff. The bot chat before it is kept as botTranscript for context.
+model SupportThread {
+  id                    Int             @id @default(autoincrement())
+  customerId            Int
+  customer              User            @relation("ThreadCustomer", fields: [customerId], references: [id])
+  assignedToId          Int?
+  assignedTo            User?           @relation("ThreadAgent", fields: [assignedToId], references: [id])
+  subject               String
+  status                SupportStatus   @default(open)
+  botTranscript         String?
+  customerReadMessageId Int             @default(0)
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @default(now())
+  messages              SupportMessage[]
+
+  @@index([status, updatedAt])
+  @@index([customerId])
+}
+
+model SupportMessage {
+  id         Int           @id @default(autoincrement())
+  threadId   Int
+  thread     SupportThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorType SupportAuthor
+  authorId   Int?
+  body       String
+  createdAt  DateTime      @default(now())
+
+  @@index([threadId, id])
 }
