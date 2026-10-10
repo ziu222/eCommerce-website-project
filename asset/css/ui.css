@@ -308,6 +308,43 @@ button { cursor: pointer; }
 .footer-base { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 20px 28px; border-top: 1px solid #25302e; color: #9fada9; font-size: 14px; }
 @media (min-width: 720px) { .footer-grid { grid-template-columns: 1.6fr 1fr 1fr 1fr; } }
 
+/* ---------- Motion ----------
+   Ease-out only, no bounce. Reveal and page transitions are switched off for people who ask for less motion. */
+
+@view-transition { navigation: auto; }
+.site-nav { view-transition-name: site-nav; transition: box-shadow 0.3s; }
+.site-nav.is-stuck { box-shadow: 0 6px 20px rgba(21, 27, 26, 0.08); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.25s; }
+
+/* content rises into place as it scrolls into view (ui.js tags the elements and removes the tag afterwards) */
+html.js-reveal [data-reveal] { opacity: 0; transform: translateY(18px); }
+html.js-reveal [data-reveal].in { opacity: 1; transform: none; transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); transition-delay: calc(var(--i, 0) * 70ms); }
+
+.pcard-media { overflow: hidden; }
+.pcard-media img { transition: transform 0.6s var(--ease); }
+.pcard:hover .pcard-media img { transform: scale(1.06); }
+.pcard-add.added { border-color: var(--ok); background: var(--ok); color: #fff; animation: pop 0.4s var(--ease); }
+@keyframes pop { 40% { transform: scale(1.2); } }
+
+.btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(21, 27, 26, 0.16); }
+.btn:active:not(:disabled) { transform: translateY(1px); box-shadow: none; }
+.cart-count.bump { animation: bump 0.45s var(--ease); }
+@keyframes bump { 40% { transform: scale(1.45); } }
+.cart-link .ms { transition: transform 0.25s var(--ease); }
+.cart-link:hover .ms { transform: translateY(-2px); }
+.link-more .ms { transition: transform 0.25s var(--ease); }
+.link-more:hover .ms { transform: translateX(4px); }
+.modal-backdrop.is-open, .modal-backdrop.show { animation: fade-in 0.2s ease-out; }
+@keyframes fade-in { from { opacity: 0; } }
+
+/* "Reduce motion" removes things that travel (sliding, zooming, lifting) and keeps fades and colour changes,
+   so the site still reacts to the pointer. It does not switch animation off altogether. */
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    html { scroll-behavior: auto; }
+    html.js-reveal [data-reveal] { transform: none; }
+    .slide-copy > *, .slide-art { transform: none !important; }
+    .pcard:hover, .btn:hover:not(:disabled), .promise li:hover, .how li:hover, .hero-tile:hover { transform: none; }
+    .pcard:hover .pcard-media img, .cat-tile:hover .ms, .cart-link:hover .ms, .link-more:hover .ms { transform: none; }
+    .pcard-add.added, .cart-count.bump { animation: none; }
+    ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 0.12s; }
 }

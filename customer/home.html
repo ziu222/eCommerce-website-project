@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check_circle,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,person,photo_camera,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
     <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/home.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
@@ -20,25 +20,53 @@
     <header id="site-header" data-active="home"></header>
 
     <main id="main">
-        <section class="hero">
-            <div class="container hero-grid">
-                <div class="hero-copy">
-                    <h1>Electronics worth keeping.</h1>
-                    <p class="hero-sub">Phones, laptops, audio and more from verified sellers. Pay with your wallet or on delivery, and reach a real person when you need one.</p>
-                    <div class="hero-cta">
-                        <a class="btn btn-primary btn-lg" href="product.html">Shop all products</a>
-                        <button type="button" class="btn btn-ghost btn-lg" data-open-support>Ask support</button>
-                    </div>
-                    <ul class="hero-points">
-                        <li><span class="ms">local_shipping</span>Free delivery</li>
-                        <li><span class="ms">verified</span>Verified sellers</li>
-                        <li><span class="ms">lock</span>Secure checkout</li>
-                        <li><span class="ms">support_agent</span>Staff replies in chat</li>
-                    </ul>
+        <section class="container hero" aria-roledescription="carousel" aria-label="Featured offers">
+            <div class="carousel" id="carousel" data-theme="teal">
+                <div class="slides" id="slides">
+                    <article class="slide is-active" data-theme="teal" aria-roledescription="slide" aria-label="1 of 4">
+                        <div class="slide-copy">
+                            <p class="slide-tag">Free delivery on every order</p>
+                            <h1>Electronics worth keeping.</h1>
+                            <p class="slide-sub">Phones, laptops, audio and more from verified sellers, with support that answers.</p>
+                            <a class="btn btn-lg slide-btn" href="product.html">Shop all products</a>
+                        </div>
+                        <div class="slide-art"><img src="../asset/img/home/ip15PM.webp" alt="" width="500" height="500"></div>
+                    </article>
+                    <article class="slide" data-theme="orange" aria-roledescription="slide" aria-label="2 of 4">
+                        <div class="slide-copy">
+                            <p class="slide-tag">Flash sale · this week</p>
+                            <h2>Up to 25% off headphones and speakers</h2>
+                            <p class="slide-sub">Studio sound at street prices. While stock lasts.</p>
+                            <a class="btn btn-lg slide-btn" href="product.html?category=audio">Shop audio</a>
+                        </div>
+                        <div class="slide-art"><img src="../asset/img/home/sonyWH.png" alt="" width="500" height="500"></div>
+                    </article>
+                    <article class="slide" data-theme="ink" aria-roledescription="slide" aria-label="3 of 4">
+                        <div class="slide-copy">
+                            <p class="slide-tag">New in gaming</p>
+                            <h2>Level up your setup</h2>
+                            <p class="slide-sub">Consoles, controllers and handhelds, ready to ship.</p>
+                            <a class="btn btn-lg slide-btn" href="product.html?category=gaming">Shop gaming</a>
+                        </div>
+                        <div class="slide-art"><img src="../asset/img/home/ps5Slim.jpg" alt="" width="500" height="500"></div>
+                    </article>
+                    <article class="slide" data-theme="sand" aria-roledescription="slide" aria-label="4 of 4">
+                        <div class="slide-copy">
+                            <p class="slide-tag">For creators</p>
+                            <h2>Shoot like a pro</h2>
+                            <p class="slide-sub">Mirrorless cameras and action cams from the brands you know.</p>
+                            <a class="btn btn-lg slide-btn" href="product.html?category=cameras">Shop cameras</a>
+                        </div>
+                        <div class="slide-art"><img src="../asset/img/home/canonEOS.jpg" alt="" width="500" height="500"></div>
+                    </article>
                 </div>
-                <div class="hero-feature" id="heroFeature" aria-label="Top rated products">
-                    <div class="skel hero-tile"></div><div class="skel hero-tile"></div>
-                    <div class="skel hero-tile"></div><div class="skel hero-tile"></div>
+                <div class="carousel-ctrl">
+                    <button type="button" class="ctrl-btn" id="carPlay" aria-label="Pause slideshow"><span class="ms">pause</span></button>
+                    <div class="dots" id="carDots"></div>
+                    <div class="ctrl-arrows">
+                        <button type="button" class="ctrl-btn" id="carPrev" aria-label="Previous slide"><span class="ms">chevron_left</span></button>
+                        <button type="button" class="ctrl-btn" id="carNext" aria-label="Next slide"><span class="ms">chevron_right</span></button>
+                    </div>
                 </div>
             </div>
         </section>

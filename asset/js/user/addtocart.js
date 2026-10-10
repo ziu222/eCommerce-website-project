@@ -46,8 +46,14 @@ function updateCartBadge() {
     const count = getCartCount();
     const badge = document.getElementById("cart-count");
     if (!badge) return;
+    const grew = count > Number(badge.textContent || 0);
     badge.textContent = count;
     badge.style.display = count > 0 ? "inline-block" : "none";
+    if (grew) {
+        badge.classList.remove("bump");
+        void badge.offsetWidth; // restart the animation if it is already running
+        badge.classList.add("bump");
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {

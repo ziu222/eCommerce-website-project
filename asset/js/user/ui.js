@@ -102,6 +102,15 @@ var UI = (function () {
         setTimeout(function () { t.remove(); }, 2800);
     }
 
+    // The round button turns into a green check for a moment.
+    function confirmAdd(btn) {
+        var icon = btn.querySelector(".ms");
+        if (!icon || btn.classList.contains("added")) return;
+        btn.classList.add("added");
+        icon.textContent = "check";
+        setTimeout(function () { btn.classList.remove("added"); icon.textContent = "add_shopping_cart"; }, 1400);
+    }
+
     // Any button with data-add="<product id>" puts that product in the cart.
     document.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-add]");
@@ -109,7 +118,10 @@ var UI = (function () {
         var id = Number(btn.dataset.add);
         var before = typeof getCartCount === "function" ? getCartCount() : 0;
         if (typeof addToCart === "function") addToCart(id);
-        if (typeof getCartCount === "function" && getCartCount() > before) toast("Added to your cart");
+        if (typeof getCartCount === "function" && getCartCount() > before) {
+            toast("Added to your cart");
+            confirmAdd(btn);
+        }
         else toast("Could not add this item. Open the product and try again.", "error");
     });
 
@@ -180,7 +192,59 @@ var UI = (function () {
         if (window.SupportChat) SupportChat.open();
     });
 
+    // ---------- motion
+    // Elements that match REVEAL rise in as they scroll into view. The marker is removed once the
+    // animation is done so hover effects on the same element work normally. Under "reduce motion" the CSS keeps only the fade.
+
+    var REVEAL = ".page-head, main > section:not(.hero), .card, .pcard, .promise li, .how li, .facts li, .cat-tile, .order, .help-band, .detail-media, .detail-info > *";
+
+    function initMotion() {
+        var header = document.getElementById("site-header");
+        if (header) {
+            var onScroll = function () { header.classList.toggle("is-stuck", window.scrollY > 8); };
+            window.addEventListener("scroll", onScroll, { passive: true });
+            onScroll();
+        }
+        if (!("IntersectionObserver" in window)) return;
+
+        document.documentElement.classList.add("js-reveal");
+        var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) return;
+                var el = entry.target;
+                io.unobserve(el);
+                el.classList.add("in");
+                var delay = 700 + (Number(el.style.getPropertyValue("--i")) || 0) * 70 + 100;
+                setTimeout(function () {
+                    el.removeAttribute("data-reveal");
+                    el.classList.remove("in");
+                    el.style.removeProperty("--i");
+                }, delay);
+            });
+        }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
+
+        function tag(el) {
+            if (el.hasAttribute("data-reveal") || el.closest(".sc-panel, .site-nav, .site-footer, .modal-backdrop")) return;
+            var pos = Array.prototype.indexOf.call(el.parentNode.children, el);
+            el.style.setProperty("--i", String(pos < 0 ? 0 : pos % 6));
+            el.setAttribute("data-reveal", "");
+            io.observe(el);
+        }
+        function scan(root) {
+            if (root.matches && root.matches(REVEAL)) tag(root);
+            if (root.querySelectorAll) [].forEach.call(root.querySelectorAll(REVEAL), tag);
+        }
+
+        scan(document.body);
+        new MutationObserver(function (records) {
+            records.forEach(function (r) {
+                [].forEach.call(r.addedNodes, function (n) { if (n.nodeType === 1) scan(n); });
+            });
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+
     mount();
+    initMotion();
 
     return { isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 

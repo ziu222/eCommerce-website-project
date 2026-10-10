@@ -5,7 +5,7 @@
 .about-intro p { max-width: 62ch; color: var(--ink-2); font-size: 1.15rem; }
 
 .how { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
-.how li { display: grid; gap: 8px; padding: 24px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
+.how li { transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); display: grid; gap: 8px; padding: 24px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
 .how-n { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--brand); color: #fff; font-weight: 700; }
 .how h3 { margin-top: 6px; font-size: 1.1rem; }
 .how p { color: var(--ink-2); }
@@ -29,3 +29,5 @@
     .support-split { grid-template-columns: 1.1fr 1fr; gap: 48px; padding: 44px; }
     .about-intro { padding-block: 88px 24px; }
 }
+
+.how li:hover { transform: translateY(-3px); box-shadow: var(--shadow-1); }
