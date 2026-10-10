@@ -19,6 +19,30 @@ function tickQty(id) {
     if (out) out.classList.add("tick");
 }
 
+// The sidebar has two steps: review (address and coupon), then payment.
+function goStep(step) {
+    const aside = document.querySelector(".summary");
+    const moved = aside.dataset.step !== step;
+    aside.dataset.step = step;
+    document.getElementById("stepReview").hidden = step !== "review";
+    document.getElementById("stepPay").hidden = step !== "pay";
+    document.querySelectorAll(".checkout-steps li").forEach((li, i) => {
+        const now = (i === 0) === (step === "review");
+        li.classList.toggle("is-now", now);
+        li.classList.toggle("is-done", i === 0 && step === "pay");
+        if (now) li.setAttribute("aria-current", "step"); else li.removeAttribute("aria-current");
+    });
+    if (moved) document.getElementById("summaryTitle").focus({ preventScroll: true });
+    validatePaymentMethod();
+}
+
+function continueToPayment() {
+    if (!getCurrentUser()) { UI.requireLogin(); return; }
+    if (!getCart().length) return;
+    if (!CartAddress.require()) return;
+    goStep("pay");
+}
+
 function renderCart() {
     const cart = getCart();
     const container = document.getElementById("cart-items");
@@ -37,7 +61,9 @@ function renderCart() {
             </div>`;
         if (countLabel) countLabel.textContent = "0 items";
         document.getElementById("total-items").textContent = "0";
+        document.getElementById("btnContinue").disabled = true;
         setTotal(0);
+        goStep("review");
         return;
     }
 
@@ -48,6 +74,7 @@ function renderCart() {
     }).join("");
 
     if (countLabel) countLabel.textContent = totalItems + (totalItems === 1 ? " item" : " items");
+    document.getElementById("btnContinue").disabled = false;
     document.getElementById("total-items").textContent = totalItems;
 
     var finalDisplay = Math.max(0, totalPrice - discountAmount);
@@ -185,7 +212,7 @@ function initCheckout() {
         document.getElementById("deliverTo").hidden = true;
         document.getElementById("pmWallet").disabled = true;
         document.getElementById("walletBalanceDisplay").textContent = "Sign in to use";
-        document.getElementById("btnCheckout").lastChild.textContent = "Sign in to check out";
+        document.getElementById("btnContinue").firstChild.textContent = "Sign in to check out";
     }
 
     // Validate balance when switching to wallet
@@ -197,9 +224,9 @@ function initCheckout() {
     var applyBtn = document.getElementById("btnApplyCoupon");
     if (applyBtn) applyBtn.addEventListener("click", applyCoupon);
 
-    // Checkout button
-    const btn = document.getElementById("btnCheckout");
-    if (btn) btn.addEventListener("click", handleCheckout);
+    document.getElementById("btnContinue").addEventListener("click", continueToPayment);
+    document.getElementById("btnBack").addEventListener("click", () => goStep("review"));
+    document.getElementById("btnCheckout").addEventListener("click", handleCheckout);
 }
 
 // Shows the wallet balance in the payment section
@@ -243,10 +270,7 @@ async function handleCheckout() {
     const cart = getCart();
     if (!cart.length) return;
 
-    if (!CartAddress.require()) {
-        UI.toast("Add a delivery address first", "error");
-        return;
-    }
+    if (!CartAddress.require()) { goStep("review"); return; }
 
     const method = document.querySelector("input[name='payMethod']:checked")?.value || "cod";
     const total  = cart.reduce((s, i) => s + i.price * i.quantity, 0);

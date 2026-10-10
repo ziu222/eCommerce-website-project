@@ -98,10 +98,7 @@
                     <div class="panel-head"><h2 id="adTitle">Addresses</h2><p class="muted">Where we deliver your orders. The default one is picked at checkout.</p></div>
                     <form class="card block addr-form" id="addrForm" hidden novalidate>
                         <h3 id="addrFormTitle">New address</h3>
-                        <div class="form-grid" id="afGrid">
-                            <div class="field"><label for="afLabel">Label <span class="muted">(optional)</span></label><input class="input" id="afLabel" maxlength="40" placeholder="Home, Office"></div>
-                            <div class="field"><label for="afRecipient">Full name</label><input class="input" id="afRecipient" maxlength="100" autocomplete="name" placeholder="Nguyễn Văn A"></div>
-                        </div>
+                        <div id="afFields"></div>
                         <label class="check"><input type="checkbox" id="afDefault"> Use as my default address</label>
                         <p class="error" id="afError" role="alert" hidden></p>
                         <div class="form-actions"><button type="submit" class="btn btn-primary">Save address</button><button type="button" class="btn btn-ghost" id="afCancel">Cancel</button></div>

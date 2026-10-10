@@ -19,6 +19,28 @@
 .line-remove:hover { background: var(--danger-soft); color: var(--danger); }
 
 .summary { display: grid; gap: 20px; padding: 24px; }
+.summary h2:focus { outline: none; }
+.step { display: grid; gap: 20px; }
+.step[hidden] { display: none; }
+.step:not([hidden]) { animation: step-in 0.3s var(--ease); }
+@keyframes step-in { from { opacity: 0; transform: translateX(12px); } }
+html[data-motion="reduced"] .step:not([hidden]) { animation-name: fade-in; }
+
+/* 1 Review — 2 Payment */
+.checkout-steps { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.checkout-steps li { display: flex; align-items: center; gap: 8px; }
+.checkout-steps li + li::before { content: ""; width: 28px; height: 2px; border-radius: 1px; background: var(--line-2); }
+.checkout-steps span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--surface-2); font-size: 12px; }
+.checkout-steps .is-now { color: var(--ink); }
+.checkout-steps .is-now span { background: var(--brand); color: #fff; }
+.checkout-steps .is-done span { background: var(--brand-soft); color: var(--brand-2); }
+/* on the payment step only the total stays, and the address shrinks to one line */
+.summary[data-step="pay"] .summary-rows div:not(.total):not(#discountRow) { display: none; }
+.summary[data-step="pay"] .summary-rows .total { padding-top: 0; border-top: 0; }
+.deliver-recap { display: flex; align-items: center; gap: 10px; padding: 10px 8px 10px 14px; border-radius: var(--r); background: var(--surface-2); font-size: 14px; }
+.deliver-recap > .ms { color: var(--brand); }
+.deliver-recap > div { display: grid; flex: 1; min-width: 0; }
+.deliver-recap .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .summary h2 { font-size: 1.15rem; }
 .summary-rows { display: grid; gap: 10px; margin: 0; }
 .summary-rows div, .order-info div { display: flex; justify-content: space-between; gap: 12px; }
@@ -40,8 +62,10 @@
 .deliver-option { cursor: pointer; transition: border-color 0.18s, background-color 0.18s; }
 .deliver-option:has(input:checked) { border-color: var(--brand); background: var(--brand-soft); }
 .deliver-option input { margin-top: 3px; accent-color: var(--brand); }
-.deliver-form { display: grid; gap: 12px; }
-.deliver-actions { display: flex; gap: 8px; }
+.deliver-empty { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px; border: 1.5px dashed var(--line-2); border-radius: var(--r); background: transparent; color: var(--ink); text-align: left; font-size: 14px; transition: border-color 0.18s, background-color 0.18s; }
+.deliver-empty:hover { border-color: var(--brand); background: var(--brand-soft); }
+.deliver-empty > .ms { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--brand-soft); color: var(--brand); }
+.deliver-empty > span:last-child { display: grid; gap: 2px; }
 .link-btn { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 8px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--brand); font-size: 14px; font-weight: 600; }
 .link-btn:hover { background: var(--brand-soft); }
 .pay { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; }

@@ -130,17 +130,51 @@ button { cursor: pointer; }
 
 .field { display: grid; gap: 6px; }
 
-/* address forms (vn-address.js): +84 in front of the phone box, suggestion list under province / ward */
+/* address forms (vn-address.js): grouped fields, +84 in front of the phone box, suggestion list under province / ward */
+.addr-fields { display: grid; gap: 22px; }
+.addr-group { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.addr-group + .addr-group { padding-top: 20px; border-top: 1px solid var(--line); }
+.addr-group legend { float: left; width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-bottom: 14px; padding: 0; font-size: 15px; font-weight: 700; }
+.addr-group legend .ms { font-size: 20px; color: var(--brand); }
+.addr-group legend + * { clear: both; }
+.legend-note { color: var(--ink-3); font-size: 13px; font-weight: 500; }
+.addr-row { display: grid; gap: 14px; align-items: start; }
+.addr-row .field { align-content: start; }
+@media (min-width: 640px) {
+    .addr-row { grid-template-columns: 1fr 1fr; }
+    .addr-row .field--wide { grid-column: 1 / -1; }
+}
+.field-msg { color: var(--danger); font-size: 13px; }
+.field-msg[hidden] { display: none; }
+.input[aria-invalid="true"] { border-color: var(--danger); }
 .phone-box { display: flex; }
-.phone-box .input { min-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.phone-box .input { flex: 1; min-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
 .phone-code { display: inline-flex; align-items: center; padding: 0 14px; border: 1px solid var(--line-2); border-right: 0; border-radius: var(--r) 0 0 var(--r); background: var(--surface-2); color: var(--ink-2); font-weight: 600; }
-.input[readonly] { background: var(--surface-2); color: var(--ink-2); }
+.pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.pill { position: relative; }
+.pill input { position: absolute; opacity: 0; pointer-events: none; }
+.pill span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 18px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 14px; font-weight: 600; cursor: pointer; transition: border-color 0.18s, background-color 0.18s, color 0.18s; }
+.pill span:hover { border-color: var(--ink-3); }
+.pill input:checked + span { border-color: var(--brand); background: var(--brand-soft); color: var(--brand-2); }
+.pill input:focus-visible + span { outline: 3px solid #f2a516; outline-offset: 2px; }
 .combo { position: relative; }
 .combo-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 30; max-height: 264px; margin: 6px 0 0; padding: 6px; overflow-y: auto; list-style: none; border: 1px solid var(--line-2); border-radius: var(--r); background: var(--surface); box-shadow: 0 12px 28px rgba(21, 27, 26, 0.12); }
 .combo-list[hidden] { display: none; }
 .combo-list li { padding: 9px 12px; border-radius: var(--r-sm); font-size: 14px; cursor: pointer; }
 .combo-list [role=option]:hover, .combo-list [aria-selected="true"] { background: var(--brand-soft); color: var(--brand-2); }
 .combo-list .combo-empty { color: var(--ink-3); cursor: default; }
+
+/* the address dialog in the cart */
+.addr-dialog { width: min(600px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); margin: auto; padding: 0; border: 0; border-radius: var(--r-lg); background: var(--surface); color: var(--ink); box-shadow: 0 24px 60px rgba(21, 27, 26, 0.24); }
+.addr-dialog::backdrop { background: rgba(21, 27, 26, 0.45); }
+.addr-dialog[open] { animation: dialog-in 0.28s var(--ease); }
+@keyframes dialog-in { from { opacity: 0; transform: translateY(16px) scale(0.98); } }
+html[data-motion="reduced"] .addr-dialog[open] { animation-name: fade-in; }
+.addr-dialog-form { display: flex; flex-direction: column; max-height: calc(100dvh - 32px); }
+.addr-dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px 18px 24px; border-bottom: 1px solid var(--line); }
+.addr-dialog-head h2 { font-size: 1.15rem; }
+.addr-dialog-body { display: grid; gap: 16px; padding: 24px; overflow-y: auto; }
+.addr-dialog-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px; border-top: 1px solid var(--line); }
 .field > label, .label, .label-row label { font-size: 14px; font-weight: 600; color: var(--ink); }
 .field .hint { font-size: 13px; color: var(--ink-3); }
 .field .error { font-size: 13px; color: var(--danger); }

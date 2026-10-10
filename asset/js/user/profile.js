@@ -263,9 +263,7 @@
         editing = a || null;
         var form = document.getElementById("addrForm");
         document.getElementById("addrFormTitle").textContent = a ? "Edit address" : "New address";
-        document.getElementById("afLabel").value = a ? a.label : "";
-        document.getElementById("afRecipient").value = a ? a.recipient : (me && me.name) || "";
-        VNAddress.fill(form, "af", a);
+        VNAddress.fill(form, "af", a, me && me.name);
         document.getElementById("afDefault").checked = a ? a.isDefault : !addresses.length;
         document.getElementById("afDefault").disabled = !!(a && a.isDefault);
         document.getElementById("afError").hidden = true;
@@ -297,18 +295,15 @@
         } catch (err) { UI.toast(err.message, "error"); }
     });
 
-    document.getElementById("afGrid").insertAdjacentHTML("beforeend", VNAddress.html("af"));
+    document.getElementById("afFields").innerHTML = VNAddress.html("af");
     document.getElementById("afCancel").addEventListener("click", function () { document.getElementById("addrForm").hidden = true; });
 
     document.getElementById("addrForm").addEventListener("submit", async function (e) {
         e.preventDefault();
-        var v = function (id) { return document.getElementById(id).value.trim(); };
         var err = document.getElementById("afError");
         err.hidden = true;
-        var place = await VNAddress.read(this, "af");
-        if (!v("afRecipient")) place = { error: "Enter the full name of who receives the order." };
-        if (place.error) { err.textContent = place.error; err.hidden = false; return; }
-        var data = { label: v("afLabel"), recipient: v("afRecipient"), phone: place.phone, ward: place.ward, line1: place.line1, city: place.city };
+        var data = await VNAddress.read(this, "af");
+        if (!data) return;
         if (document.getElementById("afDefault").checked) data.isDefault = true;
         try {
             if (editing) await Api.account.addresses.update(editing.id, data); else await Api.account.addresses.add(data);
