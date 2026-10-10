@@ -42,18 +42,23 @@
 
     // ── Load Shop ──────────────────────────────────────────
 
-    function loadShop() {
+    async function loadShop() {
         shopId = Number(getQueryParam("id"));
-        var shop = Store.getShopById(shopId);
+        var shop = null;
+        try {
+            shop = await Api.adminShops.get(shopId);
+        } catch (e) {
+            shop = null;
+        }
 
         if (!shop) {
             document.getElementById("pageTitle").textContent = "Shop Not Found";
             return;
         }
 
-        var products = Store.getProductsByShop(shop.id);
-        var revenue = Store.getShopRevenue(shop.id);
-        var orders = Store.getOrdersByShop(shop.id);
+        var products = shop.products;
+        var revenue = shop.revenue;
+        var orders = { length: shop.orderCount };
 
         document.getElementById("pageTitle").textContent = shop.shopName;
         document.getElementById("shopInitial").textContent = shop.shopName.charAt(0).toUpperCase();
@@ -87,8 +92,12 @@
         el.innerHTML = html;
     }
 
-    window.handleAction = function (newStatus) {
-        Store.updateShopStatus(shopId, newStatus);
+    window.handleAction = async function (newStatus) {
+        try {
+            await Api.adminShops.setStatus(shopId, newStatus);
+        } catch (e) {
+            alert(e.message);
+        }
         loadShop();
     };
 

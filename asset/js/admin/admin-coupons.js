@@ -84,11 +84,20 @@ function renderTable() {
     }).join("");
 }
 
+var scopeShops = [];
+
+async function loadScopeShops() {
+    try {
+        scopeShops = await Api.adminShops.list(); // needs shops.view; others can still create global coupons
+    } catch (e) {
+        scopeShops = [];
+    }
+}
+
 function populateScopeDropdown() {
-    var shops  = Store.getShops();
     var select = document.getElementById("modalScope");
     select.innerHTML = '<option value="">Global (all shops)</option>';
-    shops.forEach(function (s) {
+    scopeShops.forEach(function (s) {
         var opt = document.createElement("option");
         opt.value       = s.id;
         opt.textContent = s.shopName || s.name;
@@ -185,6 +194,7 @@ async function deleteCoupon(id) {
 
 document.addEventListener("DOMContentLoaded", function () {
     loadCoupons();
+    loadScopeShops();
 
     document.getElementById("btnNewCoupon").addEventListener("click", function () { openModal(null); });
     document.getElementById("btnSaveCoupon").addEventListener("click", saveModal);

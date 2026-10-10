@@ -1,6 +1,5 @@
 // admin-notifications.js — Quản lý Notifications (Manual send + History)
 
-Store.seed();
 Auth.requirePermission("notifications.view");
 
 (function () {
@@ -50,16 +49,19 @@ Auth.requirePermission("notifications.view");
     }
 
     // ── Populate specific recipient lists (list người nhận cụ thể) ──
-    function populateSpecificList(listId, role) {
+    async function populateSpecificList(listId, role) {
         var select = document.getElementById(listId);
         select.innerHTML = "";
-        var users = Store.getUsers().filter(function (u) {
-            return u.role === role && u.status !== "banned";
-        });
+        var users = [];
+        try {
+            users = await Api.adminNotifications.recipients(role);
+        } catch (e) {
+            return; // view-only admins cannot send, so they get no recipient list
+        }
         users.forEach(function (u) {
             var opt = document.createElement("option");
             opt.value = u.id;
-            opt.textContent = (u.name || u.username) + " (" + u.email + ")";
+            opt.textContent = (u.name || "") + " (" + u.email + ")";
             select.appendChild(opt);
         });
     }
@@ -78,7 +80,7 @@ Auth.requirePermission("notifications.view");
     });
 
     // ── Send logic 
-    function sendNotification(config) {
+    async function sendNotification(config) {
         // config: { recipientSelectId, specificListId, typeId, titleId, messageId, errorId, targetRole }
         clearError(config.errorId);
 
@@ -96,42 +98,30 @@ Auth.requirePermission("notifications.view");
             return;
         }
 
-        var batchId = "batch_" + Date.now();
-        var sentBy  = Auth.getCurrentUser() ? Auth.getCurrentUser().username : "admin";
-        var count   = 0;
-
-        if (recipient === "all") {
-            Store.addNotification({
-                targetRole: config.targetRole,
-                targetId:   "all",
-                type:       type,
-                title:      title,
-                message:    message,
-                sentBy:     sentBy,
-                source:     "manual",
-                batchId:    batchId
-            });
-            count = 1;
-        } else {
+        var userIds = [];
+        if (recipient !== "all") {
             var select = document.getElementById(config.specificListId);
-            var selected = Array.prototype.filter.call(select.options, function (o) { return o.selected; });
-            if (!selected.length) {
+            userIds = Array.prototype.filter.call(select.options, function (o) { return o.selected; })
+                .map(function (o) { return parseInt(o.value, 10); });
+            if (!userIds.length) {
                 showError(config.errorId, "Please select at least one recipient.");
                 return;
             }
-            selected.forEach(function (opt) {
-                Store.addNotification({
-                    targetRole: config.targetRole,
-                    targetId:   parseInt(opt.value, 10),
-                    type:       type,
-                    title:      title,
-                    message:    message,
-                    sentBy:     sentBy,
-                    source:     "manual",
-                    batchId:    batchId
-                });
+        }
+
+        var count = 0;
+        try {
+            var result = await Api.adminNotifications.send({
+                targetRole: config.targetRole,
+                userIds: userIds.length ? userIds : undefined,
+                type: type,
+                title: title,
+                message: message
             });
-            count = selected.length;
+            count = result.count;
+        } catch (e) {
+            showError(config.errorId, e.message);
+            return;
         }
 
         // Reset form
@@ -188,35 +178,21 @@ Auth.requirePermission("notifications.view");
         el.addEventListener("change", renderHistory);
     });
 
-    function renderHistory() {
+    async function renderHistory() {
         var tbody = document.getElementById("historyBody");
         var empty = document.getElementById("historyEmpty");
-        var role  = histRoleFilter.value;
-        var type  = histTypeFilter.value;
-        var from  = histDateFrom.value ? new Date(histDateFrom.value) : null;
-        var to    = histDateTo.value   ? new Date(histDateTo.value + "T23:59:59") : null;
 
-        // Only show manual notifications, group by batchId
-        var all = Store.getNotifications().filter(function (n) { return n.source === "manual"; });
-
-        // Apply filters on raw records before grouping
-        if (role !== "all") all = all.filter(function (n) { return n.targetRole === role; });
-        if (type !== "all") all = all.filter(function (n) { return n.type === type; });
-        if (from) all = all.filter(function (n) { return new Date(n.createdAt) >= from; });
-        if (to)   all = all.filter(function (n) { return new Date(n.createdAt) <= to; });
-
-        // Group by batchId — keep one representative record per batch
-        var seen  = {};
         var batches = [];
-        all.forEach(function (n) {
-            var key = n.batchId || ("solo_" + n.id);
-            if (!seen[key]) {
-                seen[key] = { rep: n, count: 0, hasAll: false };
-                batches.push(seen[key]);
-            }
-            seen[key].count++;
-            if (n.targetId === "all") seen[key].hasAll = true;
-        });
+        try {
+            batches = await Api.adminNotifications.history({
+                role: histRoleFilter.value,
+                type: histTypeFilter.value,
+                from: histDateFrom.value,
+                to: histDateTo.value
+            });
+        } catch (e) {
+            batches = [];
+        }
 
         tbody.innerHTML = "";
         if (!batches.length) {
@@ -228,20 +204,19 @@ Auth.requirePermission("notifications.view");
         var typeBadge = { info: "badge-info", promo: "badge-promo", warning: "badge-warning" };
 
         batches.forEach(function (b, idx) {
-            var n    = b.rep;
-            var recipients = b.hasAll
-                ? "All " + n.targetRole + "s"
-                : b.count + " user" + (b.count > 1 ? "s" : "");
-            var badgeClass = typeBadge[n.type] || "badge-info";
+            var recipients = b.recipients.all
+                ? "All " + b.targetRole + "s"
+                : b.recipients.count + " user" + (b.recipients.count > 1 ? "s" : "");
+            var badgeClass = typeBadge[b.type] || "badge-info";
             var tr = document.createElement("tr");
             tr.innerHTML =
                 "<td>" + (idx + 1) + "</td>" +
-                "<td>" + escHtml(n.title) + "</td>" +
-                "<td><span class='badge " + badgeClass + "'>" + escHtml(n.type) + "</span></td>" +
-                "<td><span class='badge badge-level1'>" + escHtml(n.targetRole) + "</span></td>" +
+                "<td>" + escHtml(b.title) + "</td>" +
+                "<td><span class='badge " + badgeClass + "'>" + escHtml(b.type) + "</span></td>" +
+                "<td><span class='badge badge-level1'>" + escHtml(b.targetRole) + "</span></td>" +
                 "<td>" + escHtml(recipients) + "</td>" +
-                "<td>" + escHtml(n.sentBy || "admin") + "</td>" +
-                "<td>" + formatDate(n.createdAt) + "</td>";
+                "<td>" + escHtml(b.sentBy || "admin") + "</td>" +
+                "<td>" + formatDate(b.createdAt) + "</td>";
             tbody.appendChild(tr);
         });
     }

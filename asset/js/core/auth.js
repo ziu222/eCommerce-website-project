@@ -207,28 +207,21 @@ var Auth = (function () {
         }
     }
 
-    // Tạo admin mới — chỉ Super Admin hoặc HR được gọi
-    function createAdmin(data) {
+    // Tạo admin mới — chỉ Super Admin hoặc HR được gọi (server kiểm tra lại quyền)
+    async function createAdmin(data) {
         if (!hasPermission("users.admin")) return { error: "Không có quyền tạo admin" };
-        if (typeof Store === "undefined") return { error: "Store not available" };
-        if (Store.getUserByEmail(data.email))       return { error: "Email đã được sử dụng" };
-        if (Store.getUserByUsername(data.username)) return { error: "Username đã được sử dụng" };
-        if (!data.password || data.password.length < 6) return { error: "Mật khẩu tối thiểu 6 ký tự" };
-
         var adminRole = data.adminRole || "staff";
         if (!ADMIN_ROLES[adminRole]) adminRole = "staff";
 
-        Store.addUser({
-            name:       data.name,
-            email:      data.email,
-            username:   data.username,
-            password:   data.password,
-            role:       "admin",
-            adminRole:  adminRole,
-            adminLevel: adminRole === "super_admin" ? 2 : 1
-        });
-
-        return { success: true };
+        try {
+            await Api.adminUsers.createAdmin({
+                name: data.name, email: data.email, username: data.username,
+                password: data.password, adminRole: adminRole
+            });
+            return { success: true };
+        } catch (e) {
+            return { error: e.message };
+        }
     }
 
     return {
