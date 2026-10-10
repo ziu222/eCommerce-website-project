@@ -7,7 +7,6 @@ var Store = (function () {
         orders:        "ecshop_orders",
         cart:          "ecshop_cart",
         notifications: "ecshop_notifications",
-        coupons:       "ecshop_coupons",
         seeded:        "ecshop_seeded"
     };
 
@@ -76,38 +75,15 @@ var Store = (function () {
         localStorage.setItem("ecshop_product_seed_v2", "true");
     }
 
-    function migrateUserWallet() {
-        if (localStorage.getItem("ecshop_wallet_v1")) return;
-        var users = _get(KEYS.users) || [];
-        var changed = false;
-        for (var i = 0; i < users.length; i++) {
-            if (users[i].walletBalance === undefined) {
-                users[i].walletBalance = users[i].role === "customer" ? 200 : 0;
-                changed = true;
-            }
-            if (users[i].walletTransactions === undefined) {
-                users[i].walletTransactions = [];
-                changed = true;
-            }
-        }
-        if (changed) _set(KEYS.users, users);
-        localStorage.setItem("ecshop_wallet_v1", "true");
-    }
-
     function seed() {
         if (localStorage.getItem(KEYS.seeded)) {
             if (!_get(KEYS.notifications)) {
                 _set(KEYS.notifications, []);
             }
-            var _existingCoupons = _get(KEYS.coupons);
-            if (typeof SEED_COUPONS !== "undefined" && (!_existingCoupons || _existingCoupons.length === 0)) {
-                _set(KEYS.coupons, SEED_COUPONS);
-            }
             migrateSeedProductStatuses();
             migrateNewSeedProducts();
             migrateProductSchema();
             migrateOrderSchema();
-            migrateUserWallet();
             return;
         }
 
@@ -116,7 +92,6 @@ var Store = (function () {
         _set(KEYS.orders,          typeof SEED_ORDERS         !== "undefined" ? SEED_ORDERS         : []);
         _set(KEYS.cart, []);
         _set(KEYS.notifications,   typeof SEED_NOTIFICATIONS  !== "undefined" ? SEED_NOTIFICATIONS  : []);
-        if (typeof SEED_COUPONS !== "undefined") _set(KEYS.coupons, SEED_COUPONS);
 
         localStorage.setItem(KEYS.seeded, "true");
         migrateProductSchema();
@@ -635,80 +610,6 @@ var Store = (function () {
 
     // ── WALLET
 
-    function getWalletBalance(userId) {
-        var user = getUserById(userId);
-        return user ? (Number(user.walletBalance) || 0) : 0;
-    }
-
-    function getWalletTransactions(userId) {
-        var user = getUserById(userId);
-        return user ? (user.walletTransactions || []) : [];
-    }
-
-    function _nextWalletTxId(txs) {
-        if (!txs || txs.length === 0) return 1;
-        var max = 0;
-        for (var i = 0; i < txs.length; i++) { if (txs[i].id > max) max = txs[i].id; }
-        return max + 1;
-    }
-
-    function topUpWallet(userId, amount, description) {
-        var user = getUserById(userId);
-        if (!user) return null;
-        var amt = Number(amount);
-        if (!amt || amt <= 0) return null;
-        var txs = user.walletTransactions ? user.walletTransactions.slice() : [];
-        var tx = {
-            id:          _nextWalletTxId(txs),
-            type:        "deposit",
-            amount:      amt,
-            description: description || "Nạp tiền",
-            orderId:     null,
-            date:        new Date().toISOString()
-        };
-        txs.push(tx);
-        updateUser(userId, { walletBalance: (Number(user.walletBalance) || 0) + amt, walletTransactions: txs });
-        return tx;
-    }
-
-    function deductWallet(userId, amount, orderId) {
-        var user = getUserById(userId);
-        if (!user) return null;
-        var amt     = Number(amount);
-        var balance = Number(user.walletBalance) || 0;
-        if (balance < amt) return null;
-        var txs = user.walletTransactions ? user.walletTransactions.slice() : [];
-        var tx = {
-            id:          _nextWalletTxId(txs),
-            type:        "payment",
-            amount:      amt,
-            description: "Thanh toán đơn #" + orderId,
-            orderId:     orderId || null,
-            date:        new Date().toISOString()
-        };
-        txs.push(tx);
-        updateUser(userId, { walletBalance: balance - amt, walletTransactions: txs });
-        return tx;
-    }
-
-    function refundWallet(userId, amount, orderId) {
-        var user = getUserById(userId);
-        if (!user) return null;
-        var amt = Number(amount);
-        var txs = user.walletTransactions ? user.walletTransactions.slice() : [];
-        var tx = {
-            id:          _nextWalletTxId(txs),
-            type:        "refund",
-            amount:      amt,
-            description: "Hoàn tiền đơn #" + orderId,
-            orderId:     orderId || null,
-            date:        new Date().toISOString()
-        };
-        txs.push(tx);
-        updateUser(userId, { walletBalance: (Number(user.walletBalance) || 0) + amt, walletTransactions: txs });
-        return tx;
-    }
-
     function deleteUser(id) {
         var users = getUsers();
         var filtered = [];
@@ -899,42 +800,6 @@ var Store = (function () {
         return result;
     }
 
-    function normalizeChangedBy(changedBy) {
-        if (changedBy === "customer" || changedBy === "shop" || changedBy === "admin") {
-            return changedBy;
-        }
-
-        var currentUser = (typeof Auth !== "undefined" && Auth.getCurrentUser)
-            ? Auth.getCurrentUser()
-            : null;
-        if (currentUser && (currentUser.role === "customer" || currentUser.role === "shop" || currentUser.role === "admin")) {
-            return currentUser.role;
-        }
-
-        return null;
-    }
-
-    function isAllowedStatusTransition(fromStatus, toStatus, changedBy) {
-        if (fromStatus === toStatus) return false;
-
-        if (changedBy === "admin") {
-            return allowedStatuses[newStatus] === true;
-        }
-
-        if (changedBy === "shop") {
-            if (fromStatus === "pending" && (toStatus === "confirmed" || toStatus === "cancelled")) return true;
-            if (fromStatus === "confirmed" && toStatus === "shipped") return true;
-            if (fromStatus === "shipped" && toStatus === "delivered") return true;
-            return false;
-        }
-
-        if (changedBy === "customer") {
-            return fromStatus === "pending" && toStatus === "cancelled";
-        }
-
-        return false;
-    }
-
     function ensureOrderStatusHistory(order) {
         if (Array.isArray(order.statusHistory) && order.statusHistory.length > 0) {
             return;
@@ -950,70 +815,6 @@ var Store = (function () {
         }];
     }
 
-    function addOrder(data) {
-        var orders = getOrders();
-        var customerId = data.customerId || data.userId || 0;
-        var nowIso = new Date().toISOString();
-        var payMethod = data.paymentMethod === "wallet" ? "wallet" : "cod";
-        var newOrder = {
-            id:            _nextId(KEYS.orders),
-            customerId:    customerId,
-            userId:        customerId,
-            shopId:        data.shopId   || 0,
-            items:         data.items    || [],
-            total:         Number(data.total) || 0,
-            status:        "pending",
-            paymentMethod: payMethod,
-            paymentStatus: payMethod === "wallet" ? "paid" : "pending",
-            statusHistory: [{
-                status: "pending",
-                changedAt: nowIso,
-                changedBy: "customer"
-            }],
-            createdAt: nowIso.split("T")[0]
-        };
-        orders.push(newOrder);
-        _set(KEYS.orders, orders);
-        return newOrder;
-    }
-
-    function updateOrderStatus(id, newStatus, changedBy) {
-        var orders = getOrders();
-        var normalizedChangedBy = normalizeChangedBy(changedBy);
-        var allowedStatuses = {
-            pending: true,
-            confirmed: true,
-            shipped: true,
-            delivered: true,
-            cancelled: true
-        };
-
-        if (!allowedStatuses[newStatus] || !normalizedChangedBy) {
-            return null;
-        }
-
-        for (var i = 0; i < orders.length; i++) {
-            if (orders[i].id === id) {
-                var currentStatus = orders[i].status || "pending";
-                ensureOrderStatusHistory(orders[i]);
-
-                if (!isAllowedStatusTransition(currentStatus, newStatus, normalizedChangedBy)) {
-                    return null;
-                }
-
-                orders[i].status = newStatus;
-                orders[i].statusHistory.push({
-                    status: newStatus,
-                    changedAt: new Date().toISOString(),
-                    changedBy: normalizedChangedBy
-                });
-                _set(KEYS.orders, orders);
-                return orders[i];
-            }
-        }
-        return null;
-    }
-
     function deleteOrder(id) {
         var orders = getOrders();
         var filtered = [];
@@ -1027,67 +828,6 @@ var Store = (function () {
 
 
     // ── CART (tested in shop.js) not official
-
-    function getCart() {
-        return _get(KEYS.cart) || [];
-    }
-
-    function addToCart(productId, qty) {
-        var cart = getCart();
-        // Check if product already in cart
-        for (var i = 0; i < cart.length; i++) {
-            if (cart[i].productId === productId) {
-                cart[i].qty += qty;
-                _set(KEYS.cart, cart);
-                return cart[i];
-            }
-        }
-        // New item
-        var item = { productId: productId, qty: qty };
-        cart.push(item);
-        _set(KEYS.cart, cart);
-        return item;
-    }
-
-    function updateCartQty(productId, qty) {
-        var cart = getCart();
-        for (var i = 0; i < cart.length; i++) {
-            if (cart[i].productId === productId) {
-                cart[i].qty = qty;
-                _set(KEYS.cart, cart);
-                return cart[i];
-            }
-        }
-        return null;
-    }
-
-    function removeFromCart(productId) {
-        var cart = getCart();
-        var filtered = [];
-        for (var i = 0; i < cart.length; i++) {
-            if (cart[i].productId !== productId) filtered.push(cart[i]);
-        }
-        if (filtered.length === cart.length) return false;
-        _set(KEYS.cart, filtered);
-        return true;
-    }
-
-    function clearCart() {
-        _set(KEYS.cart, []);
-    }
-
-    function getCartTotal() {
-        var cart = getCart();
-        var total = 0;
-        for (var i = 0; i < cart.length; i++) {
-            var product = getProductById(cart[i].productId);
-            if (product) {
-                total += product.price * cart[i].qty;
-            }
-        }
-        return total;
-    }
-
 
     //   STATS (for admin dashboard) 
 
@@ -1233,101 +973,6 @@ var Store = (function () {
 
     // COUPONS
 
-    function getCoupons() {
-        return _get(KEYS.coupons) || [];
-    }
-
-    function getCouponsByShop(shopId) {
-        return getCoupons().filter(function (c) { return c.shopId === shopId; });
-    }
-
-    function getCouponByCode(code) {
-        var upper = (code || "").toUpperCase();
-        var all = getCoupons();
-        for (var i = 0; i < all.length; i++) {
-            if (all[i].code.toUpperCase() === upper) return all[i];
-        }
-        return null;
-    }
-
-    function addCoupon(data) {
-        var coupons = getCoupons();
-        var coupon = Object.assign({}, data, {
-            id:        _nextId(KEYS.coupons),
-            code:      (data.code || "").toUpperCase(),
-            usedCount: 0,
-            createdAt: getTodayString()
-        });
-        coupons.push(coupon);
-        _set(KEYS.coupons, coupons);
-        return coupon;
-    }
-
-    function updateCoupon(id, data) {
-        var coupons = getCoupons();
-        for (var i = 0; i < coupons.length; i++) {
-            if (coupons[i].id === id) {
-                Object.assign(coupons[i], data);
-                _set(KEYS.coupons, coupons);
-                return coupons[i];
-            }
-        }
-        return null;
-    }
-
-    function deleteCoupon(id) {
-        var coupons = getCoupons().filter(function (c) { return c.id !== id; });
-        _set(KEYS.coupons, coupons);
-    }
-
-    function validateCoupon(code, cart) {
-        var coupon = getCouponByCode(code);
-        if (!coupon) return { valid: false, message: "Invalid coupon code" };
-        if (!coupon.isActive) return { valid: false, message: "Coupon is inactive" };
-
-        var today = getTodayString();
-        if (coupon.expiresAt && today > coupon.expiresAt) return { valid: false, message: "Coupon has expired" };
-        if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) return { valid: false, message: "Coupon usage limit reached" };
-
-        var applicableTotal = 0;
-        if (coupon.shopId === null || coupon.shopId === undefined) {
-            for (var i = 0; i < cart.length; i++) {
-                applicableTotal += cart[i].price * cart[i].quantity;
-            }
-        } else {
-            var hasShopItems = false;
-            for (var j = 0; j < cart.length; j++) {
-                if (cart[j].shopId === coupon.shopId) {
-                    applicableTotal += cart[j].price * cart[j].quantity;
-                    hasShopItems = true;
-                }
-            }
-            if (!hasShopItems) return { valid: false, message: "No items from this shop in your cart" };
-        }
-
-        if (coupon.minOrder > 0 && applicableTotal < coupon.minOrder) {
-            return { valid: false, message: "Minimum order $" + coupon.minOrder + " required" };
-        }
-
-        var discount = coupon.type === "percent"
-            ? applicableTotal * coupon.value / 100
-            : Math.min(coupon.value, applicableTotal);
-
-        return { valid: true, discount: discount, applicableTotal: applicableTotal, coupon: coupon };
-    }
-
-    function useCoupon(id) {
-        var coupons = getCoupons();
-        for (var i = 0; i < coupons.length; i++) {
-            if (coupons[i].id === id) {
-                coupons[i].usedCount = (coupons[i].usedCount || 0) + 1;
-                _set(KEYS.coupons, coupons);
-                return;
-            }
-        }
-    }
-
-
     // Public API
 
     return {
@@ -1362,11 +1007,6 @@ var Store = (function () {
         deleteUser:           deleteUser,
 
         // Wallet
-        getWalletBalance:         getWalletBalance,
-        getWalletTransactions:    getWalletTransactions,
-        topUpWallet:              topUpWallet,
-        deductWallet:             deductWallet,
-        refundWallet:             refundWallet,
 
         // Shops (filtered from users)
         getShops:             getShops,
@@ -1389,17 +1029,9 @@ var Store = (function () {
         getOrdersByShop:      getOrdersByShop,
         getOrdersByStatus:    getOrdersByStatus,
         getOrderCustomerId:   getOrderCustomerId,
-        addOrder:             addOrder,
-        updateOrderStatus:    updateOrderStatus,
         deleteOrder:          deleteOrder,
 
         // Cart
-        getCart:              getCart,
-        addToCart:            addToCart,
-        updateCartQty:        updateCartQty,
-        removeFromCart:       removeFromCart,
-        clearCart:            clearCart,
-        getCartTotal:         getCartTotal,
 
         // Stats
         getTotalRevenue:          getTotalRevenue,
@@ -1415,14 +1047,6 @@ var Store = (function () {
         getTransactions:         getTransactions,
 
         // Coupons
-        getCoupons:         getCoupons,
-        getCouponsByShop:   getCouponsByShop,
-        getCouponByCode:    getCouponByCode,
-        addCoupon:          addCoupon,
-        updateCoupon:       updateCoupon,
-        deleteCoupon:       deleteCoupon,
-        validateCoupon:     validateCoupon,
-        useCoupon:          useCoupon
     };
 
 })();

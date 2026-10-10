@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Product } from '../generated/prisma/client.js';
+import { toCents } from '../common/money.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
   AdminListProductsQuery,
@@ -30,6 +31,16 @@ export interface ProductDto {
   reviewedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface PricedLine {
+  productId: number;
+  shopId: number;
+  name: string;
+  imageUrl: string;
+  qty: number;
+  unitCents: number;
+  stock: number;
 }
 
 export interface Page<T> {
@@ -115,6 +126,34 @@ export class ProductsService {
       orderBy: { category: 'asc' },
     });
     return rows.map((r) => ({ category: r.category, count: r._count._all }));
+  }
+
+  /**
+   * Prices cart lines from the database (never from the client). Every product must be on sale.
+   * With `lock` the rows are locked in id order for the rest of the transaction (checkout).
+   */
+  async priceLines(db: Prisma.TransactionClient, items: { productId: number; qty: number }[], lock = false): Promise<PricedLine[]> {
+    const qtyById = new Map<number, number>();
+    for (const i of items) qtyById.set(i.productId, (qtyById.get(i.productId) ?? 0) + i.qty);
+    const ids = [...qtyById.keys()].sort((a, b) => a - b);
+
+    if (lock) await db.$queryRaw`SELECT id FROM "Product" WHERE id = ANY(${ids}::int[]) ORDER BY id FOR UPDATE`;
+    const rows = await db.product.findMany({ where: { id: { in: ids }, ...PUBLIC } });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+
+    return ids.map((id) => {
+      const p = byId.get(id);
+      if (!p) throw new BadRequestException(`Product ${id} is not available`);
+      return {
+        productId: id,
+        shopId: p.shopId,
+        name: p.name,
+        imageUrl: p.imageUrl,
+        qty: qtyById.get(id)!,
+        unitCents: toCents(p.price),
+        stock: p.stock,
+      };
+    });
   }
 
   // ---- shop (own products)

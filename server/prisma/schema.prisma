@@ -87,7 +87,6 @@ model User {
   ordersAsCustomer   Order[]             @relation("OrderCustomer")
   ordersAsShop       Order[]             @relation("OrderShop")
   coupons            Coupon[]
-  cartItems          CartItem[]
   walletTransactions WalletTransaction[]
   notificationReads  NotificationRead[]
 }
@@ -114,7 +113,6 @@ model Product {
   updatedAt   DateTime      @updatedAt
 
   orderItems OrderItem[]
-  cartItems  CartItem[]
 
   @@index([adminStatus, category])
   @@index([shopId])
@@ -169,21 +167,11 @@ model Coupon {
   minOrder   Decimal    @default(0) @db.Decimal(12, 2)
   usageLimit Int        @default(0)
   usedCount  Int        @default(0)
-  expiresAt  DateTime
+  expiresAt  DateTime?
   isActive   Boolean    @default(true)
   shopId     Int?
   shop       User?      @relation(fields: [shopId], references: [id])
   createdAt  DateTime   @default(now())
-}
-
-model CartItem {
-  userId    Int
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  productId Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  qty       Int
-
-  @@id([userId, productId])
 }
 
 model Notification {

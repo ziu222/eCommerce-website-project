@@ -1,7 +1,0 @@
-var SEED_COUPONS = [
-    { id: 1, code: "WELCOME10", type: "percent", value: 10, minOrder: 0,   usageLimit: 100, usedCount: 3,  expiresAt: "2026-12-31", isActive: true,  shopId: null, createdAt: "2026-01-01" },
-    { id: 2, code: "FLAT20",    type: "fixed",   value: 20, minOrder: 50,  usageLimit: 50,  usedCount: 10, expiresAt: "2026-06-30", isActive: true,  shopId: null, createdAt: "2026-02-01" },
-    { id: 3, code: "SUMMER25",  type: "percent", value: 25, minOrder: 100, usageLimit: 0,   usedCount: 0,  expiresAt: "2026-08-31", isActive: true,  shopId: null, createdAt: "2026-05-01" },
-    { id: 4, code: "SHOP10",    type: "percent", value: 10, minOrder: 0,   usageLimit: 50,  usedCount: 1,  expiresAt: "2026-12-31", isActive: true,  shopId: 2,    createdAt: "2026-03-01" },
-    { id: 5, code: "EXPIRED",   type: "percent", value: 15, minOrder: 0,   usageLimit: 20,  usedCount: 20, expiresAt: "2025-01-01", isActive: false, shopId: null, createdAt: "2025-01-01" }
-];
