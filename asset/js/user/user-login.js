@@ -16,7 +16,7 @@ function renderUser() {
     userBtn.classList.remove("user-btn--logged-in");
     userBtn.classList.add("user-btn--guest");
     userContent.className = "user-content-pill";
-    userContent.innerHTML = `<span class="material-symbols-outlined">person</span><span class="user-guest-label">Login</span>`;
+    userContent.innerHTML = `<span class="ms">person</span><span class="user-guest-label">Sign in</span>`;
     if (userMenu) { userMenu.classList.add("hidden"); userMenu.style.display = ""; }
     userBtn.onclick = () => { window.location.href = "login.html"; };
     return;
@@ -24,11 +24,12 @@ function renderUser() {
 
   userBtn.classList.remove("user-btn--guest");
 
-  const displayName = user.name || user.username || "User";
-  const initial     = displayName.charAt(0).toUpperCase();
+  const displayName = Api.escapeHtml(user.name || user.username || "User");
+  const email       = Api.escapeHtml(user.email || user.username || "");
+  const initial     = (user.name || user.username || "U").charAt(0).toUpperCase();
 
   const avatarInner = user.avatar
-    ? `<img src="${user.avatar}" alt="${initial}" />`
+    ? `<img src="${Api.escapeHtml(user.avatar)}" alt="" />`
     : initial;
 
   userBtn.classList.add("user-btn--logged-in");
@@ -37,7 +38,7 @@ function renderUser() {
   userContent.innerHTML = `
     <span class="user-avatar">${avatarInner}</span>
     <span class="user-display-name">${displayName}</span>
-    <span class="material-symbols-outlined user-chevron" id="userChevron">expand_more</span>`;
+    <span class="ms user-chevron" id="userChevron">expand_more</span>`;
 
   if (userMenu) {
     userMenu.style.display = "";
@@ -49,21 +50,25 @@ function renderUser() {
         </div>
         <div class="udm-info">
           <div class="udm-name">${displayName}</div>
-          <div class="udm-email">${user.email || user.username || ""}</div>
+          <div class="udm-email">${email}</div>
         </div>
       </div>
       <div class="udm-divider"></div>
       <button class="udm-item" onclick="window.location.href='profile.html'">
-        <span class="material-symbols-outlined udm-icon">account_circle</span>
+        <span class="ms udm-icon">account_circle</span>
         View Profile
       </button>
+      <button class="udm-item" onclick="window.location.href='orders.html'">
+        <span class="ms udm-icon">receipt_long</span>
+        My Orders
+      </button>
       <button class="udm-item" onclick="window.location.href='wallet.html'">
-        <span class="material-symbols-outlined udm-icon">account_balance_wallet</span>
+        <span class="ms udm-icon">account_balance_wallet</span>
         Wallet
       </button>
       <div class="udm-divider"></div>
       <button class="udm-item udm-item--danger" onclick="logout()">
-        <span class="material-symbols-outlined udm-icon">logout</span>
+        <span class="ms udm-icon">logout</span>
         Sign Out
       </button>`;
     userMenu.classList.add("hidden");
@@ -94,164 +99,65 @@ async function logout() {
   location.reload();
 }
 
-var CustomerModal = (function () {
-  var hideTimer = null;
-  var lastActiveElement = null;
+// ===== Login form (login.html) =====
 
-  function getEls() {
-    return {
-      overlay: document.getElementById("customerModal"),
-      title: document.getElementById("customerModalTitle"),
-      message: document.getElementById("customerModalMessage"),
-      okBtn: document.getElementById("customerModalOk")
-    };
-  }
-
-  function close(options) {
-    var opts = options || {};
-    var els = getEls();
-    if (!els.overlay) return;
-
-    if (hideTimer) {
-      clearTimeout(hideTimer);
-      hideTimer = null;
-    }
-
-    els.overlay.classList.remove("show");
-    els.overlay.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("customer-modal-open");
-
-    if (opts.restoreFocus !== false && lastActiveElement && typeof lastActiveElement.focus === "function") {
-      lastActiveElement.focus();
-    }
-    lastActiveElement = null;
-
-    if (typeof opts.onClose === "function") {
-      opts.onClose();
-    }
-  }
-
-  function open(options) {
-    var opts = options || {};
-    var els = getEls();
-    if (!els.overlay) return false;
-
-    lastActiveElement = document.activeElement;
-
-    if (els.title) {
-      els.title.textContent = opts.title || "Success";
-    }
-    if (els.message) {
-      els.message.textContent = opts.message || "Action completed successfully.";
-    }
-
-    els.overlay.classList.add("show");
-    els.overlay.setAttribute("aria-hidden", "false");
-    document.body.classList.add("customer-modal-open");
-
-    if (els.okBtn) {
-      els.okBtn.textContent = opts.buttonText || "Continue";
-      els.okBtn.focus();
-    }
-
-    if (hideTimer) {
-      clearTimeout(hideTimer);
-      hideTimer = null;
-    }
-
-    if (opts.autoCloseMs && opts.autoCloseMs > 0) {
-      hideTimer = setTimeout(function () {
-        close({ restoreFocus: false, onClose: opts.onAutoClose });
-      }, opts.autoCloseMs);
-    }
-
-    return true;
-  }
-
-  function init() {
-    var els = getEls();
-    if (!els.overlay) return;
-
-    if (els.okBtn) {
-      els.okBtn.addEventListener("click", function () {
-        close();
-      });
-    }
-
-    els.overlay.addEventListener("click", function (e) {
-      if (e.target === els.overlay) {
-        close();
-      }
-    });
-
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && els.overlay.classList.contains("show")) {
-        close();
-      }
-    });
-  }
-
-  return {
-    init: init,
-    open: open,
-    close: close
-  };
-})();
-
-// ===== Điều hướng (navigation) =====
-const signupTab = document.querySelector(".auth-links span:first-child");
-const loginTab = document.querySelector(".auth-links span:last-child");
-
-if (signupTab && loginTab) {
-  signupTab.addEventListener("click", () => {
-    window.location.href = "signup.html";
-  });
-
-  loginTab.addEventListener("click", () => {
-    window.location.href = "login.html";
-  });
+// Where to go after signing in: ?next=cart.html, only a plain page next to this one.
+function nextPage() {
+  const next = new URLSearchParams(location.search).get("next") || "";
+  return /^[a-z-]+\.html(\?[\w=&.-]*)?$/.test(next) ? next : "home.html";
 }
 
-// ===== Login flow =====
+function showAuthError(message) {
+  const el = document.getElementById("authError");
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+  el.classList.remove("shake");
+  void el.offsetWidth; // restart the animation for a repeated error
+  el.classList.add("shake");
+}
+
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
   loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const inputs = loginForm.querySelectorAll("input");
-    const username = inputs[0].value.trim();
-    const password = inputs[1].value.trim();
+    const username = document.getElementById("loginUser").value.trim();
+    const password = document.getElementById("loginPass").value;
+    if (!username || !password) {
+      showAuthError("Enter your username and password.");
+      return;
+    }
 
+    const submit = document.getElementById("authSubmit");
+    submit.disabled = true;
     try {
       await Api.auth.login(username, password);
     } catch (err) {
       const blocked = {
-        pending: "Shop của bạn đang chờ admin duyệt.",
-        suspended: "Tài khoản đã bị tạm khóa.",
-        banned: "Tài khoản đã bị khóa."
+        pending: "Your shop is waiting for admin approval.",
+        suspended: "This account is suspended.",
+        banned: "This account has been banned."
       };
-      alert(blocked[err.message] || err.message || "Sai tên hoặc mật khẩu!");
+      showAuthError(blocked[err.message] || "Wrong username or password.");
+      submit.disabled = false;
       return;
     }
-
-    var shown = CustomerModal.open({
-      title: "Đăng nhập thành công",
-      message: "Chào mừng bạn quay lại. Đang chuyển đến trang chủ...",
-      buttonText: "Ở lại",
-      autoCloseMs: 1250,
-      onAutoClose: function () {
-        window.location.href = "home.html";
-      }
-    });
-
-    if (!shown) {
-      window.location.href = "home.html";
-    }
+    window.location.href = nextPage();
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderUser();
-  CustomerModal.init();
+// Show / hide password
+document.querySelectorAll(".pass-toggle").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const input = btn.parentElement.querySelector("input");
+    const reveal = input.type === "password";
+    input.type = reveal ? "text" : "password";
+    btn.setAttribute("aria-pressed", String(reveal));
+    btn.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
+    btn.firstElementChild.textContent = reveal ? "visibility_off" : "visibility";
+  });
 });
+
+document.addEventListener("DOMContentLoaded", renderUser);

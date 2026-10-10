@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     // ── Auth guard ────────────────────────────────────────
     var session = getCurrentUser();
     if (!session || session.role !== "customer") {
-        window.location.href = "login.html";
+        window.location.href = "login.html?next=profile.html";
         return;
     }
 
@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     try {
         fullUser = await Api.profile.get();
     } catch (e) {
-        window.location.href = "login.html";
+        window.location.href = "login.html?next=profile.html";
         return;
     }
 
@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             renderCoverPhoto(fullUser);
             showToast("Cover photo updated");
         } catch (err) {
-            showToast(err.message);
+            showToast(err.message, "error");
         }
     });
 
@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             updateSession(fullUser);
             showToast("Avatar updated");
         } catch (err) {
-            showToast(err.message);
+            showToast(err.message, "error");
         }
     });
 
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", async function () {
             } else if (/mail/i.test(err.message)) {
                 showError("errorEmail", err.message);
             } else {
-                showToast(err.message);
+                showToast(err.message, "error");
             }
             return;
         }
@@ -124,11 +124,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         });
     }
 
-    // ── Cart button ───────────────────────────────────────
-    var cartBtn = document.getElementById("cart-btn");
-    if (cartBtn) cartBtn.addEventListener("click", function () {
-        window.location.href = "cart.html";
-    });
 });
 
 // ── Helpers ───────────────────────────────────────────────
@@ -192,7 +187,7 @@ function setAvatarDisplay(src, fallbackInitial) {
     var avatarEl = document.getElementById("profileAvatar");
     if (!avatarEl) return;
     if (src) {
-        avatarEl.innerHTML = '<img src="' + src + '" alt="avatar" />';
+        avatarEl.innerHTML = '<img src="' + Api.escapeHtml(src) + '" alt="" />';
     } else {
         avatarEl.textContent = fallbackInitial || "?";
     }
@@ -219,7 +214,9 @@ function renderCoverPhoto(user) {
 function renderBalance(userId) {
     var balance = walletSnapshot.balance || 0;
     var el = document.getElementById("profileBalance");
-    if (el) el.textContent = "$" + Number(balance).toLocaleString("en-US", { minimumFractionDigits: 2 });
+    if (el) UI.countTo(el, Number(balance), {
+        format: function (n) { return "$" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    });
 }
 
 function validateForm(fullUser) {
@@ -298,10 +295,6 @@ function getRank(userId) {
     return                    { label: "Normal", cls: "rank-normal" };
 }
 
-function showToast(msg) {
-    var toast = document.getElementById("profileToast");
-    if (!toast) return;
-    toast.querySelector(".toast-msg").textContent = msg;
-    toast.classList.add("show");
-    setTimeout(function () { toast.classList.remove("show"); }, 2800);
+function showToast(msg, kind) {
+    UI.toast(msg, kind);
 }

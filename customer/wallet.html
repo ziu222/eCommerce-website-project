@@ -1,231 +1,93 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ví của tôi - EC SHOP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/main.css">
+    <title>Wallet - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/wallet.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="wallet"></header>
 
-    <!-- ── Navbar ──────────────────────────────────────────── -->
-    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 font-headline no-underline hover:no-underline flex items-center gap-3"
-                    href="home.html">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="home.html">Home</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="product.html">Product</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="about.html">About</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="contact.html">Contact</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <el-dropdown class="inline-block relative">
-                    <button id="userBtn" class="p-2 text-teal-900 hover:bg-teal-50/50 rounded-full transition-all duration-300 active:scale-95">
-                        <span id="userContent" class="material-symbols-outlined">person</span>
-                    </button>
-                    <div id="userMenu" class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50"></div>
-                </el-dropdown>
-                <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng" onclick="window.location.href='cart.html'">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    <span>Cart</span>
-                    <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="pt-[72px]">
-
-        <!-- ── Hero banner ──────────────────────────────────── -->
-        <div class="wallet-hero">
-            <div class="wallet-hero-inner">
-                <div class="wallet-hero-text">
-                    <div class="wallet-hero-label">EC SHOP Wallet</div>
-                    <div class="wallet-hero-balance" id="heroBalance">$0.00</div>
-                    <p class="wallet-hero-sub">Quản lý số dư và lịch sử giao dịch của bạn</p>
-                    <button class="btn-add-money" id="heroAddBtn">
-                        <i class="fa-solid fa-plus"></i> Add Money
-                    </button>
-                </div>
-                <div class="wallet-hero-img">
-                    <img src="../asset/img/walletHero.png" alt="EC SHOP Wallet" />
-                </div>
-            </div>
+    <main id="main" class="container">
+        <div class="page-head">
+            <h1>Wallet</h1>
+            <p>Keep a balance here to check out in one tap.</p>
         </div>
 
-        <!-- ── Two-column layout ────────────────────────────── -->
-        <div class="wallet-wrapper">
+        <div class="wallet-layout">
+            <div class="wallet-main">
+                <section class="balance" aria-label="Balance">
+                    <p class="balance-label">Available balance</p>
+                    <p class="balance-amount" id="walletBalance">$0.00</p>
+                    <p class="balance-sub">EC SHOP Wallet</p>
+                </section>
 
-            <!-- LEFT: balance + deposit flow -->
-            <div class="wallet-left">
+                <section class="card topup" id="depositCard" aria-labelledby="topupTitle">
+                    <h2 id="topupTitle">Add money</h2>
+                    <p class="demo-note"><span class="ms">info</span>Demo mode: no real money is charged.</p>
 
-                <!-- Balance card -->
-                <div class="wallet-balance-card">
-                    <div class="wbc-label">Available Balance</div>
-                    <div class="wbc-amount" id="walletBalance">$0.00</div>
-                    <div class="wbc-sub">EC SHOP Wallet</div>
-                </div>
-
-                <!-- Deposit card — 3 steps -->
-                <div class="wallet-deposit-card" id="depositCard">
-
-                    <!-- Step 1: Choose amount -->
                     <div class="deposit-step active" id="step1">
-                        <h3>Add Money to Wallet</h3>
-                        <div class="preset-btns">
-                            <button class="preset-btn" data-amount="50">$50</button>
-                            <button class="preset-btn" data-amount="100">$100</button>
-                            <button class="preset-btn" data-amount="200">$200</button>
-                            <button class="preset-btn" data-amount="500">$500</button>
+                        <div class="presets" role="group" aria-label="Quick amounts">
+                            <button type="button" class="preset-btn" data-amount="50">$50</button>
+                            <button type="button" class="preset-btn" data-amount="100">$100</button>
+                            <button type="button" class="preset-btn" data-amount="200">$200</button>
+                            <button type="button" class="preset-btn" data-amount="500">$500</button>
                         </div>
-                        <input
-                            type="number"
-                            class="topup-input"
-                            id="topupAmount"
-                            placeholder="Or enter custom amount..."
-                            min="1"
-                        />
-                        <button class="btn-next" id="btnNext">
-                            Continue <i class="fa-solid fa-arrow-right"></i>
-                        </button>
+                        <div class="field">
+                            <label for="topupAmount">Or enter an amount (USD)</label>
+                            <input type="number" class="input" id="topupAmount" placeholder="e.g. 75" min="1" inputmode="decimal">
+                            <p class="error" id="topupError" role="alert" hidden>Enter an amount above $0.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-lg btn-block" id="btnNext">Continue</button>
                     </div>
 
-                    <!-- Step 2: Choose gateway -->
                     <div class="deposit-step" id="step2">
-                        <h3>Payment Method</h3>
-                        <p class="step-sub">Depositing: <strong id="displayAmount">$0</strong></p>
-                        <div class="gateway-grid">
-                            <div class="gateway-card" data-gw="momo" data-label="MoMo">
-                                <i class="fa-solid fa-mobile-screen gateway-icon"></i>
-                                <span>MoMo</span>
-                            </div>
-                            <div class="gateway-card" data-gw="shopee" data-label="ShopeePay">
-                                <i class="fa-solid fa-bag-shopping gateway-icon"></i>
-                                <span>ShopeePay</span>
-                            </div>
-                            <div class="gateway-card" data-gw="vnqr" data-label="VNQRPay">
-                                <i class="fa-solid fa-qrcode gateway-icon"></i>
-                                <span>VNQRPay</span>
-                            </div>
+                        <p class="step-sub">Adding <strong id="displayAmount">$0</strong>. Choose how to pay.</p>
+                        <div class="gateways">
+                            <button type="button" class="gateway-card" data-gw="momo" data-label="MoMo"><span class="ms">smartphone</span>MoMo</button>
+                            <button type="button" class="gateway-card" data-gw="shopee" data-label="ShopeePay"><span class="ms">shopping_bag</span>ShopeePay</button>
+                            <button type="button" class="gateway-card" data-gw="vnqr" data-label="VNQRPay"><span class="ms">qr_code_2</span>VNQRPay</button>
                         </div>
-                        <button class="btn-step-back" id="back1">
-                            <i class="fa-solid fa-arrow-left"></i> Back
-                        </button>
+                        <button type="button" class="btn btn-ghost btn-block" id="back1">Back</button>
                     </div>
 
-                    <!-- Step 3: QR confirm -->
                     <div class="deposit-step" id="step3">
-                        <div class="qr-confirm-box">
-                            <div class="qr-gw-header" id="qrGwHeader">MoMo</div>
-                            <p class="qr-scan-hint">Quét mã QR để thanh toán</p>
-                            <div class="qr-fake">
-                                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <!-- Corner markers -->
-                                    <rect x="4" y="4" width="28" height="28" fill="none" stroke="#1e293b" stroke-width="4"/>
-                                    <rect x="10" y="10" width="16" height="16" fill="#1e293b"/>
-                                    <rect x="68" y="4" width="28" height="28" fill="none" stroke="#1e293b" stroke-width="4"/>
-                                    <rect x="74" y="10" width="16" height="16" fill="#1e293b"/>
-                                    <rect x="4" y="68" width="28" height="28" fill="none" stroke="#1e293b" stroke-width="4"/>
-                                    <rect x="10" y="74" width="16" height="16" fill="#1e293b"/>
-                                    <!-- Data dots -->
-                                    <rect x="40" y="4" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="50" y="4" width="4" height="4" fill="#1e293b"/>
-                                    <rect x="58" y="4" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="40" y="14" width="4" height="4" fill="#1e293b"/>
-                                    <rect x="48" y="12" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="58" y="14" width="4" height="4" fill="#1e293b"/>
-                                    <rect x="4" y="40" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="14" y="38" width="4" height="10" fill="#1e293b"/>
-                                    <rect x="22" y="40" width="6" height="4" fill="#1e293b"/>
-                                    <rect x="38" y="38" width="8" height="8" fill="#1e293b"/>
-                                    <rect x="50" y="36" width="4" height="12" fill="#1e293b"/>
-                                    <rect x="58" y="40" width="8" height="6" fill="#1e293b"/>
-                                    <rect x="70" y="36" width="6" height="10" fill="#1e293b"/>
-                                    <rect x="80" y="38" width="10" height="6" fill="#1e293b"/>
-                                    <rect x="4" y="52" width="8" height="4" fill="#1e293b"/>
-                                    <rect x="16" y="50" width="4" height="8" fill="#1e293b"/>
-                                    <rect x="24" y="54" width="8" height="4" fill="#1e293b"/>
-                                    <rect x="38" y="50" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="48" y="52" width="8" height="4" fill="#1e293b"/>
-                                    <rect x="60" y="50" width="4" height="8" fill="#1e293b"/>
-                                    <rect x="68" y="52" width="10" height="4" fill="#1e293b"/>
-                                    <rect x="82" y="50" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="40" y="62" width="8" height="4" fill="#1e293b"/>
-                                    <rect x="52" y="60" width="4" height="8" fill="#1e293b"/>
-                                    <rect x="60" y="62" width="6" height="4" fill="#1e293b"/>
-                                    <rect x="70" y="60" width="4" height="6" fill="#1e293b"/>
-                                    <rect x="78" y="62" width="8" height="4" fill="#1e293b"/>
-                                    <rect x="40" y="74" width="4" height="8" fill="#1e293b"/>
-                                    <rect x="48" y="72" width="8" height="4" fill="#1e293b"/>
-                                    <rect x="58" y="74" width="4" height="10" fill="#1e293b"/>
-                                    <rect x="66" y="72" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="76" y="74" width="10" height="4" fill="#1e293b"/>
-                                    <rect x="40" y="86" width="6" height="6" fill="#1e293b"/>
-                                    <rect x="50" y="84" width="4" height="8" fill="#1e293b"/>
-                                    <rect x="58" y="86" width="8" height="4" fill="#1e293b"/>
-                                    <rect x="70" y="84" width="6" height="8" fill="#1e293b"/>
-                                    <rect x="80" y="86" width="8" height="6" fill="#1e293b"/>
-                                </svg>
-                            </div>
-                            <div class="qr-amount-label">Total amount</div>
-                            <div class="qr-amount" id="qrAmount">$0</div>
-                            <button class="btn-confirm-pay" id="btnConfirm">
-                                <i class="fa-solid fa-circle-check"></i> Confirm Payment
-                            </button>
-                            <button class="btn-cancel-pay" id="btnCancelPay">Cancel</button>
-                        </div>
+                        <dl class="confirm">
+                            <div><dt>Method</dt><dd id="qrGwHeader">MoMo</dd></div>
+                            <div class="total"><dt>Amount</dt><dd id="qrAmount">$0</dd></div>
+                        </dl>
+                        <button type="button" class="btn btn-primary btn-lg btn-block" id="btnConfirm"><span class="ms">check_circle</span>Confirm payment</button>
+                        <button type="button" class="btn btn-ghost btn-block" id="btnCancelPay">Cancel</button>
                     </div>
-
-                </div>
+                </section>
             </div>
 
-            <!-- RIGHT: Transaction history -->
-            <div class="wallet-history-card">
-                <h3>Transaction History</h3>
-                <div class="tx-list" id="txList">
-                    <div class="tx-empty">
-                        <i class="fa-solid fa-clock-rotate-left"></i>
-                        No transactions yet
-                    </div>
+            <section class="card history" aria-labelledby="historyTitle">
+                <h2 id="historyTitle">Transaction history</h2>
+                <div class="tx-list" id="txList" aria-live="polite">
+                    <div class="empty"><span class="ms">receipt_long</span>No transactions yet</div>
                 </div>
-            </div>
-
+            </section>
         </div>
     </main>
 
-    <!-- Success toast -->
-    <div class="wallet-toast" id="walletToast">
-        <i class="fa-solid fa-circle-check"></i>
-        <span id="toastMsg">Nạp tiền thành công!</span>
-    </div>
+    <footer id="site-footer"></footer>
 
-    <div class="customer-modal-overlay" id="customerModal" aria-hidden="true">
-        <div class="customer-modal-panel" role="dialog" aria-modal="true" aria-labelledby="customerModalTitle" aria-describedby="customerModalMessage">
-            <div class="customer-modal-icon" id="customerModalIcon" aria-hidden="true">✓</div>
-            <h3 class="customer-modal-title" id="customerModalTitle">Success</h3>
-            <p class="customer-modal-message" id="customerModalMessage">Action completed successfully.</p>
-            <button type="button" class="customer-modal-btn" id="customerModalOk">Continue</button>
-        </div>
-    </div>
-
-    <!-- Scripts -->
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/commerce.js"></script>
     <script src="../asset/js/core/auth.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/wallet.js"></script>

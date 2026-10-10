@@ -1,92 +1,48 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết sản phẩm - EC SHOP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/main.css">
+    <title>Product - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/product-detail.css">
-    <link rel="stylesheet" href="../asset/css/product.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
-<body class="detail-page">
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="product"></header>
 
-    <!-- ── Navbar ──────────────────────────────────────────── -->
-    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 font-headline no-underline hover:no-underline flex items-center gap-3"
-                    href="home.html">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="home.html">Home</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="product.html">Product</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="about.html">About</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="contact.html">Contact</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <el-dropdown class="inline-block relative">
-                    <button id="userBtn" class="p-2 text-teal-900 hover:bg-teal-50/50 rounded-full transition-all duration-300 active:scale-95">
-                        <span id="userContent" class="material-symbols-outlined">person</span>
-                    </button>
-                    <div id="userMenu" class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50">
-                        <button onclick="logout()" class="block w-full text-left px-5 py-2 text-sm hover:bg-gray-100">Đăng xuất</button>
-                        <button class="block w-full text-left px-5 py-2 text-sm hover:bg-gray-100">Tài khoản</button>
-                        <button class="block w-full text-left px-5 py-2 text-sm hover:bg-gray-100">Hỗ trợ</button>
-                    </div>
-                </el-dropdown>
-                <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    <span>Cart</span>
-                    <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
+    <main id="main" class="container">
+        <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb">
+            <a href="home.html">Home</a><span aria-hidden="true">/</span>
+            <a href="product.html">Shop</a>
+        </nav>
 
-    <main class="pt-[72px]">
-
-        <!-- Breadcrumb -->
-        <div class="breadcrumb-bar">
-            <a href="home.html">Home</a>
-            <span class="sep">/</span>
-            <a href="product.html">Products</a>
-            <span class="sep">/</span>
-            <span class="current" id="breadcrumb-name">Loading...</span>
+        <div class="detail" id="detail-content" aria-live="polite">
+            <div class="skel detail-skel"></div>
+            <div class="detail-info"><div class="skel" style="height:36px;width:70%"></div><div class="skel" style="height:24px;width:40%"></div><div class="skel" style="height:120px"></div></div>
         </div>
 
-        <!-- Detail content injected by JS -->
-        <div class="detail-wrapper" id="detail-content"></div>
-
-        <!-- Related products -->
-        <div class="related-section" id="related-section" style="display:none;">
-            <h3>Sản phẩm liên quan</h3>
-            <div class="related-grid product-grid" id="related-list"></div>
-        </div>
-
+        <section class="section related" id="related-section" aria-labelledby="relatedTitle" hidden>
+            <div class="section-head"><h2 id="relatedTitle">You may also like</h2></div>
+            <div class="pgrid" id="related-list"></div>
+        </section>
     </main>
 
-    <!-- Cart toast -->
-    <div class="cart-toast" id="cartToast">
-        <i class="fa-solid fa-circle-check"></i>
-        <span>Đã thêm vào giỏ hàng!</span>
-    </div>
+    <footer id="site-footer"></footer>
 
-    <!-- Scripts -->
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/products.js"></script>
-    <script src="../asset/js/core/auth.js"></script>
-    <script src="../asset/js/user/user-login.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
+    <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/product-detail.js"></script>
     <script src="../asset/js/api/support.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>

@@ -114,7 +114,7 @@ var SupportChat = (function () {
 
         turns.push({ role: "user", content: text });
         bubble("", esc(text), true);
-        var thinking = bubble("EC SHOP Assistant", "…", false);
+        var thinking = bubble("EC SHOP Assistant", '<span class="typing" role="status">Typing</span>', false);
 
         try {
             var messages = turns.slice(-MAX_SENT).map(function (t) {
@@ -159,7 +159,7 @@ var SupportChat = (function () {
         launcher.type = "button";
         launcher.className = "sc-launcher";
         launcher.setAttribute("aria-label", "Open support chat");
-        launcher.innerHTML = '<span aria-hidden="true">💬</span><span>Support</span><span class="sc-badge" id="scBadge" hidden></span>';
+        launcher.innerHTML = '<span class="ms" aria-hidden="true">forum</span><span>Support</span><span class="sc-badge" id="scBadge" hidden></span>';
 
         panel = document.createElement("section");
         panel.className = "sc-panel";
@@ -167,7 +167,7 @@ var SupportChat = (function () {
         panel.setAttribute("aria-label", "Support chat");
         panel.innerHTML =
             '<div class="sc-header"><div class="sc-title">EC SHOP Support<span class="sc-subtitle">Assistant 24/7 · staff replies when available</span></div>' +
-            '<button type="button" class="sc-close" aria-label="Close chat">&times;</button></div>' +
+            '<button type="button" class="sc-close" aria-label="Close chat"><span class="ms">close</span></button></div>' +
             '<div class="sc-tabs" role="tablist" id="scTabs" hidden>' +
             '<button type="button" role="tab" class="sc-tab" id="scTabBot" aria-selected="true">Assistant</button>' +
             '<button type="button" role="tab" class="sc-tab" id="scTabStaff" aria-selected="false">Staff <span class="sc-badge" id="scStaffBadge" hidden></span></button></div>' +

@@ -5,6 +5,20 @@ var discountAmount = 0;
 var walletBalance  = 0;
 var couponSeq      = 0;
 
+// The total counts up or down to its new value.
+function setTotal(value) {
+    UI.countTo(document.getElementById("total-price"), value, {
+        format: function (n) { return "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 }); }
+    });
+}
+
+// The quantity number pops after a change.
+function tickQty(id) {
+    const btn = document.querySelector('.cart-line .inc[data-id="' + id + '"]');
+    const out = btn && btn.parentNode.querySelector("output");
+    if (out) out.classList.add("tick");
+}
+
 function renderCart() {
     const cart = getCart();
     const container = document.getElementById("cart-items");
@@ -15,16 +29,15 @@ function renderCart() {
 
     if (cart.length === 0) {
         container.innerHTML = `
-            <div class="cart-empty">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <p>Giỏ hàng của bạn đang trống</p>
-                <button class="btn-shop" onclick="window.location.href='product.html'">
-                    Tiếp tục mua sắm
-                </button>
+            <div class="empty card">
+                <span class="anim" data-lottie="empty-cart" data-loop style="--size:180px"><span class="ms">shopping_bag</span></span>
+                <h3>Your cart is empty</h3>
+                <p>Find something you like and it will wait for you here.</p>
+                <a class="btn btn-primary" href="product.html">Start shopping</a>
             </div>`;
-        if (countLabel) countLabel.textContent = "0 sản phẩm";
+        if (countLabel) countLabel.textContent = "0 items";
         document.getElementById("total-items").textContent = "0";
-        document.getElementById("total-price").textContent = "$0";
+        setTotal(0);
         return;
     }
 
@@ -34,11 +47,11 @@ function renderCart() {
         return cartItem(item);
     }).join("");
 
-    if (countLabel) countLabel.textContent = totalItems + " sản phẩm";
+    if (countLabel) countLabel.textContent = totalItems + (totalItems === 1 ? " item" : " items");
     document.getElementById("total-items").textContent = totalItems;
 
     var finalDisplay = Math.max(0, totalPrice - discountAmount);
-    document.getElementById("total-price").textContent = "$" + finalDisplay.toLocaleString("en-US");
+    setTotal(finalDisplay);
 
     // The server re-checks the coupon against the current cart (quantities may have changed)
     if (activeCoupon) refreshCoupon();
@@ -56,30 +69,34 @@ async function refreshCoupon() {
         clearCoupon();
     }
     var rawTotal = getCart().reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
-    document.getElementById("total-price").textContent = "$" + Math.max(0, rawTotal - discountAmount).toLocaleString("en-US");
+    setTotal(Math.max(0, rawTotal - discountAmount));
 }
 
 function cartItem(item) {
+    var known = getProducts().filter(function (p) { return p.id === item.id; })[0];
+    var category = known ? known.category : "";
+    var name = Api.escapeHtml(item.name);
     return `
-    <div class="cart-item">
-        <img src="${Api.escapeHtml(item.image)}" class="cart-item-img" onerror="this.onerror=null;this.src='../asset/img/404.png'" />
-        <div class="cart-item-info">
-            <div class="cart-item-name">${Api.escapeHtml(item.name)}</div>
-            <div class="cart-item-price">$${Number(item.price).toLocaleString("en-US")}</div>
+    <article class="cart-line">
+        <img src="${Api.escapeHtml(item.image)}" alt="" class="cart-line-img${UI.isPlaceholder(item.image) ? " is-ph" : ""}" data-category="${Api.escapeHtml(category)}">
+        <div class="cart-line-info">
+            <a class="cart-line-name" href="product-detail.html?id=${item.id}">${name}</a>
+            <div class="cart-line-price">${UI.money(item.price)} each</div>
         </div>
-        <div class="qty-controls">
-            <button class="qty-btn dec" data-id="${item.id}">−</button>
-            <span class="qty-display">${item.quantity}</span>
-            <button class="qty-btn inc" data-id="${item.id}">+</button>
+        <div class="cart-line-controls">
+            <div class="line-qty" role="group" aria-label="Quantity of ${name}">
+                <button type="button" class="dec" data-id="${item.id}" aria-label="Decrease quantity">−</button>
+                <output>${item.quantity}</output>
+                <button type="button" class="inc" data-id="${item.id}" aria-label="Increase quantity">+</button>
+            </div>
+            <span class="line-total">${UI.money(item.price * item.quantity)}</span>
+            <button type="button" class="line-remove remove" data-id="${item.id}" aria-label="Remove ${name}"><span class="ms">delete</span></button>
         </div>
-        <button class="remove-btn remove" data-id="${item.id}" title="Xóa">
-            <i class="fa-solid fa-trash-can"></i>
-        </button>
-    </div>`;
+    </article>`;
 }
 
 document.getElementById("cart-items").addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
+    const btn = e.target.closest("button[data-id]");
     if (!btn) return;
 
     const id = Number(btn.dataset.id);
@@ -101,12 +118,24 @@ document.getElementById("cart-items").addEventListener("click", (e) => {
     }
 
     if (btn.classList.contains("remove")) {
+        const line = btn.closest(".cart-line");
+        if (line && UI.motion() === "full") {
+            // the line folds away first, then the cart is saved and drawn again
+            line.classList.add("leaving");
+            setTimeout(function () {
+                saveCart(getCart().filter(i => i.id !== id));
+                renderCart();
+                updateCartBadge();
+            }, 300);
+            return;
+        }
         cart = cart.filter(i => i.id !== id);
     }
 
     saveCart(cart);
     renderCart();
     updateCartBadge();
+    tickQty(id);
 });
 
 function updateDiscountUI(code, discount) {
@@ -140,7 +169,7 @@ async function applyCoupon() {
         fb.className    = "coupon-feedback success";
         // Refresh total display
         var rawTotal = getCart().reduce(function (s, i) { return s + i.price * i.quantity; }, 0);
-        document.getElementById("total-price").textContent = "$" + Math.max(0, rawTotal - discountAmount).toLocaleString("en-US");
+        setTotal(Math.max(0, rawTotal - discountAmount));
     } else {
         clearCoupon();
         fb.textContent = result.message;
@@ -152,6 +181,11 @@ function initCheckout() {
     const user = getCurrentUser();
 
     if (user) loadWalletBalance();
+    else {
+        document.getElementById("pmWallet").disabled = true;
+        document.getElementById("walletBalanceDisplay").textContent = "Sign in to use";
+        document.getElementById("btnCheckout").lastChild.textContent = "Sign in to check out";
+    }
 
     // Validate balance when switching to wallet
     document.querySelectorAll("input[name='payMethod']").forEach(r => {
@@ -203,7 +237,7 @@ function validatePaymentMethod() {
 
 async function handleCheckout() {
     const user = getCurrentUser();
-    if (!user) { window.location.href = "login.html"; return; }
+    if (!user) { window.location.href = "login.html?next=cart.html"; return; }
 
     const cart = getCart();
     if (!cart.length) return;
@@ -230,23 +264,24 @@ async function handleCheckout() {
 
         showOrderModal(result.orders.map(o => o.id), method, result.total);
     } catch (e) {
-        if (e.status === 401 || e.status === 403) { window.location.href = "login.html"; return; }
-        alert(e.message || "Checkout failed");
+        if (e.status === 401 || e.status === 403) { window.location.href = "login.html?next=cart.html"; return; }
+        UI.toast(e.message || "Checkout failed. Please try again.", "error");
     } finally {
         validatePaymentMethod();
     }
 }
 
 function showOrderModal(orderIds, method, total) {
+    // a fresh player each time, so the check draws itself when the order goes through
+    document.getElementById("orderAnim").innerHTML = '<span class="anim" data-lottie="order-success" style="--size:112px"><span class="ms ms-fill">check_circle</span></span>';
     document.getElementById("modalOrderId").textContent = "#" + orderIds.join(", #");
-    document.getElementById("modalPayMethod").textContent = method === "wallet" ? "Wallet" : "Cash on Delivery";
+    document.getElementById("modalPayMethod").textContent = method === "wallet" ? "Wallet" : "Cash on delivery";
     document.getElementById("modalTotal").textContent = "$" + Number(total).toLocaleString("en-US");
     document.getElementById("orderModal").classList.add("is-open");
+    UI.confetti();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     renderCart();
     initCheckout();
-    const cartBtn = document.getElementById("cart-btn");
-    if (cartBtn) cartBtn.addEventListener("click", () => window.location.href = "cart.html");
 });

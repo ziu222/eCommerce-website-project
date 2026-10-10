@@ -1,0 +1,115 @@
+/* home.css — layout of customer/home.html */
+
+/* ---------- Banner carousel ---------- */
+
+.hero { padding-block: 20px 8px; }
+.carousel { --ctrl: #fff; position: relative; overflow: hidden; border-radius: var(--r-lg); color: var(--ctrl); }
+.carousel[data-theme="sand"] { --ctrl: var(--ink); }
+.slides { display: grid; }
+.slide {
+    --bg: #0b4f4b; --accent: #0f6b66; --ink-on: #fff;
+    position: relative;
+    grid-area: 1 / 1;
+    display: grid;
+    gap: 20px;
+    align-items: center;
+    padding: 28px 24px 96px;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--ink-on);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.7s var(--ease), visibility 0s linear 0.7s;
+}
+.slide.is-active { opacity: 1; visibility: visible; transition-delay: 0s; }
+.slide[data-theme="orange"] { --bg: #b8370f; --accent: #cf4a22; }
+.slide[data-theme="ink"] { --bg: #151b1a; --accent: #26302e; }
+.slide[data-theme="sand"] { --bg: #e8e1d1; --accent: #d9cfb8; --ink-on: var(--ink); }
+.slide::before { content: ""; position: absolute; right: -14%; top: -34%; width: 70%; aspect-ratio: 1; border-radius: 50%; background: var(--accent); }
+
+.slide-copy, .slide-art { position: relative; z-index: 1; }
+.slide-copy { display: grid; gap: 14px; justify-items: start; }
+.slide-copy h1, .slide-copy h2 { max-width: 14ch; font-size: clamp(2rem, 1.3rem + 3.6vw, 3.6rem); letter-spacing: -0.035em; line-height: 1.04; }
+.slide-tag { font-size: 14px; font-weight: 700; letter-spacing: 0.02em; opacity: 0.85; }
+.slide-sub { max-width: 44ch; font-size: 1.05rem; opacity: 0.9; }
+.slide-btn { margin-top: 6px; background: #fff; color: var(--ink); }
+.slide-btn:hover { background: var(--brand-soft); color: var(--ink); }
+.slide[data-theme="sand"] .slide-btn { background: var(--ink); color: #fff; }
+.slide[data-theme="sand"] .slide-btn:hover { background: #2b3533; color: #fff; }
+.slide-art { justify-self: center; width: min(100%, 300px); aspect-ratio: 1; padding: 6%; border-radius: 28px; background: #fff; box-shadow: var(--shadow-2); }
+.slide-art img { width: 100%; height: 100%; object-fit: contain; }
+
+/* what moves when a slide becomes active: copy rises in one line at a time, the picture slides in */
+.slide-copy > * { opacity: 0; transform: translateY(20px); transition: opacity 0.7s var(--ease), transform 0.7s var(--ease); }
+.slide.is-active .slide-copy > * { opacity: 1; transform: none; transition-delay: calc(0.18s + var(--n, 0) * 0.09s); }
+.slide-copy > :nth-child(2) { --n: 1; }
+.slide-copy > :nth-child(3) { --n: 2; }
+.slide-copy > :nth-child(4) { --n: 3; }
+.slide-art { opacity: 0; transform: translateX(48px) scale(0.94); transition: opacity 0.8s var(--ease), transform 0.9s var(--ease); }
+.slide.is-active .slide-art { opacity: 1; transform: none; transition-delay: 0.2s; }
+
+.carousel-ctrl { position: absolute; left: 12px; right: 12px; bottom: 14px; z-index: 3; display: flex; align-items: center; gap: 8px; }
+.ctrl-btn { display: grid; place-items: center; flex: none; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.16); color: var(--ctrl); transition: background-color 0.18s, transform 0.12s; }
+.carousel[data-theme="sand"] .ctrl-btn { background: rgba(21, 27, 26, 0.1); }
+.ctrl-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.carousel[data-theme="sand"] .ctrl-btn:hover { background: rgba(21, 27, 26, 0.18); }
+.ctrl-btn:active { transform: scale(0.92); }
+.ctrl-arrows { display: flex; gap: 8px; margin-left: auto; }
+.dots { display: flex; }
+.dot { position: relative; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--ctrl); }
+.dot::before, .dot::after { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; height: 4px; margin-top: -2px; border-radius: 2px; background: currentColor; }
+.dot::before { opacity: 0.3; }
+.dot::after { transform: scaleX(0); transform-origin: left; }
+.dot[aria-current="true"]::after { animation: dot-fill 6s linear forwards; }
+.carousel.is-paused .dot[aria-current="true"]::after { animation-play-state: paused; }
+.carousel.is-stopped .dot[aria-current="true"]::after { animation: none; transform: scaleX(1); }
+@keyframes dot-fill { to { transform: scaleX(1); } }
+
+@media (min-width: 720px) {
+    .carousel-ctrl { left: 32px; right: 32px; bottom: 22px; }
+    .dot { width: 56px; }
+    .slide { grid-template-columns: 1.1fr 1fr; gap: 32px; padding: 44px 40px 96px; min-height: 420px; }
+}
+@media (min-width: 960px) {
+    .hero { padding-block: 28px 12px; }
+    .slide { gap: 40px; padding: 56px 56px 100px; min-height: 480px; }
+    .slide-art { width: min(100%, 380px); }
+}
+
+.cat-strip { padding-block: 16px 8px; }
+.cat-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.cat-tile { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 92px; padding: 14px 8px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 600; text-decoration: none; transition: border-color 0.18s, background-color 0.18s, color 0.18s; }
+.cat-tile .ms { font-size: 28px; color: var(--brand); transition: color 0.18s, transform 0.3s var(--ease); }
+.cat-tile:hover .ms { transform: translateY(-3px) scale(1.12); }
+.cat-tile:hover { border-color: var(--brand); background: var(--brand); color: #fff; }
+.cat-tile:hover .ms { color: #fff; }
+
+.promise { display: grid; gap: 14px; margin: 24px 0 0; padding: 0; list-style: none; }
+.promise li { transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease); display: flex; align-items: flex-start; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); }
+.promise .ms { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); font-size: 24px; }
+.promise h3 { font-size: 16px; }
+.promise p { margin-top: 2px; color: var(--ink-3); font-size: 14px; }
+
+.help-band { display: grid; gap: 20px; align-items: center; margin-top: 40px; padding: 32px; border-radius: var(--r-lg); background: var(--ink); color: #fff; }
+.help-band h2 { font-size: clamp(1.4rem, 1.1rem + 1.2vw, 2rem); }
+.help-band p { max-width: 56ch; margin-top: 8px; color: #b8c4c1; }
+.help-band .btn { background: #fff; color: var(--ink); justify-self: start; }
+.help-band .btn:hover { background: var(--brand-soft); color: var(--ink); }
+
+@media (min-width: 640px) {
+    .cat-list { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .promise { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 960px) {
+    .promise { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .help-band { grid-template-columns: 1fr auto; padding: 44px 48px; }
+    .help-band .btn { justify-self: end; }
+}
+
+.promise li:hover { transform: translateY(-3px); box-shadow: var(--shadow-1); }
+
+/* the banner picture floats and the round shape behind it drifts, only while its slide is showing */
+@keyframes float { 50% { translate: 0 -10px; } }
+@keyframes drift { to { translate: -24px 18px; scale: 1.06; } }
+.slide.is-active .slide-art { animation: float 7s ease-in-out 1.2s infinite; }
+.slide.is-active::before { animation: drift 14s ease-in-out infinite alternate; }

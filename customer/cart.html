@@ -1,179 +1,99 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giỏ hàng - EC SHOP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/main.css">
+    <title>Your cart - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/cart.css">
-    <link rel="stylesheet" href="../asset/css/wallet.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
-<body class="cart-page">
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="cart"></header>
 
-    <!-- ── Navbar ──────────────────────────────────────────── -->
-    <nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 font-headline no-underline hover:no-underline flex items-center gap-3"
-                    href="home.html">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="home.html">Home</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="product.html">Product</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="about.html">About</a>
-                    <a class="text-slate-600 hover:text-teal-800 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline" href="contact.html">Contact</a>
-                </div>
-            </div>
-            <div class="flex items-center gap-4">
-                <el-dropdown class="inline-block relative">
-                    <button id="userBtn" class="p-2 text-teal-900 hover:bg-teal-50/50 rounded-full transition-all duration-300 active:scale-95">
-                        <span id="userContent" class="material-symbols-outlined">person</span>
-                    </button>
-                    <div id="userMenu" class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50">
-                        <button onclick="logout()" class="block w-full text-left px-5 py-2 text-sm hover:bg-gray-100">Đăng xuất</button>
-                        <button class="block w-full text-left px-5 py-2 text-sm hover:bg-gray-100">Tài khoản</button>
-                        <button class="block w-full text-left px-5 py-2 text-sm hover:bg-gray-100">Hỗ trợ</button>
-                    </div>
-                </el-dropdown>
-                <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng">
-                    <span class="material-symbols-outlined">shopping_cart</span>
-                    <span>Cart</span>
-                    <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="pt-[72px]">
-
-        <!-- Back link -->
-        <div class="cart-back">
-            <button class="btn-back" onclick="window.location.href='product.html'">
-                <i class="fa-solid fa-arrow-left"></i> Tiếp tục mua sắm
-            </button>
+    <main id="main" class="container">
+        <div class="page-head">
+            <h1>Your cart</h1>
+            <p id="cart-count-label" aria-live="polite">0 items</p>
         </div>
 
-        <!-- Two-column layout -->
-        <div class="cart-wrapper">
-
-            <!-- LEFT: Items -->
-            <div class="cart-panel">
-                <div class="cart-panel-header">
-                    <h1>Giỏ hàng</h1>
-                    <p class="cart-count-label" id="cart-count-label">0 sản phẩm</p>
-                </div>
+        <div class="cart-layout">
+            <section class="cart-list" aria-label="Items in your cart">
                 <div id="cart-items"></div>
-            </div>
+            </section>
 
-            <!-- RIGHT: Summary -->
-            <div class="summary-panel">
-                <h2>Tóm tắt đơn hàng</h2>
+            <aside class="card summary" aria-labelledby="summaryTitle">
+                <h2 id="summaryTitle">Order summary</h2>
 
-                <div class="summary-row">
-                    <span>Tổng sản phẩm</span>
-                    <span id="total-items">0</span>
-                </div>
-                <div class="summary-row">
-                    <span>Phí vận chuyển</span>
-                    <span style="color: var(--success-color); font-weight: 600;">Miễn phí</span>
-                </div>
-                <div class="summary-row discount-row" id="discountRow" style="display:none;">
-                    <span>Discount (<span id="couponCodeLabel">—</span>)</span>
-                    <span id="discountAmount" style="color:var(--success-color);font-weight:700;">−$0</span>
-                </div>
-                <div class="summary-row total">
-                    <span>Thành tiền</span>
-                    <span id="total-price">$0</span>
-                </div>
+                <dl class="summary-rows">
+                    <div><dt>Items</dt><dd id="total-items">0</dd></div>
+                    <div><dt>Delivery</dt><dd class="free">Free</dd></div>
+                    <div id="discountRow" style="display:none"><dt>Discount (<span id="couponCodeLabel">—</span>)</dt><dd class="free" id="discountAmount">−$0</dd></div>
+                    <div class="total"><dt>Total</dt><dd id="total-price">$0</dd></div>
+                </dl>
 
-                <!-- Payment method -->
-                <div class="payment-method-section">
-                    <div class="pm-title">Payment Method</div>
-                    <label class="pm-option">
-                        <input type="radio" name="payMethod" value="wallet" id="pmWallet" />
-                        <span class="material-symbols-outlined">account_balance_wallet</span>
-                        <span>Wallet</span>
-                        <span class="pm-balance-badge" id="walletBalanceDisplay">$0.00</span>
+                <fieldset class="pay">
+                    <legend>Payment method</legend>
+                    <label class="pay-option">
+                        <input type="radio" name="payMethod" value="wallet" id="pmWallet">
+                        <span class="ms">account_balance_wallet</span>
+                        <span class="pay-name">Wallet</span>
+                        <span class="pay-balance" id="walletBalanceDisplay">$0.00</span>
                     </label>
-                    <label class="pm-option">
-                        <input type="radio" name="payMethod" value="cod" id="pmCod" checked />
-                        <span class="material-symbols-outlined">local_shipping</span>
-                        <span>Cash on Delivery</span>
+                    <label class="pay-option">
+                        <input type="radio" name="payMethod" value="cod" id="pmCod" checked>
+                        <span class="ms">local_shipping</span>
+                        <span class="pay-name">Cash on delivery</span>
                     </label>
-                    <p class="pm-warning hidden" id="pmWarning">
-                        <i class="fa-solid fa-triangle-exclamation"></i>
-                        Insufficient wallet balance
-                    </p>
+                    <p class="pay-warning hidden" id="pmWarning" role="alert"><span class="ms">warning</span>Your wallet balance is too low for this order. <a href="wallet.html">Add funds</a></p>
+                </fieldset>
+
+                <div class="field">
+                    <label for="couponInput">Discount code</label>
+                    <div class="coupon">
+                        <input type="text" class="input" id="couponInput" placeholder="Enter code" autocomplete="off">
+                        <button type="button" class="btn btn-ghost" id="btnApplyCoupon">Apply</button>
+                    </div>
+                    <p class="coupon-feedback" id="couponFeedback" role="status"></p>
                 </div>
 
-                <div class="discount-wrap">
-                    <input type="text" class="discount-input" id="couponInput" placeholder="Mã giảm giá" />
-                    <button class="btn-apply" id="btnApplyCoupon">Áp dụng</button>
-                </div>
-                <p class="coupon-feedback" id="couponFeedback"></p>
-
-                <button class="btn-checkout" id="btnCheckout">
-                    <i class="fa-solid fa-lock"></i>
-                    Thanh toán
-                </button>
-
-                <div class="secure-badge">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    Thanh toán an toàn &amp; bảo mật
-                </div>
-            </div>
-
+                <button type="button" class="btn btn-primary btn-lg btn-block" id="btnCheckout"><span class="ms">lock</span>Check out</button>
+                <p class="secure"><span class="ms">shield</span>Secure checkout. Prices are confirmed again when you pay.</p>
+            </aside>
         </div>
     </main>
 
-    <!-- Order Success Modal -->
-    <div class="order-modal-backdrop" id="orderModal">
-        <div class="order-modal">
-            <div class="order-modal__icon-wrap">
-                <span class="material-symbols-outlined">check_circle</span>
-            </div>
-            <h2 class="order-modal__title">Order Placed!</h2>
-            <p class="order-modal__sub">Thank you — your order is confirmed.</p>
-            <div class="order-modal__info">
-                <div class="order-modal__row">
-                    <span>Order ID</span>
-                    <span id="modalOrderId">#—</span>
-                </div>
-                <div class="order-modal__row">
-                    <span>Payment</span>
-                    <span id="modalPayMethod">—</span>
-                </div>
-                <div class="order-modal__row order-modal__row--total">
-                    <span>Total</span>
-                    <span id="modalTotal">$0</span>
-                </div>
-            </div>
-            <div class="order-modal__actions">
-                <button class="order-modal__btn order-modal__btn--primary" onclick="window.location.href='home.html'">
-                    <span class="material-symbols-outlined">home</span>
-                    Go to Home
-                </button>
-                <button class="order-modal__btn order-modal__btn--outline" onclick="window.location.href='product.html'">
-                    <span class="material-symbols-outlined">storefront</span>
-                    Continue Shopping
-                </button>
+    <div class="modal-backdrop" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
+        <div class="modal order-modal">
+            <span class="order-check" id="orderAnim" aria-hidden="true"></span>
+            <h2 id="orderTitle">Order placed</h2>
+            <p class="muted">Thank you. Your seller will start preparing it.</p>
+            <dl class="order-info">
+                <div><dt>Order</dt><dd id="modalOrderId">#—</dd></div>
+                <div><dt>Payment</dt><dd id="modalPayMethod">—</dd></div>
+                <div class="total"><dt>Total</dt><dd id="modalTotal">$0</dd></div>
+            </dl>
+            <div class="order-actions">
+                <a class="btn btn-primary btn-block" href="orders.html">View my orders</a>
+                <a class="btn btn-ghost btn-block" href="product.html">Keep shopping</a>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <footer id="site-footer"></footer>
+
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/commerce.js"></script>
     <script src="../asset/js/core/auth.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
     <script src="../asset/js/user/cart.js"></script>

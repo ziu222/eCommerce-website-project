@@ -1,180 +1,115 @@
-// product-detail.js — Single product detail page logic
+// product-detail.js — one product: photo, price, stock, quantity and add to cart, then related products.
 
 (function () {
 
-    function renderStars(rating) {
-        const full  = Math.floor(rating);
-        const half  = rating - full >= 0.5 ? "½" : "";
-        const empty = 5 - full - (half ? 1 : 0);
-        return "★".repeat(full) + half + "☆".repeat(empty);
+    var esc = Api.escapeHtml;
+
+    function notFound() {
+        document.getElementById("detail-content").innerHTML =
+            '<div class="empty" style="grid-column:1/-1"><span class="ms">search_off</span><h3>We could not find this product</h3>' +
+            '<a class="btn btn-primary" href="product.html">Back to the shop</a></div>';
     }
 
-    function showToast() {
-        const toast = document.getElementById("cartToast");
-        if (!toast) return;
-        toast.classList.add("show");
-        setTimeout(() => toast.classList.remove("show"), 2500);
+    function specsHtml(specs) {
+        var keys = Object.keys(specs || {});
+        if (!keys.length) return "";
+        return '<section class="specs" aria-labelledby="specsTitle"><h2 id="specsTitle">Specifications</h2><dl>' +
+            keys.map(function (k) { return "<dt>" + esc(k.replace(/_/g, " ")) + "</dt><dd>" + esc(specs[k]) + "</dd>"; }).join("") +
+            "</dl></section>";
     }
 
-    function renderDetail(product) {
-        const price       = Number(product.price);
-        const oldPrice    = Number(product.oldPrice);
-        const discountPct = oldPrice > price ? Math.round((1 - price / oldPrice) * 100) : 0;
-        const inStock     = product.stock > 0;
-
-        document.getElementById("breadcrumb-name").textContent = product.name;
-        document.title = product.name + " - EC SHOP";
-
-        document.getElementById("detail-content").innerHTML = `
-            <div class="detail-img-col">
-                <img
-                    class="detail-main-img"
-                    src="${Api.escapeHtml(product.image)}"
-                    alt="${Api.escapeHtml(product.name)}"
-                    onerror="this.onerror=null;this.src='../asset/img/404.png'"
-                />
-            </div>
-
-            <div class="detail-info-col">
-                <div class="detail-top-row">
-                    <span class="detail-category">${Api.escapeHtml(product.category)}</span>
-                    ${discountPct > 0 ? `<span class="detail-discount-badge">-${discountPct}% OFF</span>` : ""}
-                </div>
-
-                <h1 class="detail-name">${Api.escapeHtml(product.name)}</h1>
-
-                <div class="detail-rating">
-                    <span class="stars">${renderStars(product.rating)}</span>
-                    <strong>${product.rating}</strong>
-                    <span>(${product.reviews} đánh giá)</span>
-                </div>
-
-                <div class="detail-price-box">
-                    <span class="detail-new-price">$${price.toLocaleString("en-US")}</span>
-                    ${oldPrice > price ? `<span class="detail-old-price">$${oldPrice.toLocaleString("en-US")}</span>` : ""}
-                </div>
-
-                ${product.description ? `
-                <div class="detail-description">${Api.escapeHtml(product.description)}</div>
-                ` : ""}
-
-                <div class="detail-stock ${inStock ? "in-stock" : "out-stock"}">
-                    <i class="fa-solid ${inStock ? "fa-circle-check" : "fa-circle-xmark"}"></i>
-                    ${inStock ? `Còn ${product.stock} sản phẩm` : "Hết hàng"}
-                </div>
-
-                <div class="detail-actions">
-                    <div class="qty-box">
-                        <button id="qtyDec">−</button>
-                        <span class="qty-val" id="qtyVal">1</span>
-                        <button id="qtyInc">+</button>
-                    </div>
-                    <button
-                        class="btn-add-cart"
-                        id="btnAddCart"
-                        ${!inStock ? "disabled" : ""}
-                    >
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        Thêm vào giỏ hàng
-                    </button>
-                </div>
-            </div>
-        `;
-
-        // Qty controls
-        let qty = 1;
-        const qtyVal  = document.getElementById("qtyVal");
-        const qtyDec  = document.getElementById("qtyDec");
-        const qtyInc  = document.getElementById("qtyInc");
-        const btnAdd  = document.getElementById("btnAddCart");
-
-        if (qtyDec) qtyDec.addEventListener("click", () => {
-            if (qty > 1) { qty--; qtyVal.textContent = qty; }
-        });
-
-        if (qtyInc) qtyInc.addEventListener("click", () => {
-            if (qty < product.stock) { qty++; qtyVal.textContent = qty; }
-        });
-
-        if (btnAdd) btnAdd.addEventListener("click", () => {
-            for (let i = 0; i < qty; i++) addToCart(product.id);
-            showToast();
-        });
+    function stockHtml(stock) {
+        if (stock <= 0) return '<p class="detail-stock out-stock"><span class="ms">cancel</span>Sold out</p>';
+        if (stock <= 5) return '<p class="detail-stock low-stock"><span class="ms">schedule</span>Only ' + stock + " left</p>";
+        return '<p class="detail-stock in-stock"><span class="ms">check_circle</span>In stock</p>';
     }
 
-    async function renderRelated(currentProduct) {
-        let related = [];
-        try {
-            const res = await Api.products.list({ category: currentProduct.category, limit: 5 });
-            related = res.items.filter(p => p.id !== currentProduct.id).slice(0, 4);
-        } catch (e) {
-            return; // related products are optional
+    function renderDetail(p) {
+        var off = UI.discount(p);
+        var inStock = p.stock > 0;
+        var shopName = p.shop && p.shop.shopName ? p.shop.shopName : "";
+        var catLabel = UI.categoryLabel(p.category);
+
+        document.title = p.name + " - EC SHOP";
+        document.getElementById("breadcrumb").innerHTML =
+            '<a href="home.html">Home</a><span aria-hidden="true">/</span><a href="product.html">Shop</a><span aria-hidden="true">/</span>' +
+            '<a href="product.html?category=' + encodeURIComponent(p.category) + '">' + esc(catLabel) + '</a><span aria-hidden="true">/</span>' +
+            '<span aria-current="page">' + esc(p.name) + "</span>";
+
+        document.getElementById("detail-content").innerHTML =
+            '<div class="detail-media"><img src="' + esc(p.image) + '" alt="' + esc(p.name) + '"' + (UI.isPlaceholder(p.image) ? ' class="is-ph"' : "") + ' data-category="' + esc(p.category) + '">' +
+            (off ? '<span class="badge badge-sale">-' + off + "%</span>" : "") + "</div>" +
+            '<div class="detail-info">' +
+            '<a class="detail-cat" href="product.html?category=' + encodeURIComponent(p.category) + '">' + esc(catLabel) + "</a>" +
+            '<h1 class="detail-name">' + esc(p.name) + "</h1>" +
+            '<div class="detail-meta">' + UI.stars(p.rating) + "<span><strong>" + Number(p.rating).toFixed(1) + "</strong> · " + p.reviews + " reviews</span>" +
+            (shopName ? "<span>Sold by <strong>" + esc(shopName) + "</strong></span>" : "") + "</div>" +
+            '<div class="detail-price"><b>' + UI.money(p.price) + "</b>" +
+            (off ? "<s>" + UI.money(p.oldPrice) + '</s><span class="detail-save">You save ' + UI.money(p.oldPrice - p.price) + "</span>" : "") + "</div>" +
+            (p.description ? '<p class="detail-desc">' + esc(p.description) + "</p>" : "") +
+            stockHtml(p.stock) +
+            '<div class="detail-actions">' +
+            '<div class="qty" role="group" aria-label="Quantity"><button type="button" id="qtyDec" aria-label="Decrease quantity">−</button>' +
+            '<output id="qtyVal" aria-live="polite">1</output><button type="button" id="qtyInc" aria-label="Increase quantity">+</button></div>' +
+            '<button type="button" class="btn btn-primary btn-lg" id="btnAddCart"' + (inStock ? "" : " disabled") + '><span class="ms">add_shopping_cart</span>Add to cart</button>' +
+            '<button type="button" class="btn btn-ghost btn-lg" id="btnBuyNow"' + (inStock ? "" : " disabled") + ">Buy now</button></div>" +
+            '<ul class="detail-perks"><li><span class="ms">local_shipping</span>Free delivery on every order</li>' +
+            '<li><span class="ms">autorenew</span>30-day returns</li>' +
+            '<li><span class="ms">support_agent</span>Questions? <a href="#" data-open-support>Ask our assistant</a></li></ul>' +
+            specsHtml(p.specs) + "</div>";
+
+        var qty = 1;
+        var val = document.getElementById("qtyVal");
+        var dec = document.getElementById("qtyDec");
+        var inc = document.getElementById("qtyInc");
+        function show(animate) {
+            val.textContent = qty;
+            if (animate) {
+                val.classList.remove("tick");
+                void val.offsetWidth;
+                val.classList.add("tick");
+            }
+            dec.disabled = qty <= 1;
+            inc.disabled = qty >= p.stock;
         }
+        dec.addEventListener("click", function () { if (qty > 1) { qty--; show(true); } });
+        inc.addEventListener("click", function () { if (qty < p.stock) { qty++; show(true); } });
+        show();
 
-        if (related.length === 0) return;
+        function add() {
+            for (var i = 0; i < qty; i++) addToCart(p.id);
+        }
+        document.getElementById("btnAddCart").addEventListener("click", function () {
+            add();
+            var self = this;
+            self.innerHTML = '<span class="ms">check</span>Added';
+            setTimeout(function () { self.innerHTML = '<span class="ms">add_shopping_cart</span>Add to cart'; }, 1400);
+            UI.toast(qty > 1 ? qty + " items added to your cart" : "Added to your cart");
+        });
+        document.getElementById("btnBuyNow").addEventListener("click", function () {
+            add();
+            location.href = "cart.html";
+        });
+    }
 
-        const section = document.getElementById("related-section");
-        const list    = document.getElementById("related-list");
-        if (!section || !list) return;
-
-        section.style.display = "";
-
-        list.innerHTML = related.map((p, idx) => {
-            const price       = Number(p.price);
-            const oldPrice    = Number(p.oldPrice);
-            const discountPct = oldPrice > price ? Math.round((1 - price / oldPrice) * 100) : 0;
-            const inStock     = p.stock > 0;
-            const delay       = idx * 0.07;
-
-            return `
-            <div class="product-card" style="animation-delay:${delay}s"
-                 onclick="window.location.href='product-detail.html?id=${p.id}'">
-                <div class="product-img-wrap">
-                    <img src="${Api.escapeHtml(p.image)}" alt="${Api.escapeHtml(p.name)}" onerror="this.onerror=null;this.src='../asset/img/404.png'" />
-                    ${discountPct > 0 ? `<span class="discount-badge">-${discountPct}%</span>` : ""}
-                    <span class="category-chip">${Api.escapeHtml(p.category)}</span>
-                </div>
-                <div class="card-body">
-                    <div class="product-name">${Api.escapeHtml(p.name)}</div>
-                    <div class="price-box">
-                        <span class="new-price">$${price.toLocaleString("en-US")}</span>
-                        ${oldPrice > price ? `<span class="old-price">$${oldPrice.toLocaleString("en-US")}</span>` : ""}
-                    </div>
-                    <button class="cart-btn" onclick="event.stopPropagation(); addToCart(${p.id})" ${!inStock ? "disabled" : ""}>
-                        <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ
-                    </button>
-                </div>
-            </div>`;
-        }).join("");
+    async function renderRelated(p) {
+        try {
+            var res = await Api.products.list({ category: p.category, limit: 5 });
+            var related = res.items.filter(function (x) { return x.id !== p.id; }).slice(0, 4);
+            if (!related.length) return;
+            document.getElementById("related-list").innerHTML = related.map(UI.productCard).join("");
+            document.getElementById("related-section").hidden = false;
+        } catch (e) { /* related products are optional */ }
     }
 
     async function init() {
-        const params    = new URLSearchParams(window.location.search);
-        const productId = parseInt(params.get("id"), 10);
-
-        if (!productId) {
-            document.getElementById("detail-content").innerHTML =
-                '<p style="padding:60px;text-align:center;color:var(--muted-text);">Sản phẩm không tồn tại. <a href="product.html" style="color:var(--primary-color)">Quay lại</a></p>';
-            return;
-        }
-
-        let product = null;
-        try {
-            product = await Api.products.get(productId);
-        } catch (e) {
-            product = null;
-        }
-        if (!product) {
-            document.getElementById("detail-content").innerHTML =
-                '<p style="padding:60px;text-align:center;color:var(--muted-text);">Sản phẩm không tìm thấy. <a href="product.html" style="color:var(--primary-color)">Quay lại</a></p>';
-            return;
-        }
-
+        var id = parseInt(new URLSearchParams(location.search).get("id"), 10);
+        if (!id) { notFound(); return; }
+        var product = null;
+        try { product = await Api.products.get(id); } catch (e) { product = null; }
+        if (!product) { notFound(); return; }
         renderDetail(product);
         renderRelated(product);
-
-        const cartBtn = document.getElementById("cart-btn");
-        if (cartBtn) cartBtn.addEventListener("click", () => window.location.href = "cart.html");
     }
 
     document.addEventListener("DOMContentLoaded", init);
