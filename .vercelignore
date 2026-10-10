@@ -1,0 +1,4 @@
+server/
+docs/
+docker-compose.yml
+.github/

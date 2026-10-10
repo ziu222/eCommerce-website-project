@@ -1,0 +1,21 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: ecshop-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ecshop
+      POSTGRES_PASSWORD: ecshop
+      POSTGRES_DB: ecshop
+    ports:
+      - "5432:5432"
+    volumes:
+      - ecshop-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecshop -d ecshop"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  ecshop-pgdata:

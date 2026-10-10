@@ -1,0 +1,22 @@
+import { Module } from '@nestjs/common';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { resolve } from 'node:path';
+import { HealthController } from './health/health.controller.js';
+import { PrismaModule } from './prisma/prisma.module.js';
+
+// In development the repo root (static storefront) is served by Nest so pages and API share an origin.
+const serveStatic =
+  process.env.NODE_ENV === 'production'
+    ? []
+    : [
+        ServeStaticModule.forRoot({
+          rootPath: resolve(process.cwd(), '..'),
+          exclude: ['/api/{*splat}'],
+        }),
+      ];
+
+@Module({
+  imports: [PrismaModule, ...serveStatic],
+  controllers: [HealthController],
+})
+export class AppModule {}
