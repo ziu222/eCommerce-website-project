@@ -192,6 +192,43 @@ var UI = (function () {
         if (window.SupportChat) SupportChat.open();
     });
 
+    // ---------- Lottie animations
+    // Put <span class="anim" data-lottie="name" data-loop><span class="ms">fallback_icon</span></span> anywhere (also in
+    // markup added later). The player script is fetched the first time one is needed; until then, and if it cannot be
+    // loaded, the fallback icon inside stays. Files live in asset/lottie/.
+
+    var PLAYER = "https://cdn.jsdelivr.net/npm/@lottiefiles/lottie-player@2.0.3/dist/lottie-player.js";
+    var playerReady = null;
+
+    function loadPlayer() {
+        if (!playerReady) {
+            playerReady = new Promise(function (resolve, reject) {
+                var s = document.createElement("script");
+                s.src = PLAYER;
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        }
+        return playerReady;
+    }
+
+    function mountAnimation(el) {
+        if (el.hasAttribute("data-lottie-ready")) return;
+        el.setAttribute("data-lottie-ready", "");
+        // under "reduce motion" a loop plays once instead of repeating
+        var loop = el.hasAttribute("data-loop") && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        loadPlayer().then(function () {
+            el.innerHTML = '<lottie-player src="../asset/lottie/' + el.dataset.lottie + '.json" background="transparent" speed="1"' +
+                (loop ? " loop" : "") + " autoplay></lottie-player>";
+        }).catch(function () { /* the fallback icon stays */ });
+    }
+
+    function mountAnimations(root) {
+        if (root.matches && root.matches("[data-lottie]")) mountAnimation(root);
+        if (root.querySelectorAll) [].forEach.call(root.querySelectorAll("[data-lottie]"), mountAnimation);
+    }
+
     // ---------- motion
     // Elements that match REVEAL rise in as they scroll into view. The marker is removed once the
     // animation is done so hover effects on the same element work normally. Under "reduce motion" the CSS keeps only the fade.
@@ -245,6 +282,12 @@ var UI = (function () {
 
     mount();
     initMotion();
+    mountAnimations(document.body);
+    new MutationObserver(function (records) {
+        records.forEach(function (r) {
+            [].forEach.call(r.addedNodes, function (n) { if (n.nodeType === 1) mountAnimations(n); });
+        });
+    }).observe(document.body, { childList: true, subtree: true });
 
     return { isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 

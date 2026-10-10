@@ -191,6 +191,9 @@ button { cursor: pointer; }
 .breadcrumb a:hover { color: var(--brand); text-decoration: underline; }
 .breadcrumb [aria-current] { color: var(--ink); font-weight: 500; }
 
+.anim { --size: 160px; display: grid; place-items: center; width: var(--size); height: var(--size); }
+.anim lottie-player { width: 100%; height: 100%; }
+.anim .ms { font-size: calc(var(--size) * 0.4); color: var(--line-2); }
 .empty { display: grid; justify-items: center; gap: 10px; padding: 56px 20px; text-align: center; color: var(--ink-3); }
 .empty .ms { font-size: 44px; color: var(--line-2); }
 .empty h3 { color: var(--ink); font-size: 1.15rem; }

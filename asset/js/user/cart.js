@@ -16,7 +16,7 @@ function renderCart() {
     if (cart.length === 0) {
         container.innerHTML = `
             <div class="empty card">
-                <span class="ms">shopping_bag</span>
+                <span class="anim" data-lottie="empty-cart" data-loop style="--size:180px"><span class="ms">shopping_bag</span></span>
                 <h3>Your cart is empty</h3>
                 <p>Find something you like and it will wait for you here.</p>
                 <a class="btn btn-primary" href="product.html">Start shopping</a>
@@ -246,6 +246,8 @@ async function handleCheckout() {
 }
 
 function showOrderModal(orderIds, method, total) {
+    // a fresh player each time, so the check draws itself when the order goes through
+    document.getElementById("orderAnim").innerHTML = '<span class="anim" data-lottie="order-success" style="--size:112px"><span class="ms ms-fill">check_circle</span></span>';
     document.getElementById("modalOrderId").textContent = "#" + orderIds.join(", #");
     document.getElementById("modalPayMethod").textContent = method === "wallet" ? "Wallet" : "Cash on delivery";
     document.getElementById("modalTotal").textContent = "$" + Number(total).toLocaleString("en-US");

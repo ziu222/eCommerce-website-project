@@ -39,7 +39,7 @@ function showControls() {
 function renderEmpty() {
     document.getElementById("product-list").innerHTML = `
         <div class="empty" style="grid-column:1/-1">
-            <span class="ms">search_off</span>
+            <span class="anim" data-lottie="empty-box" data-loop style="--size:160px"><span class="ms">search_off</span></span>
             <h3>No products match</h3>
             <p>Try a different word or clear the filters.</p>
             <button type="button" class="btn btn-ghost" id="clearFilters">Clear filters</button>
