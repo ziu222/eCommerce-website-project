@@ -2,14 +2,6 @@
 
 (function () {
 
-    function getProducts() {
-        return JSON.parse(localStorage.getItem("ecshop_products")) || [];
-    }
-
-    function getProductById(id) {
-        return getProducts().find(p => p.id === id) || null;
-    }
-
     function renderStars(rating) {
         const full  = Math.floor(rating);
         const half  = rating - full >= 0.5 ? "½" : "";
@@ -37,19 +29,19 @@
             <div class="detail-img-col">
                 <img
                     class="detail-main-img"
-                    src="${product.image}"
-                    alt="${product.name}"
-                    onerror="this.src='../asset/img/placeholder.png'"
+                    src="${Api.escapeHtml(product.image)}"
+                    alt="${Api.escapeHtml(product.name)}"
+                    onerror="this.onerror=null;this.src='../asset/img/404.png'"
                 />
             </div>
 
             <div class="detail-info-col">
                 <div class="detail-top-row">
-                    <span class="detail-category">${product.category}</span>
+                    <span class="detail-category">${Api.escapeHtml(product.category)}</span>
                     ${discountPct > 0 ? `<span class="detail-discount-badge">-${discountPct}% OFF</span>` : ""}
                 </div>
 
-                <h1 class="detail-name">${product.name}</h1>
+                <h1 class="detail-name">${Api.escapeHtml(product.name)}</h1>
 
                 <div class="detail-rating">
                     <span class="stars">${renderStars(product.rating)}</span>
@@ -63,7 +55,7 @@
                 </div>
 
                 ${product.description ? `
-                <div class="detail-description">${product.description}</div>
+                <div class="detail-description">${Api.escapeHtml(product.description)}</div>
                 ` : ""}
 
                 <div class="detail-stock ${inStock ? "in-stock" : "out-stock"}">
@@ -110,11 +102,14 @@
         });
     }
 
-    function renderRelated(currentProduct) {
-        const all     = getProducts().filter(p => p.adminStatus === "approved");
-        const related = all
-            .filter(p => p.id !== currentProduct.id && p.category === currentProduct.category)
-            .slice(0, 4);
+    async function renderRelated(currentProduct) {
+        let related = [];
+        try {
+            const res = await Api.products.list({ category: currentProduct.category, limit: 5 });
+            related = res.items.filter(p => p.id !== currentProduct.id).slice(0, 4);
+        } catch (e) {
+            return; // related products are optional
+        }
 
         if (related.length === 0) return;
 
@@ -135,12 +130,12 @@
             <div class="product-card" style="animation-delay:${delay}s"
                  onclick="window.location.href='product-detail.html?id=${p.id}'">
                 <div class="product-img-wrap">
-                    <img src="${p.image}" alt="${p.name}" onerror="this.src='../asset/img/placeholder.png'" />
+                    <img src="${Api.escapeHtml(p.image)}" alt="${Api.escapeHtml(p.name)}" onerror="this.onerror=null;this.src='../asset/img/404.png'" />
                     ${discountPct > 0 ? `<span class="discount-badge">-${discountPct}%</span>` : ""}
-                    <span class="category-chip">${p.category}</span>
+                    <span class="category-chip">${Api.escapeHtml(p.category)}</span>
                 </div>
                 <div class="card-body">
-                    <div class="product-name">${p.name}</div>
+                    <div class="product-name">${Api.escapeHtml(p.name)}</div>
                     <div class="price-box">
                         <span class="new-price">$${price.toLocaleString("en-US")}</span>
                         ${oldPrice > price ? `<span class="old-price">$${oldPrice.toLocaleString("en-US")}</span>` : ""}
@@ -153,7 +148,7 @@
         }).join("");
     }
 
-    function init() {
+    async function init() {
         const params    = new URLSearchParams(window.location.search);
         const productId = parseInt(params.get("id"), 10);
 
@@ -163,7 +158,12 @@
             return;
         }
 
-        const product = getProductById(productId);
+        let product = null;
+        try {
+            product = await Api.products.get(productId);
+        } catch (e) {
+            product = null;
+        }
         if (!product) {
             document.getElementById("detail-content").innerHTML =
                 '<p style="padding:60px;text-align:center;color:var(--muted-text);">Sản phẩm không tìm thấy. <a href="product.html" style="color:var(--primary-color)">Quay lại</a></p>';

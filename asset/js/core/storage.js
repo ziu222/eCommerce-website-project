@@ -340,6 +340,23 @@ var Store = (function () {
         return null;
     }
 
+    // Transitional: stores products fetched from the API (same ids) so cart and order code that
+    // still reads LocalStorage can find them. Removed together with the store.
+    function mergeProducts(list) {
+        var byId = {};
+        var products = _get(KEYS.products) || [];
+        for (var i = 0; i < products.length; i++) byId[products[i].id] = i;
+        for (var j = 0; j < list.length; j++) {
+            if (byId[list[j].id] === undefined) {
+                byId[list[j].id] = products.length;
+                products.push(list[j]);
+            } else {
+                products[byId[list[j].id]] = list[j];
+            }
+        }
+        _set(KEYS.products, products);
+    }
+
     function deleteProduct(id) {
         var products = getProducts();
         var filtered = [];
@@ -1329,6 +1346,7 @@ var Store = (function () {
         addProduct:              addProduct,
         updateProduct:           updateProduct,
         deleteProduct:           deleteProduct,
+        mergeProducts:           mergeProducts,
         reviewProduct:           reviewProduct,
         suspendProduct:          suspendProduct,
         restoreProduct:          restoreProduct,

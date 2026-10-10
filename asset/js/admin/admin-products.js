@@ -4,6 +4,7 @@ Auth.requirePermission("products.view");
 var ProductAdminPage = (function () {
     var state = {
         products: [],
+        stats: null,
         filteredProducts: [],
         selectedProductId: null,
         activeTab: "queue",
@@ -202,8 +203,19 @@ var ProductAdminPage = (function () {
         }
     }
 
-    function refresh() {
-        state.products = Store.getProducts();
+    function shopNameOf(product) {
+        return (product.shop && product.shop.shopName) || ("Shop #" + product.shopId);
+    }
+
+    async function refresh() {
+        try {
+            var loaded = await Promise.all([Api.adminProducts.listAll(), Api.adminProducts.stats()]);
+            state.products = loaded[0];
+            state.stats = loaded[1];
+        } catch (e) {
+            AdminModal.alert("Could not load products: " + e.message, "error");
+            return;
+        }
         populateFilterOptions();
         renderStats();
         applyFilters();
@@ -238,8 +250,7 @@ var ProductAdminPage = (function () {
         var shops = {};
         for (var i = 0; i < state.products.length; i++) {
             var product = state.products[i];
-            var shop = Store.getShopById(product.shopId);
-            shops[product.shopId] = shop ? (shop.shopName || shop.name) : ("Shop #" + product.shopId);
+            shops[product.shopId] = shopNameOf(product);
         }
 
         var html = '<option value="all">All Shops</option>';
@@ -253,7 +264,7 @@ var ProductAdminPage = (function () {
     }
 
     function renderStats() {
-        var stats = Store.getProductStats ? Store.getProductStats() : { total: 0, pending: 0, approved: 0, rejected: 0, suspended: 0 };
+        var stats = state.stats || { total: 0, pending: 0, approved: 0, rejected: 0, suspended: 0 };
         if (els.statTotalProducts) els.statTotalProducts.textContent = stats.total || 0;
         if (els.statPendingProducts) els.statPendingProducts.textContent = stats.pending || 0;
         if (els.statApprovedProducts) els.statApprovedProducts.textContent = stats.approved || 0;
@@ -284,8 +295,7 @@ var ProductAdminPage = (function () {
             }
 
             // Common filters for both tabs
-            var shop = Store.getShopById(product.shopId);
-            var shopName = shop ? (shop.shopName || shop.name || "") : "";
+            var shopName = shopNameOf(product);
 
             if (match && state.categoryFilter !== "all" && product.category !== state.categoryFilter) match = false;
             if (match && state.shopFilter !== "all" && String(product.shopId) !== String(state.shopFilter)) match = false;
@@ -342,8 +352,7 @@ var ProductAdminPage = (function () {
 
         for (var i = 0; i < items.length; i++) {
             var product = items[i];
-            var shop = Store.getShopById(product.shopId);
-            var shopName = shop ? (shop.shopName || shop.name) : ("Shop #" + product.shopId);
+            var shopName = shopNameOf(product);
             var isPending = product.adminStatus === "pending";
 
             html += '' +
@@ -403,8 +412,7 @@ var ProductAdminPage = (function () {
             return;
         }
 
-        var shop = Store.getShopById(product.shopId);
-        var shopName = shop ? (shop.shopName || shop.name) : ("Shop #" + product.shopId);
+        var shopName = shopNameOf(product);
 
         if (els.previewSubtext) els.previewSubtext.textContent = "Product #" + product.id + " from " + shopName;
         if (els.previewProductName) els.previewProductName.textContent = product.name;
@@ -564,8 +572,8 @@ var ProductAdminPage = (function () {
         var product = findProductById(productId);
         if (!product) return;
 
-        AdminModal.confirm('Approve "' + product.name + '"?', function () {
-            var result = Store.reviewProduct(productId, "approved", null);
+        AdminModal.confirm('Approve "' + product.name + '"?', async function () {
+            var result = await Api.adminProducts.review(productId, "approved");
             if (!result || !result.success) {
                 AdminModal.alert(result && result.error ? result.error : "Unable to approve this product.", "error");
                 return;
@@ -588,8 +596,8 @@ var ProductAdminPage = (function () {
             required: true,
             errorMessage: "A rejection reason is required.",
             confirmLabel: "Reject"
-        }, function (note) {
-            var result = Store.reviewProduct(productId, "rejected", note);
+        }, async function (note) {
+            var result = await Api.adminProducts.review(productId, "rejected", note);
             if (!result || !result.success) {
                 AdminModal.alert(result && result.error ? result.error : "Unable to reject this product.", "error");
                 return;
@@ -605,15 +613,16 @@ var ProductAdminPage = (function () {
 
         openReasonPromptModal({
             title: "Suspend Product",
-            description: 'Optionally enter a suspension reason for "' + product.name + '".',
+            description: 'Enter a suspension reason for "' + product.name + '".',
             label: "Suspension reason",
-            placeholder: "Reason (optional)",
+            placeholder: "Reason for suspending this product...",
             defaultValue: "",
-            required: false,
+            required: true,
+            errorMessage: "A suspension reason is required.",
             confirmLabel: "Continue"
         }, function (note) {
-            AdminModal.confirm('Suspend "' + product.name + '"?' + (note ? ' Reason: ' + note : ''), function () {
-                var result = Store.suspendProduct(productId, note);
+            AdminModal.confirm('Suspend "' + product.name + '"?' + (note ? ' Reason: ' + note : ''), async function () {
+                var result = await Api.adminProducts.suspend(productId, note);
                 if (!result || !result.success) {
                     AdminModal.alert(result && result.error ? result.error : "Unable to suspend this product.", "error");
                     return;
@@ -628,8 +637,8 @@ var ProductAdminPage = (function () {
         var product = findProductById(productId);
         if (!product) return;
 
-        AdminModal.confirm('Restore "' + product.name + '"?', function () {
-            var result = Store.restoreProduct(productId);
+        AdminModal.confirm('Restore "' + product.name + '"?', async function () {
+            var result = await Api.adminProducts.restore(productId);
             if (!result || !result.success) {
                 AdminModal.alert(result && result.error ? result.error : "Unable to restore this product.", "error");
                 return;
@@ -643,8 +652,7 @@ var ProductAdminPage = (function () {
         var product = findProductById(productId);
         if (!product || !els.productModal) return;
 
-        var shop = Store.getShopById(product.shopId);
-        var shopName = shop ? (shop.shopName || shop.name) : ("Shop #" + product.shopId);
+        var shopName = shopNameOf(product);
 
         if (els.productModalTitle) {
             els.productModalTitle.textContent = "Product #" + product.id + " details";
