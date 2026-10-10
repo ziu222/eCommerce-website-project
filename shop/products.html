@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Products - EC SHOP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../asset/css/admin-dashboard.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <a href="products.html" class="sidebar-logo-text">EC SHOP</a>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Shop</div>
+        <a href="products.html" class="nav-item active"><i class="fa-solid fa-box"></i> My Products</a>
+        <a href="coupons.html" class="nav-item"><i class="fa-solid fa-tag"></i> My Coupons</a>
+        <div class="nav-section-label">Account</div>
+        <a href="#" class="nav-item" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+</aside>
+
+<header class="topbar">
+    <h1 class="topbar-title">My Products</h1>
+    <div class="topbar-right">
+        <div class="topbar-user">
+            <div class="topbar-avatar" id="topbarAvatar">S</div>
+            <span id="topbarUserName">Shop</span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <div class="stats-row stats-row-4">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Total</span>
+                <div class="stat-card-icon teal"><i class="fa-solid fa-box"></i></div>
+            </div>
+            <div class="stat-card-value" id="statTotal">0</div>
+            <div class="stat-card-sub">Your products</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Live</span>
+                <div class="stat-card-icon blue"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+            <div class="stat-card-value" id="statApproved">0</div>
+            <div class="stat-card-sub">Visible to customers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">In Review</span>
+                <div class="stat-card-icon orange"><i class="fa-solid fa-hourglass-half"></i></div>
+            </div>
+            <div class="stat-card-value" id="statPending">0</div>
+            <div class="stat-card-sub">Waiting for an admin</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Needs Attention</span>
+                <div class="stat-card-icon purple"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            </div>
+            <div class="stat-card-value" id="statAttention">0</div>
+            <div class="stat-card-sub">Rejected or suspended</div>
+        </div>
+    </div>
+
+    <div class="toolbar product-toolbar">
+        <div class="toolbar-stack">
+            <div class="filter-tabs">
+                <button class="filter-tab active" type="button" data-filter="all">All</button>
+                <button class="filter-tab" type="button" data-filter="approved">Live</button>
+                <button class="filter-tab" type="button" data-filter="pending">In Review</button>
+                <button class="filter-tab" type="button" data-filter="attention">Needs Attention</button>
+            </div>
+        </div>
+        <div class="toolbar-right">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="productSearch" placeholder="Search products...">
+            </div>
+            <button class="btn-primary" type="button" id="btnNewProduct">
+                <i class="fa-solid fa-plus"></i> New Product
+            </button>
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="productTableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="table-empty" id="emptyState" style="display:none;">
+        <i class="fa-solid fa-box"></i>
+        <p>No products here yet — add your first one!</p>
+    </div>
+
+</main>
+
+<!-- Create / Edit Modal -->
+<div class="modal-overlay" id="productModal">
+    <div class="modal-panel">
+        <div class="modal-header">
+            <h3 id="modalTitle">New Product</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p class="form-hint" id="reviewHint" style="display:none;margin:0 0 12px;font-size:13px;color:#b45309;">
+                Saving changes sends this product back to an admin for review.
+            </p>
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="modalName" maxlength="200" placeholder="e.g. Galaxy Buds Pro" />
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select class="form-input" id="modalCategory">
+                        <option value="smartphone">Smartphone</option>
+                        <option value="laptops">Laptops</option>
+                        <option value="audio">Audio</option>
+                        <option value="cameras">Cameras</option>
+                        <option value="gaming">Gaming</option>
+                        <option value="wearables">Wearables</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Stock</label>
+                    <input type="number" class="form-input" id="modalStock" min="0" step="1" value="1" />
+                </div>
+            </div>
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Price ($)</label>
+                    <input type="number" class="form-input" id="modalPrice" min="0.01" step="0.01" placeholder="e.g. 199" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Old Price ($, optional)</label>
+                    <input type="number" class="form-input" id="modalOldPrice" min="0" step="0.01" placeholder="shown struck through" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-input" id="modalDescription" rows="3" maxlength="5000"></textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Photo</label>
+                <div style="display:flex;gap:12px;align-items:center;">
+                    <img id="imagePreview" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:10px;background:#f1f3f5;" src="../asset/img/placeholder/audio.svg" />
+                    <div style="flex:1;">
+                        <input type="file" id="modalImageFile" accept="image/png,image/jpeg,image/webp" />
+                        <div id="uploadStatus" style="font-size:12px;color:#666;margin-top:4px;">PNG, JPEG or WebP, up to 2 MB</div>
+                    </div>
+                </div>
+                <input type="text" class="form-input" id="modalImageUrl" style="margin-top:8px;" placeholder="or paste an https:// image link" />
+            </div>
+            <div id="modalError" style="display:none;color:#c0392b;font-size:13px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn close" type="button" onclick="closeModal()">Cancel</button>
+            <button class="modal-btn confirm" type="button" id="btnSaveProduct">Save</button>
+        </div>
+    </div>
+</div>
+
+<script src="../asset/js/api/client.js"></script>
+<script src="../asset/js/api/auth.js"></script>
+<script src="../asset/js/api/products.js"></script>
+<script src="../asset/js/core/auth.js"></script>
+<script src="../asset/js/shop/shop-products.js"></script>
+</body>
+</html>

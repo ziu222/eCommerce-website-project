@@ -104,3 +104,47 @@ Api.adminProducts = (function () {
     };
 
 })();
+
+// A shop's own products. Every create or edit goes back to the admin review queue.
+Api.shopProducts = (function () {
+
+    function toApi(data) {
+        var body = {
+            name: data.name,
+            price: data.price,
+            imageUrl: data.imageUrl,
+            category: data.category,
+            stock: data.stock,
+            description: data.description
+        };
+        if (data.oldPrice) body.oldPrice = data.oldPrice;
+        return body;
+    }
+
+    return {
+        list: async function () { return (await Api.request("GET", "/shop/products")).map(Api.products.toLegacy); },
+        create: function (data) { return Api.request("POST", "/shop/products", toApi(data)); },
+        update: function (id, data) { return Api.request("PATCH", "/shop/products/" + id, toApi(data)); },
+        remove: function (id) { return Api.request("DELETE", "/shop/products/" + id); }
+    };
+
+})();
+
+// Product photos. Resolves to the https url of the stored image.
+Api.uploads = (function () {
+
+    async function image(file) {
+        var form = new FormData();
+        form.append("file", file);
+        var res = await fetch("/api/uploads/image", { method: "POST", credentials: "same-origin", body: form });
+        var data = null;
+        try { data = await res.json(); } catch (e) { /* empty body */ }
+        if (!res.ok) {
+            throw new Api.ApiError(res.status, (data && data.message) || res.statusText);
+        }
+        return data.url;
+    }
+
+    return { image: image };
+
+})();

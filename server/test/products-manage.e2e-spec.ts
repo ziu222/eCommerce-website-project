@@ -69,6 +69,15 @@ describe('shop and admin product management', () => {
       await shop.post('/api/shop/products').send({ ...draft, category: 'furniture' }).expect(400);
     });
 
+    it('accepts only https or site-asset image links', async () => {
+      const shop = await apple();
+      for (const imageUrl of ['javascript:alert(1)', 'http://example.com/a.png', 'data:image/png;base64,AAAA', '//example.com/a.png', '../etc/passwd', 'a b.png']) {
+        await shop.post('/api/shop/products').send({ ...draft, imageUrl }).expect(400);
+      }
+      await shop.post('/api/shop/products').send({ ...draft, imageUrl: 'https://res.cloudinary.com/demo/image/upload/a.jpg' }).expect(201);
+      await shop.post('/api/shop/products').send({ ...draft, imageUrl: '../asset/img/placeholder/audio.svg' }).expect(201);
+    });
+
     it('lists only its own products, in any status', async () => {
       const res = await (await samsung()).get('/api/shop/products').expect(200);
       expect(res.body.length).toBeGreaterThan(0);
