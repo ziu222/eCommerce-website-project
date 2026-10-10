@@ -1,66 +1,54 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Đăng nhập - EC SHOP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../asset/css/user-login.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
+    <link rel="stylesheet" href="../asset/css/user-login.css">
 </head>
 
 <body class="auth-page">
+    <main class="auth">
+        <aside class="auth-aside" aria-hidden="true">
+            <a class="brand" href="home.html" tabindex="-1"><span class="brand-mark">EC</span>EC SHOP</a>
+            <p class="auth-aside-line">Electronics worth keeping.</p>
+        </aside>
 
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
+        <section class="auth-panel">
+            <a class="brand auth-brand" href="home.html"><span class="brand-mark" aria-hidden="true">EC</span>EC SHOP</a>
+            <h1>Welcome back</h1>
+            <p class="muted">Sign in to check out, track orders and use your wallet.</p>
 
-  <div class="auth-card">
+            <form id="loginForm" class="auth-form" novalidate>
+                <div class="field">
+                    <label for="loginUser">Username</label>
+                    <input class="input" type="text" id="loginUser" autocomplete="username" autofocus>
+                </div>
+                <div class="field">
+                    <label for="loginPass">Password</label>
+                    <div class="pass-wrap">
+                        <input class="input" type="password" id="loginPass" autocomplete="current-password">
+                        <button type="button" class="pass-toggle" aria-label="Show password" aria-pressed="false"><span class="ms">visibility</span></button>
+                    </div>
+                </div>
+                <p class="auth-error" id="authError" role="alert" hidden></p>
+                <button type="submit" class="btn btn-primary btn-lg btn-block" id="authSubmit">Sign in</button>
+            </form>
 
-    <div class="auth-logo">
-      <div class="auth-logo-title">EC SHOP</div>
-      <div class="auth-logo-sub">Chào mừng bạn trở lại</div>
-    </div>
+            <p class="auth-switch">New here? <a href="signup.html">Create an account</a></p>
+        </section>
+    </main>
 
-    <div class="auth-tabs">
-      <a href="login.html" class="auth-tab active">Đăng nhập</a>
-      <a href="signup.html" class="auth-tab">Đăng ký</a>
-    </div>
-
-    <form id="loginForm">
-      <div class="input-group">
-        <span class="material-symbols-outlined input-icon">person</span>
-        <input type="text" placeholder="Tên đăng nhập" autocomplete="username">
-      </div>
-      <div class="input-group">
-        <span class="material-symbols-outlined input-icon">lock</span>
-        <input type="password" placeholder="Mật khẩu" autocomplete="current-password">
-      </div>
-
-      <div class="extra">
-        <label>
-          <input type="checkbox"> Ghi nhớ tài khoản
-        </label>
-        <a href="#">Quên mật khẩu?</a>
-      </div>
-
-      <button type="submit" class="btn-auth">Đăng nhập</button>
-    </form>
-
-  </div>
-
-  <div class="customer-modal-overlay" id="customerModal" aria-hidden="true">
-    <div class="customer-modal-panel" role="dialog" aria-modal="true" aria-labelledby="customerModalTitle" aria-describedby="customerModalMessage">
-      <div class="customer-modal-icon" id="customerModalIcon" aria-hidden="true">✓</div>
-      <h3 class="customer-modal-title" id="customerModalTitle">Success</h3>
-      <p class="customer-modal-message" id="customerModalMessage">Action completed successfully.</p>
-      <button type="button" class="customer-modal-btn" id="customerModalOk">Continue</button>
-    </div>
-  </div>
-
-  <script src="../asset/js/api/client.js"></script>
-  <script src="../asset/js/api/auth.js"></script>
-  <script src="../asset/js/user/user-login.js"></script>
+    <script src="../asset/js/api/client.js"></script>
+    <script src="../asset/js/api/auth.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
+    <script src="../asset/js/user/user-login.js"></script>
 </body>
 
 </html>

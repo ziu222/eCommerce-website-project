@@ -27,7 +27,7 @@
         try {
             snapshot = await Api.wallet.get();
         } catch (e) {
-            if (e.status === 401 || e.status === 403) { window.location.href = "login.html"; return; }
+            if (e.status === 401 || e.status === 403) { window.location.href = "login.html?next=wallet.html"; return; }
             UI.toast(e.message, "error");
         }
         document.getElementById("walletBalance").textContent = fmt(snapshot.balance);
@@ -142,7 +142,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         if (!getCurrentUser()) {
-            window.location.href = "login.html";
+            window.location.href = "login.html?next=wallet.html";
             return;
         }
         refresh();

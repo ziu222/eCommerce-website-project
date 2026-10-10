@@ -99,164 +99,62 @@ async function logout() {
   location.reload();
 }
 
-var CustomerModal = (function () {
-  var hideTimer = null;
-  var lastActiveElement = null;
+// ===== Login form (login.html) =====
 
-  function getEls() {
-    return {
-      overlay: document.getElementById("customerModal"),
-      title: document.getElementById("customerModalTitle"),
-      message: document.getElementById("customerModalMessage"),
-      okBtn: document.getElementById("customerModalOk")
-    };
-  }
-
-  function close(options) {
-    var opts = options || {};
-    var els = getEls();
-    if (!els.overlay) return;
-
-    if (hideTimer) {
-      clearTimeout(hideTimer);
-      hideTimer = null;
-    }
-
-    els.overlay.classList.remove("show");
-    els.overlay.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("customer-modal-open");
-
-    if (opts.restoreFocus !== false && lastActiveElement && typeof lastActiveElement.focus === "function") {
-      lastActiveElement.focus();
-    }
-    lastActiveElement = null;
-
-    if (typeof opts.onClose === "function") {
-      opts.onClose();
-    }
-  }
-
-  function open(options) {
-    var opts = options || {};
-    var els = getEls();
-    if (!els.overlay) return false;
-
-    lastActiveElement = document.activeElement;
-
-    if (els.title) {
-      els.title.textContent = opts.title || "Success";
-    }
-    if (els.message) {
-      els.message.textContent = opts.message || "Action completed successfully.";
-    }
-
-    els.overlay.classList.add("show");
-    els.overlay.setAttribute("aria-hidden", "false");
-    document.body.classList.add("customer-modal-open");
-
-    if (els.okBtn) {
-      els.okBtn.textContent = opts.buttonText || "Continue";
-      els.okBtn.focus();
-    }
-
-    if (hideTimer) {
-      clearTimeout(hideTimer);
-      hideTimer = null;
-    }
-
-    if (opts.autoCloseMs && opts.autoCloseMs > 0) {
-      hideTimer = setTimeout(function () {
-        close({ restoreFocus: false, onClose: opts.onAutoClose });
-      }, opts.autoCloseMs);
-    }
-
-    return true;
-  }
-
-  function init() {
-    var els = getEls();
-    if (!els.overlay) return;
-
-    if (els.okBtn) {
-      els.okBtn.addEventListener("click", function () {
-        close();
-      });
-    }
-
-    els.overlay.addEventListener("click", function (e) {
-      if (e.target === els.overlay) {
-        close();
-      }
-    });
-
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape" && els.overlay.classList.contains("show")) {
-        close();
-      }
-    });
-  }
-
-  return {
-    init: init,
-    open: open,
-    close: close
-  };
-})();
-
-// ===== Điều hướng (navigation) =====
-const signupTab = document.querySelector(".auth-links span:first-child");
-const loginTab = document.querySelector(".auth-links span:last-child");
-
-if (signupTab && loginTab) {
-  signupTab.addEventListener("click", () => {
-    window.location.href = "signup.html";
-  });
-
-  loginTab.addEventListener("click", () => {
-    window.location.href = "login.html";
-  });
+// Where to go after signing in: ?next=cart.html, only a plain page next to this one.
+function nextPage() {
+  const next = new URLSearchParams(location.search).get("next") || "";
+  return /^[a-z-]+\.html(\?[\w=&.-]*)?$/.test(next) ? next : "home.html";
 }
 
-// ===== Login flow =====
+function showAuthError(message) {
+  const el = document.getElementById("authError");
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+}
+
 const loginForm = document.getElementById("loginForm");
 
 if (loginForm) {
   loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    const inputs = loginForm.querySelectorAll("input");
-    const username = inputs[0].value.trim();
-    const password = inputs[1].value.trim();
+    const username = document.getElementById("loginUser").value.trim();
+    const password = document.getElementById("loginPass").value;
+    if (!username || !password) {
+      showAuthError("Enter your username and password.");
+      return;
+    }
 
+    const submit = document.getElementById("authSubmit");
+    submit.disabled = true;
     try {
       await Api.auth.login(username, password);
     } catch (err) {
       const blocked = {
-        pending: "Shop của bạn đang chờ admin duyệt.",
-        suspended: "Tài khoản đã bị tạm khóa.",
-        banned: "Tài khoản đã bị khóa."
+        pending: "Your shop is waiting for admin approval.",
+        suspended: "This account is suspended.",
+        banned: "This account has been banned."
       };
-      alert(blocked[err.message] || err.message || "Sai tên hoặc mật khẩu!");
+      showAuthError(blocked[err.message] || "Wrong username or password.");
+      submit.disabled = false;
       return;
     }
-
-    var shown = CustomerModal.open({
-      title: "Đăng nhập thành công",
-      message: "Chào mừng bạn quay lại. Đang chuyển đến trang chủ...",
-      buttonText: "Ở lại",
-      autoCloseMs: 1250,
-      onAutoClose: function () {
-        window.location.href = "home.html";
-      }
-    });
-
-    if (!shown) {
-      window.location.href = "home.html";
-    }
+    window.location.href = nextPage();
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderUser();
-  CustomerModal.init();
+// Show / hide password
+document.querySelectorAll(".pass-toggle").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const input = btn.parentElement.querySelector("input");
+    const reveal = input.type === "password";
+    input.type = reveal ? "text" : "password";
+    btn.setAttribute("aria-pressed", String(reveal));
+    btn.setAttribute("aria-label", reveal ? "Hide password" : "Show password");
+    btn.firstElementChild.textContent = reveal ? "visibility_off" : "visibility";
+  });
 });
+
+document.addEventListener("DOMContentLoaded", renderUser);
