@@ -2,6 +2,16 @@ var currentShopId  = null;
 var currentFilter  = "all";
 var currentSearch  = "";
 var editingId      = null;
+var couponCache    = [];
+
+async function loadCoupons() {
+    try {
+        couponCache = await Api.coupons.shop.list();
+    } catch (e) {
+        alert(e.message);
+    }
+    renderTable();
+}
 
 function getCurrentUser() {
     var raw = localStorage.getItem("ecshop_currentUser");
@@ -21,7 +31,7 @@ function renderStats(coupons) {
 }
 
 function renderTable() {
-    var all   = Store.getCouponsByShop(currentShopId);
+    var all   = couponCache;
     var today = new Date().toISOString().split("T")[0];
     var query = currentSearch.toLowerCase();
 
@@ -75,7 +85,7 @@ function openModal(id) {
     var titleEl = document.getElementById("modalTitle");
 
     if (editingId) {
-        var c = Store.getCoupons().find(function (x) { return x.id === editingId; });
+        var c = couponCache.find(function (x) { return x.id === editingId; });
         if (!c) return;
         titleEl.textContent                               = "Edit Coupon";
         document.getElementById("modalCode").value        = c.code;
@@ -103,7 +113,7 @@ function closeModal() {
     editingId = null;
 }
 
-function saveModal() {
+async function saveModal() {
     var code  = document.getElementById("modalCode").value.trim().toUpperCase();
     var value = parseFloat(document.getElementById("modalValue").value);
 
@@ -119,26 +129,35 @@ function saveModal() {
         minOrder:   parseFloat(document.getElementById("modalMinOrder").value) || 0,
         usageLimit: parseInt(document.getElementById("modalUsageLimit").value) || 0,
         expiresAt:  document.getElementById("modalExpiresAt").value || "",
-        isActive:   document.getElementById("modalActive").checked,
-        shopId:     currentShopId
+        isActive:   document.getElementById("modalActive").checked
     };
 
-    if (editingId) {
-        Store.updateCoupon(editingId, data);
-    } else {
-        Store.addCoupon(data);
+    try {
+        if (editingId) {
+            await Api.coupons.shop.update(editingId, data);
+        } else {
+            await Api.coupons.shop.create(data);
+        }
+    } catch (e) {
+        alert(e.message);
+        return;
     }
 
     closeModal();
-    renderTable();
+    await loadCoupons();
 }
 
-function deleteCoupon(id) {
-    var c = Store.getCoupons().find(function (x) { return x.id === id; });
+async function deleteCoupon(id) {
+    var c = couponCache.find(function (x) { return x.id === id; });
     if (!c) return;
     if (!confirm('Delete coupon "' + c.code + '"?')) return;
-    Store.deleteCoupon(id);
-    renderTable();
+    try {
+        await Api.coupons.shop.remove(id);
+    } catch (e) {
+        alert(e.message);
+        return;
+    }
+    await loadCoupons();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -155,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (avatar) avatar.textContent = (user.shopName || user.name || "S").charAt(0).toUpperCase();
     if (name)   name.textContent   = user.shopName || user.name || "Shop";
 
-    renderTable();
+    loadCoupons();
 
     document.getElementById("btnNewCoupon").addEventListener("click", function () { openModal(null); });
     document.getElementById("btnSaveCoupon").addEventListener("click", saveModal);

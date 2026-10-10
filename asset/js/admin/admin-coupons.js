@@ -1,9 +1,20 @@
 var currentFilter  = "all";
 var currentSearch  = "";
 var editingId      = null;
+var couponCache    = [];
+
+async function loadCoupons() {
+    try {
+        couponCache = await Api.coupons.admin.list();
+    } catch (e) {
+        alert(e.message);
+    }
+    renderStats();
+    renderTable();
+}
 
 function renderStats() {
-    var coupons = Store.getCoupons();
+    var coupons = couponCache;
     var today   = new Date().toISOString().split("T")[0];
 
     var active     = coupons.filter(function (c) { return c.isActive && (!c.expiresAt || c.expiresAt >= today); }).length;
@@ -16,14 +27,13 @@ function renderStats() {
     document.getElementById("statGlobal").textContent   = global;
 }
 
-function getShopName(shopId) {
-    if (!shopId) return "Global";
-    var shop = Store.getShopById(shopId);
-    return shop ? (shop.shopName || shop.name) : "Shop #" + shopId;
+function getShopName(coupon) {
+    if (!coupon.shopId) return "Global";
+    return (coupon.shop && coupon.shop.shopName) || "Shop #" + coupon.shopId;
 }
 
 function renderTable() {
-    var coupons = Store.getCoupons();
+    var coupons = couponCache;
     var today   = new Date().toISOString().split("T")[0];
     var query   = currentSearch.toLowerCase();
 
@@ -53,7 +63,7 @@ function renderTable() {
         var expired   = c.expiresAt && c.expiresAt < today;
         var statusCls = (c.isActive && !expired) ? "status-badge delivered" : "status-badge cancelled";
         var statusTxt = (c.isActive && !expired) ? "Active" : (expired ? "Expired" : "Inactive");
-        var scopeTxt  = getShopName(c.shopId);
+        var scopeTxt  = Api.escapeHtml(getShopName(c));
         var usageStr  = c.usedCount + " / " + (c.usageLimit > 0 ? c.usageLimit : "∞");
         var valueTxt  = c.type === "percent" ? c.value + "%" : "$" + c.value;
 
@@ -93,7 +103,7 @@ function openModal(id) {
     var titleEl = document.getElementById("modalTitle");
 
     if (editingId) {
-        var c = Store.getCoupons().find(function (x) { return x.id === editingId; });
+        var c = couponCache.find(function (x) { return x.id === editingId; });
         if (!c) return;
         titleEl.textContent                                = "Edit Coupon";
         document.getElementById("modalCode").value        = c.code;
@@ -124,7 +134,7 @@ function closeModal() {
     editingId = null;
 }
 
-function saveModal() {
+async function saveModal() {
     var code  = document.getElementById("modalCode").value.trim().toUpperCase();
     var value = parseFloat(document.getElementById("modalValue").value);
 
@@ -145,29 +155,36 @@ function saveModal() {
         isActive:     document.getElementById("modalActive").checked
     };
 
-    if (editingId) {
-        Store.updateCoupon(editingId, data);
-    } else {
-        Store.addCoupon(data);
+    try {
+        if (editingId) {
+            await Api.coupons.admin.update(editingId, data);
+        } else {
+            await Api.coupons.admin.create(data);
+        }
+    } catch (e) {
+        alert(e.message);
+        return;
     }
 
     closeModal();
-    renderStats();
-    renderTable();
+    await loadCoupons();
 }
 
-function deleteCoupon(id) {
-    var c = Store.getCoupons().find(function (x) { return x.id === id; });
+async function deleteCoupon(id) {
+    var c = couponCache.find(function (x) { return x.id === id; });
     if (!c) return;
     if (!confirm('Delete coupon "' + c.code + '"?')) return;
-    Store.deleteCoupon(id);
-    renderStats();
-    renderTable();
+    try {
+        await Api.coupons.admin.remove(id);
+    } catch (e) {
+        alert(e.message);
+        return;
+    }
+    await loadCoupons();
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    renderStats();
-    renderTable();
+    loadCoupons();
 
     document.getElementById("btnNewCoupon").addEventListener("click", function () { openModal(null); });
     document.getElementById("btnSaveCoupon").addEventListener("click", saveModal);
