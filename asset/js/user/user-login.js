@@ -1,8 +1,3 @@
-// ===== Lấy dữ liệu User (LocalStorage) =====
-function getUsers() {
-  return JSON.parse(localStorage.getItem("ecshop_users")) || [];
-}
-
 // ===== User Session (phiên đăng nhập) =====
 function getCurrentUser() {
   return JSON.parse(localStorage.getItem("ecshop_currentUser"));

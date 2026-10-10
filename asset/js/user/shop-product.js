@@ -121,7 +121,6 @@ function goToPage(page) {
 
 // ── Bootstrap event listeners ─────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
-    Store.seed();
     applyFilters();
 
     // Category pills

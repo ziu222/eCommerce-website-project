@@ -1,4 +1,3 @@
-Store.seed();
 Auth.requirePermission("products.view");
 
 var ProductAdminPage = (function () {
