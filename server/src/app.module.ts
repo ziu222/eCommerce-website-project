@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { resolve } from 'node:path';
 import { HealthController } from './health/health.controller.js';
+import { AuthModule } from './auth/auth.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
 // In development the repo root (static storefront) is served by Nest so pages and API share an origin.
@@ -16,7 +17,7 @@ const serveStatic =
       ];
 
 @Module({
-  imports: [PrismaModule, ...serveStatic],
+  imports: [PrismaModule, AuthModule, ...serveStatic],
   controllers: [HealthController],
 })
 export class AppModule {}
