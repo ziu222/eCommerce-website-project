@@ -16,7 +16,7 @@
 
     function heroTile(p) {
         return '<a class="hero-tile" href="product-detail.html?id=' + p.id + '">' +
-            '<img src="' + Api.escapeHtml(p.image) + '" alt="" data-category="' + Api.escapeHtml(p.category) + '">' +
+            '<img src="' + Api.escapeHtml(p.image) + '" alt=""' + (UI.isPlaceholder(p.image) ? ' class="is-ph"' : "") + ' data-category="' + Api.escapeHtml(p.category) + '">' +
             '<span class="hero-tile-name">' + Api.escapeHtml(p.name) + "</span>" +
             '<span class="hero-tile-price">' + UI.money(p.price) + "</span></a>";
     }

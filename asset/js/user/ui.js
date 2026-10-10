@@ -50,8 +50,11 @@ var UI = (function () {
         var img = e.target;
         if (!img || img.tagName !== "IMG" || !img.dataset.category || img.dataset.fellBack) return;
         img.dataset.fellBack = "1";
+        img.classList.add("is-ph");
         img.src = fallbackFor(img.dataset.category);
     }, true);
+
+    function isPlaceholder(src) { return String(src).indexOf("/placeholder/") !== -1; }
 
     // ---------- product card (home, catalogue, related)
 
@@ -62,7 +65,7 @@ var UI = (function () {
         var shop = p.shop && p.shop.shopName ? " · " + esc(p.shop.shopName) : "";
         return '<article class="pcard">' +
             '<a class="pcard-media" href="' + href + '" tabindex="-1" aria-hidden="true">' +
-            '<img loading="lazy" src="' + esc(p.image) + '" alt="" data-category="' + esc(p.category) + '">' +
+            '<img loading="lazy" src="' + esc(p.image) + '" alt=""' + (isPlaceholder(p.image) ? ' class="is-ph"' : "") + ' data-category="' + esc(p.category) + '">' +
             (off ? '<span class="badge badge-sale">-' + off + "%</span>" : "") + "</a>" +
             '<div class="pcard-body">' +
             '<p class="pcard-cat">' + esc(categoryLabel(p.category)) + shop + "</p>" +
@@ -176,6 +179,6 @@ var UI = (function () {
 
     mount();
 
-    return { CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
+    return { isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 
 })();

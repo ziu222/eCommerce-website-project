@@ -1,129 +1,70 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Sản phẩm - EC SHOP</title>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/tailwind-built.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="../asset/css/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop - EC SHOP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/product.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
 <body>
-    <nav class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-sm">
-        <div class="flex justify-between items-center px-8 py-4 max-w-screen-2xl mx-auto w-full">
-            <div class="flex items-center gap-12">
-                <a class="text-2xl font-bold tracking-tighter text-teal-900 dark:text-teal-400 font-headline no-underline hover:no-underline flex items-center gap-3"
-                    href="#">
-                    <span>EC SHOP</span>
-                </a>
-                <div class="hidden lg:flex items-center gap-8">
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="home.html">Home</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="#">Product</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="about.html">About</a>
-                    <a class="text-slate-600 dark:text-slate-400 hover:text-teal-800 dark:hover:text-teal-300 transition-colors text-sm font-medium tracking-wide no-underline hover:no-underline"
-                        href="contact.html">Contact</a>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header id="site-header" data-active="product"></header>
+
+    <main id="main" class="container">
+        <div class="page-head">
+            <h1 id="shop-title">Shop</h1>
+            <p id="result-count" aria-live="polite"></p>
+        </div>
+
+        <div class="filters">
+            <div class="filters-row">
+                <div class="filter-search">
+                    <span class="ms" aria-hidden="true">search</span>
+                    <label class="visually-hidden" for="filter-search">Search products</label>
+                    <input class="input" id="filter-search" type="search" placeholder="Search products" autocomplete="off">
+                </div>
+                <div class="filter-sort">
+                    <label class="visually-hidden" for="filter-sort">Sort by</label>
+                    <select id="filter-sort" class="select">
+                        <option value="default">Featured</option>
+                        <option value="price-asc">Price: low to high</option>
+                        <option value="price-desc">Price: high to low</option>
+                        <option value="rating">Top rated</option>
+                        <option value="newest">Newest</option>
+                    </select>
                 </div>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="relative group hidden xl:block">
-                    <input
-                        class="bg-surface-container-highest border-none rounded-full py-2 pl-10 pr-4 w-64 text-sm focus:ring-2 focus:ring-primary transition-all"
-                        placeholder="Search flagship boutique..." type="text" />
-                    <span
-                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 scale-90">search</span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <el-dropdown class="inline-block relative">
-                        <button id="userBtn"
-                            class="p-2 text-teal-900 dark:text-teal-400 hover:bg-teal-50/50 dark:hover:bg-teal-900/20 rounded-full transition-all duration-300 active:scale-95">
-                            <span id="userContent" class="material-symbols-outlined">person</span>
-                        </button>
-                        <!-- Dropdown -->
-                        <div id="userMenu"
-                            class="hidden absolute right-0 mt-2 bg-white shadow rounded-lg overflow-hidden z-50">
-
-                            <button onclick="logout()"
-                                class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
-                                Đăng xuất
-                            </button>
-                            <button
-                                class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
-                                Tài khoản
-                            </button>
-                            <button
-                                class="block w-full text-left px-6 py-2 whitespace-nowrap hover:bg-gray-100 dark:hover:bg-gray-700">
-                                Hỗ trợ
-                            </button>
-                        </div>
-                    </el-dropdown>
-                    <button id="cart-btn" class="cart-nav-btn" title="Giỏ hàng">
-                        <span class="material-symbols-outlined">shopping_cart</span>
-                        <span>Cart</span>
-                        <span id="cart-count" class="cart-nav-badge" style="display:none;">0</span>
-                    </button>
-                </div>
+            <div class="chips" id="filter-cats" role="group" aria-label="Category">
+                <button type="button" class="filter-btn active" data-cat="all" aria-pressed="true">All</button>
+                <button type="button" class="filter-btn" data-cat="smartphone" aria-pressed="false">Smartphones</button>
+                <button type="button" class="filter-btn" data-cat="laptops" aria-pressed="false">Laptops</button>
+                <button type="button" class="filter-btn" data-cat="wearables" aria-pressed="false">Wearables</button>
+                <button type="button" class="filter-btn" data-cat="audio" aria-pressed="false">Audio</button>
+                <button type="button" class="filter-btn" data-cat="cameras" aria-pressed="false">Cameras</button>
+                <button type="button" class="filter-btn" data-cat="gaming" aria-pressed="false">Gaming</button>
             </div>
         </div>
-    </nav>
-    <main class="pt-[72px]">
-        <div class="hero-section">
-            <div class="hero-container">
-                <header class="header">
-                    <h2>Shop Products</h2>
-                </header>
 
-                <div class="filter-bar">
-                    <div class="filter-bar-inner">
-                        <div class="filter-search-wrap">
-                            <span class="material-symbols-outlined">search</span>
-                            <input id="filter-search" type="text" placeholder="Search products..." autocomplete="off" />
-                        </div>
-                        <div class="filter-cats" id="filter-cats">
-                            <button class="filter-btn active" data-cat="all">All</button>
-                            <button class="filter-btn" data-cat="smartphone">Smartphones</button>
-                            <button class="filter-btn" data-cat="wearables">Wearables</button>
-                            <button class="filter-btn" data-cat="laptops">Laptops</button>
-                            <button class="filter-btn" data-cat="audio">Audio</button>
-                            <button class="filter-btn" data-cat="cameras">Cameras</button>
-                            <button class="filter-btn" data-cat="gaming">Gaming</button>
-                        </div>
-                        <select id="filter-sort" class="sort-select">
-                            <option value="default">Sort: Default</option>
-                            <option value="price-asc">Price: Low → High</option>
-                            <option value="price-desc">Price: High → Low</option>
-                            <option value="rating">Top Rated</option>
-                            <option value="newest">Newest</option>
-                        </select>
-                    </div>
-                    <p id="result-count" class="result-count"></p>
-                </div>
-
-                <div class="container">
-                    <div class="product-grid" id="product-list"></div>
-                    <nav id="pagination" class="pagination" aria-label="Product pages"></nav>
-                </div>
-            </div>
-        </div>
+        <div class="pgrid" id="product-list" aria-live="polite" aria-busy="true"></div>
+        <nav id="pagination" class="pagination" aria-label="Product pages"></nav>
     </main>
+
+    <footer id="site-footer"></footer>
 
     <script src="../asset/js/api/client.js"></script>
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/products.js"></script>
-    <script src="../asset/js/user/shop-product.js"></script>
+    <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
+    <script src="../asset/js/user/shop-product.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/api/support.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>
