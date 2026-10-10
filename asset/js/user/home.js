@@ -4,22 +4,19 @@
 
     // ---------- banner carousel
     // Next to the banner a rail lists every slide (picture, tag, title). The active item carries a progress bar
-    // (a CSS animation); when it finishes the banner moves on, so pausing only has to pause that animation.
+    // (a CSS animation); when it finishes the banner moves on by itself. Hovering or focusing the banner pauses that animation.
 
     var carousel = document.getElementById("carousel");
     var slides = [].slice.call(document.querySelectorAll(".slide"));
     var rail = document.getElementById("carRail");
-    var playBtn = document.getElementById("carPlay");
     var current = 0;
-    var stopped = false;
 
     slides.forEach(function (s, i) {
         var li = document.createElement("li");
-        var title = s.querySelector("h1, h2").textContent;
         li.innerHTML = '<button type="button" class="rail-item" data-theme="' + s.dataset.theme + '">' +
-            '<img src="' + s.querySelector(".slide-art img").getAttribute("src") + '" alt="">' +
-            '<span class="rail-text"><span class="rail-tag">' + Api.escapeHtml(s.querySelector(".slide-tag").textContent) + "</span>" +
-            '<span class="rail-title">' + Api.escapeHtml(title) + "</span></span>" +
+            '<img src="' + s.querySelector("img").getAttribute("src") + '" alt="">' +
+            '<span class="rail-text"><span class="rail-tag">' + Api.escapeHtml(s.dataset.tag) + "</span>" +
+            '<span class="rail-title">' + Api.escapeHtml(s.dataset.title) + "</span></span>" +
             '<span class="rail-bar" aria-hidden="true"></span></button>';
         li.firstChild.addEventListener("click", function () { go(i); });
         rail.appendChild(li);
@@ -42,18 +39,9 @@
         if (rail.scrollWidth > rail.clientWidth) rail.scrollTo({ left: items[current].parentNode.offsetLeft - 16, behavior: "smooth" });
     }
 
-    function setStopped(value) {
-        stopped = value;
-        document.querySelector(".hero").classList.toggle("is-stopped", stopped);
-        document.getElementById("slides").setAttribute("aria-live", stopped ? "polite" : "off");
-        playBtn.setAttribute("aria-label", stopped ? "Play slideshow" : "Pause slideshow");
-        playBtn.firstElementChild.textContent = stopped ? "play_arrow" : "pause";
-    }
-
     rail.addEventListener("animationend", function (e) {
-        if (e.animationName === "dot-fill" && !stopped) go(current + 1);
+        if (e.animationName === "dot-fill") go(current + 1);
     });
-    playBtn.addEventListener("click", function () { setStopped(!stopped); });
 
     // paused while the pointer is over the banner or the rail, or focus is inside them
     var hero = document.querySelector(".hero");
@@ -74,7 +62,6 @@
         if (Math.abs(dx) > 50) go(current + (dx < 0 ? 1 : -1));
     });
 
-    setStopped(false);
     go(0);
 
     // ---------- products

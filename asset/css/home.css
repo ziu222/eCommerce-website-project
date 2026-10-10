@@ -148,3 +148,12 @@ html[data-motion="reduced"] .rail-item:hover, html[data-motion="reduced"] .rail-
     .rail { flex-direction: column; overflow: visible; padding: 0; }
     .rail li { flex: 1; width: auto; }
 }
+
+/* banner slides are the shop's own banner pictures; the active one eases out of a slow zoom */
+.slide.slide--image { display: block; padding: 0; min-height: 0; aspect-ratio: 23 / 10; background: #eef0f3; }
+.slide--image::before { display: none; }
+.slide--image img { width: 100%; height: 100%; object-fit: cover; }
+.slide--image.is-active img { animation: banner-zoom 7s var(--ease) both; }
+@keyframes banner-zoom { from { transform: scale(1.06); } }
+.rail-item img { object-fit: cover; padding: 0; }
+html[data-motion="reduced"] .slide--image.is-active img { animation: none; }
