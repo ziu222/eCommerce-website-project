@@ -1,0 +1,120 @@
+/* Support inbox (admin/support.html): conversation list on the left, the open conversation on the right. */
+
+.support-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 20px;
+    height: calc(100vh - 64px);
+    min-height: 0;
+}
+
+.support-list, .support-detail {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border: 1px solid #e3e8ec;
+    border-radius: 14px;
+    background: #fff;
+    overflow: hidden;
+}
+
+.support-tabs { padding: 10px; border-bottom: 1px solid #eef1f3; flex-wrap: wrap; }
+.support-count {
+    display: inline-block;
+    min-width: 18px;
+    margin-left: 4px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #fde7c3;
+    color: #5b3a00;
+    font-size: 11px;
+    line-height: 18px;
+    text-align: center;
+}
+
+.support-items { flex: 1; overflow-y: auto; }
+.support-item {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    border: 0;
+    border-bottom: 1px solid #eef1f3;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.support-item:hover { background: #f5f9f9; }
+.support-item[aria-current="true"] { background: #e6f3f3; box-shadow: inset 3px 0 0 #0a6e6e; }
+.support-item:focus-visible { outline: 3px solid #f5b942; outline-offset: -3px; }
+.support-item-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
+.support-item-name { font-weight: 600; }
+.support-item-time { color: #5b6773; font-size: 12px; white-space: nowrap; }
+.support-item-subject { overflow: hidden; color: #1f2933; text-overflow: ellipsis; white-space: nowrap; }
+.support-item-last { overflow: hidden; color: #5b6773; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.support-empty { padding: 24px; color: #5b6773; text-align: center; }
+
+.support-placeholder {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #5b6773;
+}
+.support-placeholder i { font-size: 32px; color: #9fb4b4; }
+
+.support-thread { display: flex; flex: 1; flex-direction: column; min-height: 0; }
+.support-thread[hidden], .support-empty[hidden], .support-placeholder[hidden] { display: none; }
+.support-thread-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid #eef1f3;
+}
+.support-thread-head h2 { margin: 0; font-size: 16px; }
+.support-thread-actions { display: flex; align-items: center; gap: 10px; }
+.support-meta { margin: 2px 0 0; color: #5b6773; font-size: 12px; }
+
+.support-bot { border-bottom: 1px solid #eef1f3; background: #fafbfc; font-size: 13px; }
+.support-bot summary { padding: 8px 18px; color: #3d4a57; cursor: pointer; }
+.support-bot > div { max-height: 160px; padding: 0 18px 10px; overflow-y: auto; }
+.support-bot p { margin: 4px 0; }
+
+.support-messages { flex: 1; padding: 16px 18px; overflow-y: auto; background: #f5f7f8; }
+.support-msg { display: flex; flex-direction: column; margin-bottom: 10px; }
+.support-msg--staff { align-items: flex-end; }
+.support-bubble {
+    max-width: 75%;
+    padding: 9px 12px;
+    border: 1px solid #e3e8ec;
+    border-radius: 14px;
+    background: #fff;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+.support-msg--staff .support-bubble { border-color: #0a6e6e; background: #0a6e6e; color: #fff; }
+.support-who { margin-bottom: 2px; color: #3d4a57; font-size: 11px; }
+.support-time { margin-top: 2px; color: #5b6773; font-size: 11px; }
+
+.support-reply { padding: 12px 18px; border-top: 1px solid #eef1f3; background: #fff; }
+.support-reply textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #c8d1d8;
+    border-radius: 10px;
+    font: inherit;
+    resize: vertical;
+}
+.support-reply textarea:focus { outline: 2px solid #0a6e6e; border-color: #0a6e6e; }
+.support-reply-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.support-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+@media (max-width: 900px) {
+    .support-layout { grid-template-columns: 1fr; height: auto; }
+    .support-list { max-height: 320px; }
+    .support-detail { min-height: 520px; }
+}

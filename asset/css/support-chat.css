@@ -171,3 +171,27 @@
     .sc-panel.sc-open { animation: sc-in 0.16s ease-out; }
     @keyframes sc-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 }
+
+/* Staff tab */
+.sc-threads { display: flex; flex-direction: column; gap: 8px; }
+.sc-thread {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e3e8ec;
+    border-radius: 12px;
+    background: #fff;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.sc-thread:hover { border-color: #0a6e6e; }
+.sc-thread:focus-visible { outline: 3px solid #f5b942; outline-offset: 2px; }
+.sc-thread-main { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.sc-thread-last { overflow: hidden; color: #52606d; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.sc-thread-meta { flex-shrink: 0; color: #52606d; font-size: 11px; text-align: right; }
+.sc-error { margin: 0; color: #a12622; font-size: 13px; }
+.sc-error[hidden], .sc-badge[hidden], .sc-tabs[hidden] { display: none; }

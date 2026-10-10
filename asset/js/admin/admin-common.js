@@ -133,7 +133,8 @@ var AdminModal = (function () {
             "products.html":     "products.view",
             "orders-manage.html":"orders.view",
             "users-manage.html": "users.view",
-            "notifications.html":"notifications.view"
+            "notifications.html":"notifications.view",
+            "support.html":      "support.view"
         };
         var navLinks = document.querySelectorAll(".nav-item[href]");
         for (var j = 0; j < navLinks.length; j++) {
