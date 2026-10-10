@@ -6,7 +6,7 @@
 
     function notFound() {
         document.getElementById("detail-content").innerHTML =
-            '<div class="empty" style="grid-column:1/-1"><span class="ms">search_off</span><h3>We could not find this product</h3>' +
+            '<div class="empty" style="grid-column:1/-1">' + UI.mascot("sad", 104) + '<h3>We could not find this product</h3>' +
             '<a class="btn btn-primary" href="product.html">Back to the shop</a></div>';
     }
 

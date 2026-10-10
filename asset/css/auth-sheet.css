@@ -31,7 +31,7 @@ html.as-lock { overflow: hidden; }
 .as-x:hover { background: var(--surface-2); transform: rotate(90deg); }
 
 .as-head { display: grid; gap: 6px; justify-items: start; margin-bottom: 18px; }
-.as-head .brand-mark { width: 40px; height: 40px; border-radius: 12px; font-size: 17px; }
+.as-logo { width: 48px; height: 48px; }
 .as-head h2 { margin-top: 8px; font-size: 1.6rem; }
 .as-head p { font-size: 15px; }
 .as-head h2, .as-head p { transition: opacity 0.2s, transform 0.3s var(--ease); }

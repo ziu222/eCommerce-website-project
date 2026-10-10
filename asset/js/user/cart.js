@@ -273,7 +273,7 @@ async function handleCheckout() {
 
 function showOrderModal(orderIds, method, total) {
     // a fresh player each time, so the check draws itself when the order goes through
-    document.getElementById("orderAnim").innerHTML = '<span class="anim" data-lottie="order-success" style="--size:112px"><span class="ms ms-fill">check_circle</span></span>';
+    document.getElementById("orderAnim").innerHTML = UI.mascot("happy", 112);
     document.getElementById("modalOrderId").textContent = "#" + orderIds.join(", #");
     document.getElementById("modalPayMethod").textContent = method === "wallet" ? "Wallet" : "Cash on delivery";
     document.getElementById("modalTotal").textContent = "$" + Number(total).toLocaleString("en-US");

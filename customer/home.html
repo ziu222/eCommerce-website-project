@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,menu_book,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,refresh,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
     <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/home.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
@@ -60,15 +60,9 @@
                         <div class="slide-art"><img src="../asset/img/home/canonEOS.jpg" alt="" width="500" height="500"></div>
                     </article>
                 </div>
-                <div class="carousel-ctrl">
-                    <button type="button" class="ctrl-btn" id="carPlay" aria-label="Pause slideshow"><span class="ms">pause</span></button>
-                    <div class="dots" id="carDots"></div>
-                    <div class="ctrl-arrows">
-                        <button type="button" class="ctrl-btn" id="carPrev" aria-label="Previous slide"><span class="ms">chevron_left</span></button>
-                        <button type="button" class="ctrl-btn" id="carNext" aria-label="Next slide"><span class="ms">chevron_right</span></button>
-                    </div>
-                </div>
+                <button type="button" class="ctrl-btn car-play" id="carPlay" aria-label="Pause slideshow"><span class="ms">pause</span></button>
             </div>
+            <ol class="rail" id="carRail" aria-label="Featured offers"></ol>
         </section>
 
         <section class="container cat-strip" aria-label="Categories">

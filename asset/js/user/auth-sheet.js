@@ -41,7 +41,7 @@ var AuthSheet = (function () {
             '<section class="as-sheet" role="dialog" aria-modal="true" aria-labelledby="asTitle">' +
             '<div class="as-grab" aria-hidden="true"><span></span></div>' +
             '<button type="button" class="as-x" aria-label="Close" data-as-close><span class="ms">close</span></button>' +
-            '<div class="as-head"><span class="brand-mark" style="--n:0" aria-hidden="true">EC</span><h2 id="asTitle" style="--n:1"></h2><p class="muted" id="asSub" style="--n:2"></p></div>' +
+            '<div class="as-head"><img class="as-logo" style="--n:0" src="../asset/brand/logo-mark.svg" alt="" width="48" height="48"><h2 id="asTitle" style="--n:1"></h2><p class="muted" id="asSub" style="--n:2"></p></div>' +
             '<div class="as-tabs" role="tablist" data-mode="login"><span class="as-ind" aria-hidden="true"></span>' +
             '<button type="button" role="tab" class="as-tab" id="asTabLogin" data-mode="login" aria-selected="true" aria-controls="asLogin">Sign in</button>' +
             '<button type="button" role="tab" class="as-tab" id="asTabSignup" data-mode="signup" aria-selected="false" aria-controls="asSignup">Create account</button></div>' +
