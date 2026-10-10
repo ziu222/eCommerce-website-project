@@ -10,10 +10,10 @@ document.addEventListener("DOMContentLoaded", async function () {
         return;
     }
 
-    Store.seed();
-
-    var fullUser = Store.getUserById(session.id);
-    if (!fullUser) {
+    var fullUser;
+    try {
+        fullUser = await Api.profile.get();
+    } catch (e) {
         window.location.href = "login.html";
         return;
     }
@@ -33,18 +33,17 @@ document.addEventListener("DOMContentLoaded", async function () {
         coverInput.click();
     });
 
-    if (coverInput) coverInput.addEventListener("change", function (e) {
+    if (coverInput) coverInput.addEventListener("change", async function (e) {
         var file = e.target.files[0];
         if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function (ev) {
-            var base64 = ev.target.result;
-            fullUser.coverPhoto = base64;
+        try {
+            var cover = await resizeImage(file, 1200, 500, 0.7);
+            fullUser = await Api.profile.update({ coverPhoto: cover });
             renderCoverPhoto(fullUser);
-            Store.updateUser(fullUser.id, { coverPhoto: base64 });
             showToast("Cover photo updated");
-        };
-        reader.readAsDataURL(file);
+        } catch (err) {
+            showToast(err.message);
+        }
     });
 
     // ── Avatar upload ─────────────────────────────────────
@@ -55,24 +54,23 @@ document.addEventListener("DOMContentLoaded", async function () {
         avatarInput.click();
     });
 
-    if (avatarInput) avatarInput.addEventListener("change", function (e) {
+    if (avatarInput) avatarInput.addEventListener("change", async function (e) {
         var file = e.target.files[0];
         if (!file) return;
-        var reader = new FileReader();
-        reader.onload = function (ev) {
-            var base64 = ev.target.result;
-            setAvatarDisplay(base64);
-            fullUser.avatar = base64;
-            Store.updateUser(fullUser.id, { avatar: base64 });
+        try {
+            var avatar = await resizeImage(file, 256, 256, 0.85);
+            fullUser = await Api.profile.update({ avatar: avatar });
+            setAvatarDisplay(fullUser.avatar);
             updateSession(fullUser);
             showToast("Avatar updated");
-        };
-        reader.readAsDataURL(file);
+        } catch (err) {
+            showToast(err.message);
+        }
     });
 
     // ── Save changes ──────────────────────────────────────
     var form = document.getElementById("profileForm");
-    if (form) form.addEventListener("submit", function (e) {
+    if (form) form.addEventListener("submit", async function (e) {
         e.preventDefault();
         if (!validateForm(fullUser)) return;
 
@@ -81,10 +79,23 @@ document.addEventListener("DOMContentLoaded", async function () {
         var newPw = document.getElementById("inputNewPw").value;
 
         var updates = { name: name, email: email };
-        if (newPw) updates.password = newPw;
+        if (newPw) {
+            updates.currentPassword = document.getElementById("inputCurrentPw").value;
+            updates.newPassword = newPw;
+        }
 
-        Store.updateUser(fullUser.id, updates);
-        fullUser = Store.getUserById(fullUser.id);
+        try {
+            fullUser = await Api.profile.update(updates);
+        } catch (err) {
+            if (/password/i.test(err.message)) {
+                showError("errorCurrentPw", err.message);
+            } else if (/mail/i.test(err.message)) {
+                showError("errorEmail", err.message);
+            } else {
+                showToast(err.message);
+            }
+            return;
+        }
         updateSession(fullUser);
         renderProfile(fullUser);
 
@@ -121,6 +132,28 @@ document.addEventListener("DOMContentLoaded", async function () {
 });
 
 // ── Helpers ───────────────────────────────────────────────
+
+// Shrinks a picked image in the browser so it stays small enough to store with the profile.
+function resizeImage(file, maxWidth, maxHeight, quality) {
+    return new Promise(function (resolve, reject) {
+        var img = new Image();
+        var url = URL.createObjectURL(file);
+        img.onload = function () {
+            var scale = Math.min(1, maxWidth / img.width, maxHeight / img.height);
+            var canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(img.width * scale));
+            canvas.height = Math.max(1, Math.round(img.height * scale));
+            canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+            URL.revokeObjectURL(url);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = function () {
+            URL.revokeObjectURL(url);
+            reject(new Error("That file is not a valid image"));
+        };
+        img.src = url;
+    });
+}
 
 function renderProfile(user) {
     var displayName = user.name || user.username || "User";
@@ -209,8 +242,6 @@ function validateForm(fullUser) {
     if (newPw || currentPw || confirmPw) {
         if (!currentPw) {
             showError("errorCurrentPw", "Enter your current password"); ok = false;
-        } else if (currentPw !== fullUser.password) {
-            showError("errorCurrentPw", "Current password is incorrect"); ok = false;
         }
         if (newPw && newPw.length < 6) {
             showError("errorNewPw", "New password must be at least 6 characters"); ok = false;
