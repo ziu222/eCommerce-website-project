@@ -21,7 +21,7 @@ describe('prisma schema', () => {
       data: { name: 'C', username: 'c1', email: 'c1@x.io', passwordHash: 'h', role: 'customer' },
     });
     const shop = await prisma.user.create({
-      data: { name: 'S', username: 's1', email: 's1@x.io', passwordHash: 'h', role: 'shop', shopStatus: 'approved' },
+      data: { name: 'S', username: 's1', email: 's1@x.io', passwordHash: 'h', role: 'shop', shopStatus: 'active' },
     });
     const product = await prisma.product.create({
       data: { shopId: shop.id, name: 'Phone', price: '799.99', imageUrl: 'x.png', category: 'smartphone', stock: 3 },
