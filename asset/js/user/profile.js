@@ -1,10 +1,10 @@
-// profile.js — the account hub: overview, wishlist, addresses, notifications, personal info and security.
+// profile.js — the account hub: overview, orders, wishlist, addresses, notifications, personal info and security.
 // Sections are switched with the URL hash (#overview, #wishlist, ...) so they can be linked to.
 
 (function () {
 
     var esc = Api.escapeHtml;
-    var PANELS = ["overview", "wishlist", "addresses", "notifications", "personal", "security"];
+    var PANELS = ["overview", "orders", "wishlist", "addresses", "notifications", "personal", "security"];
     var me = null;
     var loaded = {};
     var notes = [];
@@ -41,6 +41,7 @@
 
     var LOADERS = {
         overview: loadOverview,
+        orders: Orders.load,
         wishlist: loadWishlist,
         addresses: loadAddresses,
         notifications: loadNotes,

@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,devices,done_all,edit,error,expand_more,favorite,forum,headphones,info,inventory_2,laptop_mac,local_offer,local_shipping,location_on,lock,logout,mail,menu,menu_book,notifications,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,refresh,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,space_dashboard,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
     <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/profile.css">
+    <link rel="stylesheet" href="../asset/css/orders.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
@@ -41,7 +42,7 @@
         <div class="account-layout">
             <nav class="account-nav" aria-label="Account sections">
                 <a href="#overview" data-panel="overview"><span class="ms">space_dashboard</span>Overview</a>
-                <a href="orders.html"><span class="ms">receipt_long</span>Orders</a>
+                <a href="#orders" data-panel="orders"><span class="ms">receipt_long</span>Orders</a>
                 <a href="#wishlist" data-panel="wishlist"><span class="ms">favorite</span>Wishlist<span class="nav-count" id="savedCount" hidden></span></a>
                 <a href="#addresses" data-panel="addresses"><span class="ms">location_on</span>Addresses</a>
                 <a href="#notifications" data-panel="notifications"><span class="ms">notifications</span>Notifications<span class="nav-count nav-count--alert" id="unreadCount" hidden></span></a>
@@ -61,14 +62,14 @@
 
                     <div class="stats">
                         <a class="stat" href="wallet.html"><span class="ms">account_balance_wallet</span><span class="stat-label">Wallet</span><strong id="statWallet">$0.00</strong></a>
-                        <a class="stat" href="orders.html"><span class="ms">local_shipping</span><span class="stat-label">On the way</span><strong id="statActive">0</strong></a>
+                        <a class="stat" href="#orders"><span class="ms">local_shipping</span><span class="stat-label">On the way</span><strong id="statActive">0</strong></a>
                         <div class="stat"><span class="ms">receipt_long</span><span class="stat-label">Spent</span><strong id="statSpent">$0</strong></div>
                         <a class="stat" href="#wishlist"><span class="ms">favorite</span><span class="stat-label">Saved</span><strong id="statSaved">0</strong></a>
                     </div>
 
                     <div class="ov-grid">
                         <article class="card block" aria-labelledby="activeTitle">
-                            <div class="block-head"><h3 id="activeTitle">Latest order</h3><a class="link-more" href="orders.html">All orders <span class="ms">arrow_forward</span></a></div>
+                            <div class="block-head"><h3 id="activeTitle">Latest order</h3><a class="link-more" href="#orders">All orders <span class="ms">arrow_forward</span></a></div>
                             <div id="activeOrder"></div>
                         </article>
                         <article class="card block tier-card" aria-labelledby="tierTitle">
@@ -81,6 +82,11 @@
                         <div class="block-head"><h3 id="recentTitle">Recent notifications</h3><a class="link-more" href="#notifications">See all <span class="ms">arrow_forward</span></a></div>
                         <div id="recentNotes"></div>
                     </article>
+                </section>
+
+                <section class="panel" id="panel-orders" aria-labelledby="orTitle" hidden>
+                    <div class="panel-head"><h2 id="orTitle">Orders</h2><p class="muted" id="orderCount" aria-live="polite">Track and manage what you bought.</p></div>
+                    <div class="order-list" id="orderList" aria-live="polite"></div>
                 </section>
 
                 <section class="panel" id="panel-wishlist" aria-labelledby="wlTitle" hidden>
@@ -186,6 +192,7 @@
     <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
+    <script src="../asset/js/user/orders.js"></script>
     <script src="../asset/js/user/profile.js"></script>
     <script src="../asset/js/api/support.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>
