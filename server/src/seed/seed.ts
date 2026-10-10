@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import argon2 from 'argon2';
+import { fold } from '../assistant/text.js';
 import type { PrismaClient } from '../generated/prisma/client.js';
 
 const load = <T>(name: string): T =>
@@ -16,6 +17,7 @@ export async function runSeed(prisma: PrismaClient): Promise<void> {
   const orders = load<any[]>('orders.json');
   const coupons = load<any[]>('coupons.json');
   const notifications = load<any[]>('notifications.json');
+  const policies = load<{ slug: string; title: string; body: string }[]>('policies.json');
 
   for (const u of users) {
     const { password, walletBalance, createdAt, ...rest } = u;
@@ -77,6 +79,12 @@ export async function runSeed(prisma: PrismaClient): Promise<void> {
         reads: { create: readBy.map((userId: number) => ({ userId })) },
       },
     });
+  }
+
+  // Policies are edited in policies.json, so unlike the sample data they are refreshed on every seed.
+  for (const p of policies) {
+    const data = { title: p.title, body: p.body, searchText: fold(`${p.title} ${p.body}`) };
+    await prisma.policyChunk.upsert({ where: { slug: p.slug }, update: data, create: { slug: p.slug, ...data } });
   }
 
   // Explicit ids were inserted, so move each serial past the highest seeded id.

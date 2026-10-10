@@ -1,0 +1,57 @@
+[
+  {
+    "slug": "shipping",
+    "title": "Shipping / Giao hàng",
+    "body": "Free shipping on every order over $50. For smaller orders, ask our staff about shipping costs. Delivery typically takes 3-5 business days after the shop confirms the order; each shop ships its own products, so an order with items from several shops arrives as separate parcels. | Miễn phí vận chuyển cho mọi đơn trên $50. Với đơn nhỏ hơn, hãy hỏi nhân viên về phí vận chuyển. Giao hàng thường mất 3-5 ngày làm việc kể từ khi shop xác nhận đơn; mỗi shop tự gửi sản phẩm của mình, nên đơn có sản phẩm của nhiều shop sẽ đến thành nhiều kiện riêng."
+  },
+  {
+    "slug": "returns",
+    "title": "Returns / Đổi trả",
+    "body": "You can return most products within 30 days of delivery if they are unused and in the original packaging. Contact support with your order number to start a return. Items that arrive damaged or different from the listing are returned at our cost. | Bạn có thể đổi trả hầu hết sản phẩm trong vòng 30 ngày kể từ ngày nhận hàng nếu sản phẩm chưa sử dụng và còn nguyên bao bì. Hãy liên hệ hỗ trợ kèm mã đơn hàng để bắt đầu đổi trả. Hàng bị hư hỏng hoặc khác với mô tả sẽ được đổi trả miễn phí."
+  },
+  {
+    "slug": "refunds",
+    "title": "Refunds / Hoàn tiền",
+    "body": "Orders paid with the wallet are refunded to the wallet immediately when the order is cancelled. For returned items, the refund is issued after the shop receives and checks the product. For cash on delivery orders, our staff will arrange the refund with you. | Đơn trả bằng ví được hoàn vào ví ngay khi đơn bị hủy. Với hàng trả lại, tiền được hoàn sau khi shop nhận và kiểm tra sản phẩm. Với đơn thanh toán khi nhận hàng (COD), nhân viên sẽ trao đổi với bạn để hoàn tiền."
+  },
+  {
+    "slug": "cancellation",
+    "title": "Cancelling an order / Hủy đơn hàng",
+    "body": "An order can be cancelled while it is still pending, before the shop confirms it. After the shop confirms or ships it, it can no longer be cancelled; use the return policy instead. To cancel, contact support with your order number. | Đơn hàng có thể hủy khi còn ở trạng thái chờ xử lý (pending), trước khi shop xác nhận. Sau khi shop xác nhận hoặc đã gửi hàng thì không hủy được, hãy dùng chính sách đổi trả. Để hủy đơn, hãy liên hệ hỗ trợ kèm mã đơn hàng."
+  },
+  {
+    "slug": "order-status",
+    "title": "Order status / Trạng thái đơn hàng",
+    "body": "An order moves through pending, confirmed, shipped and delivered. Pending means the shop has not yet confirmed it; confirmed means the shop is preparing it; shipped means it is on its way; delivered means it has arrived. Each shop updates its own orders. | Đơn hàng đi qua các trạng thái: chờ xử lý (pending), đã xác nhận (confirmed), đang giao (shipped) và đã giao (delivered). Chờ xử lý nghĩa là shop chưa xác nhận; đã xác nhận là shop đang chuẩn bị hàng; đang giao là hàng đang trên đường; đã giao là hàng đã đến. Mỗi shop tự cập nhật đơn của mình."
+  },
+  {
+    "slug": "payment",
+    "title": "Payment methods / Phương thức thanh toán",
+    "body": "You can pay by cash on delivery or with your EC SHOP wallet. All transactions are protected. The wallet balance is checked when you place the order and the amount is charged at once. | Bạn có thể thanh toán khi nhận hàng (COD) hoặc bằng ví EC SHOP. Mọi giao dịch đều được bảo vệ. Số dư ví được kiểm tra khi đặt hàng và số tiền được trừ ngay."
+  },
+  {
+    "slug": "wallet",
+    "title": "Wallet / Ví EC SHOP",
+    "body": "Your wallet keeps a balance you can spend at checkout. Open the Wallet page to see your balance and every payment, top-up and refund. Top-ups on this store are a demo: choose an amount and a gateway; there is a limit per top-up and per day. | Ví lưu số dư để bạn dùng khi thanh toán. Vào trang Ví để xem số dư và mọi giao dịch thanh toán, nạp tiền, hoàn tiền. Việc nạp tiền trên cửa hàng này là bản demo: chọn số tiền và cổng thanh toán; có giới hạn cho mỗi lần nạp và mỗi ngày."
+  },
+  {
+    "slug": "coupons",
+    "title": "Coupons / Mã giảm giá",
+    "body": "Enter a coupon code in your cart and press Apply. A coupon can be a percentage or a fixed amount, may need a minimum order, can expire or run out of uses, and some only work on one shop's products. Only one coupon can be used per order. | Nhập mã giảm giá trong giỏ hàng rồi bấm Apply. Mã có thể giảm theo phần trăm hoặc số tiền cố định, có thể yêu cầu giá trị đơn tối thiểu, có hạn dùng hoặc giới hạn số lượt, và một số mã chỉ áp dụng cho sản phẩm của một shop. Mỗi đơn chỉ dùng được một mã."
+  },
+  {
+    "slug": "warranty",
+    "title": "Warranty / Bảo hành",
+    "body": "Products are covered by the manufacturer's warranty. The warranty period depends on the product and is shown by the shop that sells it. For a warranty claim, contact support with your order number and a description of the problem. | Sản phẩm được bảo hành theo chính sách của nhà sản xuất. Thời hạn bảo hành tùy sản phẩm và do shop bán hàng cung cấp. Để yêu cầu bảo hành, hãy liên hệ hỗ trợ kèm mã đơn hàng và mô tả vấn đề."
+  },
+  {
+    "slug": "support",
+    "title": "Contacting support / Liên hệ hỗ trợ",
+    "body": "This assistant is available 24/7 for questions about shipping, returns, payments and more. For anything it cannot answer, or for help with a specific order, choose Talk to staff while signed in: leave a message and our support team replies as soon as they can; you will see the answer in this chat. | Trợ lý này hoạt động 24/7 cho các câu hỏi về giao hàng, đổi trả, thanh toán... Với việc trợ lý không trả lời được hoặc cần hỗ trợ về một đơn hàng cụ thể, hãy chọn Gặp nhân viên sau khi đăng nhập: để lại tin nhắn, đội hỗ trợ sẽ trả lời sớm nhất có thể và bạn sẽ thấy câu trả lời ngay trong khung chat này."
+  },
+  {
+    "slug": "account",
+    "title": "Account and security / Tài khoản và bảo mật",
+    "body": "You can change your name, email, password and pictures on the Profile page. To change your password you must enter your current one. Staff never ask for your password. If you suspect someone else used your account, contact support right away. | Bạn có thể đổi tên, email, mật khẩu và ảnh ở trang Hồ sơ. Để đổi mật khẩu cần nhập mật khẩu hiện tại. Nhân viên không bao giờ hỏi mật khẩu của bạn. Nếu nghi ngờ có người khác dùng tài khoản của bạn, hãy liên hệ hỗ trợ ngay."
+  }
+]
