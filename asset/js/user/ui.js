@@ -204,7 +204,7 @@ var UI = (function () {
             '<div class="footer-col"><h4>Help</h4><ul><li><a href="contact.html">Contact us</a></li><li><a href="about.html">About EC SHOP</a></li>' +
             '<li><a href="#" data-open-support>Chat with support</a></li></ul></div>' +
             '<div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="wallet.html">Wallet</a></li>' +
-            '<li><a href="cart.html">Cart</a></li><li><a href="login.html">Sign in</a></li></ul></div></div>' +
+            '<li><a href="cart.html">Cart</a></li><li><a href="login.html" data-auth="login">Sign in</a></li></ul></div></div>' +
             '<div class="container footer-base"><span>© 2026 EC SHOP</span><span>Prices in USD</span>' +
             '<button type="button" class="motion-toggle" id="motionToggle" hidden></button></div>';
     }
@@ -252,6 +252,57 @@ var UI = (function () {
         if (!opener) return;
         e.preventDefault();
         if (window.SupportChat) SupportChat.open();
+    });
+
+    // ---------- Sign in / sign up sheet
+    // The sheet (auth-sheet.js and its CSS) is fetched the first time it is needed, or at idle time for a visitor who is
+    // not signed in. UI.openAuth("login" | "signup", { required, next }) opens it over the current page.
+
+    var authReady = null;
+
+    function preloadAuth() {
+        if (!authReady) {
+            var css = new Promise(function (resolve, reject) {
+                var l = document.createElement("link");
+                l.rel = "stylesheet";
+                l.href = "../asset/css/auth-sheet.css";
+                l.onload = resolve;
+                l.onerror = reject;
+                document.head.appendChild(l);
+            });
+            var js = new Promise(function (resolve, reject) {
+                var s = document.createElement("script");
+                s.src = "../asset/js/user/auth-sheet.js";
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+            authReady = Promise.all([css, js]);
+        }
+        return authReady;
+    }
+
+    function openAuth(mode, options) {
+        return preloadAuth().then(function () { window.AuthSheet.open(mode, options); }).catch(function () {
+            // the sheet could not load: fall back to the plain page
+            location.href = "login.html" + (mode === "signup" ? "?auth=signup" : "");
+        });
+    }
+
+    // For pages that need an account: the sheet opens over the page and closing it without signing in leads home.
+    function requireLogin() {
+        return openAuth("login", { required: true });
+    }
+
+    function signedInCustomer() {
+        try { return !!JSON.parse(localStorage.getItem("ecshop_currentUser")); } catch (e) { return false; }
+    }
+
+    document.addEventListener("click", function (e) {
+        var link = e.target.closest("[data-auth]");
+        if (!link) return;
+        e.preventDefault();
+        openAuth(link.dataset.auth);
     });
 
     // ---------- Lottie animations
@@ -346,6 +397,11 @@ var UI = (function () {
 
     mount();
     initMotion();
+    if (!signedInCustomer()) {
+        var wanted = new URLSearchParams(location.search).get("auth");
+        if (wanted === "login" || wanted === "signup") openAuth(wanted);
+        else if (window.requestIdleCallback) requestIdleCallback(preloadAuth); else setTimeout(preloadAuth, 1500);
+    }
     mountAnimations(document.body);
     new MutationObserver(function (records) {
         records.forEach(function (r) {
@@ -353,6 +409,6 @@ var UI = (function () {
         });
     }).observe(document.body, { childList: true, subtree: true });
 
-    return { motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
+    return { openAuth: openAuth, requireLogin: requireLogin, preloadAuth: preloadAuth, motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 
 })();

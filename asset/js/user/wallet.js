@@ -27,7 +27,7 @@
         try {
             snapshot = await Api.wallet.get();
         } catch (e) {
-            if (e.status === 401 || e.status === 403) { window.location.href = "login.html?next=wallet.html"; return; }
+            if (e.status === 401 || e.status === 403) { UI.requireLogin(); return; }
             UI.toast(e.message, "error");
         }
         UI.countTo(document.getElementById("walletBalance"), snapshot.balance, { format: fmt });
@@ -150,7 +150,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         if (!getCurrentUser()) {
-            window.location.href = "login.html?next=wallet.html";
+            UI.requireLogin();
             return;
         }
         refresh();

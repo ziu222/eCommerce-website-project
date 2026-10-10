@@ -1,65 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign in - EC SHOP</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
-    <link rel="stylesheet" href="../asset/css/ui.css">
-    <link rel="stylesheet" href="../asset/css/user-login.css">
+    <meta http-equiv="refresh" content="0;url=home.html?auth=login">
+    <script>location.replace("home.html?auth=login" + (location.search ? "&" + location.search.slice(1) : ""));</script>
 </head>
-
-<body class="auth-page">
-    <main class="auth">
-        <aside class="auth-aside" aria-hidden="true">
-            <a class="brand" href="home.html" tabindex="-1"><span class="brand-mark">EC</span>EC SHOP</a>
-            <div class="art">
-                <figure class="art-tile" style="--n:1;--x:3%;--y:2%;--w:35%;--r:-6deg;--zoom:1.55;--depth:22;--t:7s"><img src="../asset/img/home/ip15PM.webp" alt=""><figcaption>iPhone 15 Pro Max</figcaption></figure>
-                <figure class="art-tile" style="--n:2;--x:61%;--y:0%;--w:34%;--r:5deg;--depth:34;--t:8s"><img src="../asset/img/home/sonyWH.png" alt=""><figcaption>Sony WH-1000XM5</figcaption></figure>
-                <figure class="art-tile" style="--n:3;--x:30%;--y:31%;--w:40%;--r:3deg;--depth:14;--t:9s"><img src="../asset/img/home/ps5Slim.jpg" alt=""><figcaption>PlayStation 5</figcaption></figure>
-                <figure class="art-tile" style="--n:4;--x:68%;--y:52%;--w:29%;--r:-5deg;--zoom:1.6;--depth:40;--t:7.5s"><img src="../asset/img/home/canonEOS.jpg" alt=""><figcaption>Canon EOS R50</figcaption></figure>
-                <figure class="art-tile" style="--n:5;--x:2%;--y:55%;--w:27%;--r:7deg;--zoom:2.2;--depth:30;--t:8.5s"><img src="../asset/img/home/pixel8.png" alt=""><figcaption>Pixel 8 Pro</figcaption></figure>
-                <span class="art-chip" style="--n:6;--x:37%;--y:-7%;--depth:50"><span class="ms">local_shipping</span>Free delivery</span>
-                <span class="art-chip" style="--n:7;--x:1%;--y:42%;--depth:46"><span class="ms">verified</span>Verified sellers</span>
-                <span class="art-chip" style="--n:8;--x:33%;--y:90%;--depth:48"><span class="ms">forum</span>Staff replies in chat</span>
-            </div>
-            <p class="auth-aside-line">Electronics worth keeping.</p>
-        </aside>
-
-        <section class="auth-panel">
-            <a class="brand auth-brand" href="home.html"><span class="brand-mark" aria-hidden="true">EC</span>EC SHOP</a>
-            <h1>Welcome back</h1>
-            <p class="muted">Sign in to check out, track orders and use your wallet.</p>
-
-            <form id="loginForm" class="auth-form" novalidate>
-                <div class="field">
-                    <label for="loginUser">Username</label>
-                    <input class="input" type="text" id="loginUser" autocomplete="username" autofocus>
-                </div>
-                <div class="field">
-                    <label for="loginPass">Password</label>
-                    <div class="pass-wrap">
-                        <input class="input" type="password" id="loginPass" autocomplete="current-password">
-                        <button type="button" class="pass-toggle" aria-label="Show password" aria-pressed="false"><span class="ms">visibility</span></button>
-                    </div>
-                </div>
-                <p class="auth-error" id="authError" role="alert" hidden></p>
-                <button type="submit" class="btn btn-primary btn-lg btn-block" id="authSubmit">Sign in</button>
-            </form>
-
-            <p class="auth-switch">New here? <a href="signup.html">Create an account</a></p>
-        </section>
-    </main>
-
-    <script src="../asset/js/api/client.js"></script>
-    <script src="../asset/js/api/auth.js"></script>
-    <script src="../asset/js/user/ui.js"></script>
-    <script src="../asset/js/user/auth-art.js"></script>
-    <script src="../asset/js/user/user-login.js"></script>
+<body>
+    <p><a href="home.html?auth=login">Continue to sign in</a></p>
 </body>
-
 </html>

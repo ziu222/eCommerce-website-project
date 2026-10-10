@@ -49,7 +49,7 @@
             list.innerHTML = orders.length ? orders.map(card).join("") :
                 '<div class="empty card"><span class="anim" data-lottie="empty-box" data-loop style="--size:160px"><span class="ms">receipt_long</span></span><h3>No orders yet</h3><p>When you check out, your orders show up here.</p><a class="btn btn-primary" href="product.html">Start shopping</a></div>';
         } catch (e) {
-            if (e.status === 401 || e.status === 403) { location.href = "login.html?next=orders.html"; return; }
+            if (e.status === 401 || e.status === 403) { UI.requireLogin(); return; }
             list.innerHTML = '<div class="empty card"><span class="ms">cloud_off</span><h3>Could not load your orders</h3><p>' + esc(e.message) + "</p></div>";
         }
     }
@@ -71,7 +71,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         var u = getCurrentUser();
-        if (!u || u.role !== "customer") { location.href = "login.html?next=orders.html"; return; }
+        if (!u || u.role !== "customer") { UI.requireLogin(); return; }
         load();
     });
 

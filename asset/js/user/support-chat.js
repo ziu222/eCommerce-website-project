@@ -55,7 +55,7 @@ var SupportChat = (function () {
         var user = currentUser();
         var out = [];
         if (reply.type === "login" || (reply.actions || []).indexOf("login") !== -1) {
-            out.push('<a class="sc-action" href="' + esc(loginUrl()) + '">Sign in / Đăng nhập</a>');
+            out.push('<a class="sc-action" href="' + esc(loginUrl()) + '" data-auth="login">Sign in / Đăng nhập</a>');
         }
         var wantsStaff = reply.type === "handoff" || (reply.actions || []).indexOf("handoff") !== -1;
         if (wantsStaff && user && user.role === "customer" && window.SupportThreads) {

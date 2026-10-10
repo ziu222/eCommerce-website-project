@@ -237,7 +237,7 @@ function validatePaymentMethod() {
 
 async function handleCheckout() {
     const user = getCurrentUser();
-    if (!user) { window.location.href = "login.html?next=cart.html"; return; }
+    if (!user) { UI.requireLogin(); return; }
 
     const cart = getCart();
     if (!cart.length) return;
@@ -264,7 +264,7 @@ async function handleCheckout() {
 
         showOrderModal(result.orders.map(o => o.id), method, result.total);
     } catch (e) {
-        if (e.status === 401 || e.status === 403) { window.location.href = "login.html?next=cart.html"; return; }
+        if (e.status === 401 || e.status === 403) { UI.requireLogin(); return; }
         UI.toast(e.message || "Checkout failed. Please try again.", "error");
     } finally {
         validatePaymentMethod();
