@@ -7,8 +7,6 @@ Api.auth = (function () {
 
     function saveSession(session) {
         localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-        // Transitional: pages not yet moved to the API still read users from the local Store.
-        if (typeof Store !== "undefined" && Store.ensureUser) Store.ensureUser(session);
         return session;
     }
 
@@ -46,6 +44,19 @@ Api.auth = (function () {
             }
         }
     }
+
+    // The pre-API local store kept users (with plaintext passwords), orders and more in this browser. Remove them once.
+    function purgeLegacyData() {
+        try {
+            if (localStorage.getItem("ecshop_api_v1")) return;
+            ["ecshop_users", "ecshop_orders", "ecshop_notifications", "ecshop_coupons", "ecshop_seeded",
+             "ecshop_products", "ecshop_products_v3", "ecshop_product_seed_v2", "ecshop_wallet_v1"].forEach(function (k) {
+                localStorage.removeItem(k);
+            });
+            localStorage.setItem("ecshop_api_v1", "1");
+        } catch (e) { /* storage unavailable */ }
+    }
+    purgeLegacyData();
 
     document.addEventListener("DOMContentLoaded", sync);
 

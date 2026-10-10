@@ -1,6 +1,5 @@
 // admin-users.js — Users Management Page Logic
 
-Store.seed();
 Auth.requireRole("admin", "admin-login.html");
 Auth.requirePermission("users.view");
 
@@ -41,8 +40,31 @@ Auth.requirePermission("users.view");
     }
 
     // ── Data helpers ─────────────────────────────────────────
+    var allUsers = [];
+
     function getAllUsers() {
-        return Store.getUsers();
+        return allUsers;
+    }
+
+    async function loadUsers() {
+        try {
+            allUsers = await Api.adminUsers.list();
+        } catch (e) {
+            alert("Could not load users: " + e.message);
+        }
+        renderCustomers();
+        renderShops();
+        renderAdmins();
+        renderBanned();
+    }
+
+    async function changeStatus(id, change) {
+        try {
+            await Api.adminUsers.setStatus(id, change);
+        } catch (e) {
+            alert(e.message);
+        }
+        await loadUsers();
     }
 
     // ── Render Tab 1: Customers ─────────────────────────────
@@ -75,10 +97,7 @@ Auth.requirePermission("users.view");
     document.getElementById("bodyCustomers").addEventListener("click", function (e) {
         var btn = e.target.closest(".icon-btn-suspend");
         if (!btn) return;
-        var id = parseInt(btn.dataset.id, 10);
-        Store.updateUser(id, { status: "suspended" });
-        renderCustomers();
-        renderBanned();
+        changeStatus(parseInt(btn.dataset.id, 10), { status: "suspended" });
     });
 
     // ── Render Tab 2: Shops ──────────────────────────────────
@@ -135,14 +154,9 @@ Auth.requirePermission("users.view");
         if (!user) return;
 
         if (action === "approve") {
-            Store.updateUser(id, { shopStatus: "active" });
-            renderShops();
-            renderCustomers();
+            changeStatus(id, { shopStatus: "active" });
         } else if (action === "suspend") {
-            Store.updateUser(id, { shopStatus: "suspended" });
-            renderShops();
-            renderBanned();
-            renderCustomers();
+            changeStatus(id, { shopStatus: "suspended" });
         } else if (action === "view") {
             openShopViewModal(user);
         }
@@ -201,7 +215,7 @@ Auth.requirePermission("users.view");
     if (shopModal) shopModal.addEventListener("click", function (e) { if (e.target === shopModal) closeShopModal(); });
 
     if (btnSubmitShop) {
-        btnSubmitShop.addEventListener("click", function () {
+        btnSubmitShop.addEventListener("click", async function () {
             shopErrorEl.classList.remove("show");
 
             var data = {
@@ -218,35 +232,29 @@ Auth.requirePermission("users.view");
                 shopErrorEl.classList.add("show");
                 return;
             }
-            if (Store.getUserByEmail(data.email)) {
-                shopErrorEl.textContent = "Email already in use.";
-                shopErrorEl.classList.add("show");
-                return;
-            }
-            if (Store.getUserByUsername(data.username)) {
-                shopErrorEl.textContent = "Username already taken.";
-                shopErrorEl.classList.add("show");
-                return;
-            }
             if (data.password.length < 6) {
                 shopErrorEl.textContent = "Password must be at least 6 characters.";
                 shopErrorEl.classList.add("show");
                 return;
             }
 
-            Store.addUser({
-                name:       data.name,
-                shopName:   data.shopName,
-                email:      data.email,
-                username:   data.username,
-                password:   data.password,
-                role:       "shop",
-                shopStatus: data.shopStatus
-            });
+            try {
+                await Api.adminUsers.createShop({
+                    name:       data.name,
+                    shopName:   data.shopName,
+                    email:      data.email,
+                    username:   data.username,
+                    password:   data.password,
+                    shopStatus: data.shopStatus
+                });
+            } catch (e) {
+                shopErrorEl.textContent = e.message;
+                shopErrorEl.classList.add("show");
+                return;
+            }
 
             closeShopModal();
-            renderShops();
-            renderCustomers();
+            await loadUsers();
         });
     }
 
@@ -317,10 +325,7 @@ Auth.requirePermission("users.view");
         if (!user) return;
         var update = { status: "active" };
         if (user.role === "shop") update.shopStatus = "active";
-        Store.updateUser(id, update);
-        renderBanned();
-        renderCustomers();
-        renderShops();
+        changeStatus(id, update);
     });
 
     // ── Create Admin Modal ───────────────────────────────────
@@ -354,7 +359,7 @@ Auth.requirePermission("users.view");
     });
 
     if (btnSubmit) {
-        btnSubmit.addEventListener("click", function () {
+        btnSubmit.addEventListener("click", async function () {
             errorEl.classList.remove("show");
 
             var data = {
@@ -371,7 +376,7 @@ Auth.requirePermission("users.view");
                 return;
             }
 
-            var result = Auth.createAdmin(data);
+            var result = await Auth.createAdmin(data);
 
             if (result.error) {
                 errorEl.textContent = result.error;
@@ -380,14 +385,11 @@ Auth.requirePermission("users.view");
             }
 
             closeModal();
-            renderAdmins();
+            await loadUsers();
         });
     }
 
     // ── Init ─────────────────────────────────────────────────
-    renderCustomers();
-    renderShops();
-    renderAdmins();
-    renderBanned();
+    loadUsers();
 
 })();

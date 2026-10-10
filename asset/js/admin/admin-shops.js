@@ -8,6 +8,11 @@ Auth.requirePermission("shops.view");
 
     var currentFilter = "all";
     var currentSearch = "";
+    var allShops = [];
+
+    function findShop(id) {
+        return allShops.filter(function (s) { return s.id === id; })[0] || null;
+    }
 
     function formatCurrency(amount) {
         return "$" + amount.toLocaleString("en-US");
@@ -41,7 +46,7 @@ Auth.requirePermission("shops.view");
     // ── Stats cards ────────────────────────────────────────
 
     function renderStats() {
-        var shops = Store.getShops();
+        var shops = allShops;
         var active = 0, pending = 0;
 
         for (var i = 0; i < shops.length; i++) {
@@ -58,7 +63,7 @@ Auth.requirePermission("shops.view");
     // ── Table rendering ────────────────────────────────────
 
     function getFilteredShops() {
-        var shops = Store.getShops();
+        var shops = allShops;
         var result = [];
 
         for (var i = 0; i < shops.length; i++) {
@@ -95,16 +100,13 @@ Auth.requirePermission("shops.view");
 
         for (var i = 0; i < shops.length; i++) {
             var s = shops[i];
-            var products = Store.getProductsByShop(s.id);
-            var revenue = Store.getShopRevenue(s.id);
-
             html += '<tr>'
                 + '<td>' + s.id + '</td>'
                 + '<td><a href="shop-detail.html?id=' + s.id + '" class="shop-name-link">' + escapeHtml(s.shopName) + '</a></td>'
                 + '<td>' + escapeHtml(s.name) + '</td>'
                 + '<td><span class="badge badge-' + s.shopStatus + '">' + s.shopStatus + '</span></td>'
-                + '<td>' + products.length + '</td>'
-                + '<td>' + formatCurrency(revenue) + '</td>'
+                + '<td>' + s.productCount + '</td>'
+                + '<td>' + formatCurrency(s.revenue) + '</td>'
                 + '<td>' + getActionButtons(s) + '</td>'
                 + '</tr>';
         }
@@ -146,27 +148,21 @@ Auth.requirePermission("shops.view");
         var approveButtons = document.querySelectorAll(".icon-btn-approve");
         for (var i = 0; i < approveButtons.length; i++) {
             approveButtons[i].addEventListener("click", function () {
-                var id = Number(this.getAttribute("data-id"));
-                Store.updateShopStatus(id, "active");
-                refresh();
+                changeStatus(Number(this.getAttribute("data-id")), "active");
             });
         }
 
         var suspendButtons = document.querySelectorAll(".icon-btn-suspend");
         for (var i = 0; i < suspendButtons.length; i++) {
             suspendButtons[i].addEventListener("click", function () {
-                var id = Number(this.getAttribute("data-id"));
-                Store.updateShopStatus(id, "suspended");
-                refresh();
+                changeStatus(Number(this.getAttribute("data-id")), "suspended");
             });
         }
 
         var reactivateButtons = document.querySelectorAll(".icon-btn-restore");
         for (var i = 0; i < reactivateButtons.length; i++) {
             reactivateButtons[i].addEventListener("click", function () {
-                var id = Number(this.getAttribute("data-id"));
-                Store.updateShopStatus(id, "active");
-                refresh();
+                changeStatus(Number(this.getAttribute("data-id")), "active");
             });
         }
 
@@ -213,11 +209,10 @@ Auth.requirePermission("shops.view");
     // ── Detail Modal (quick view) ──────────────────────────
 
     function openDetailModal(shopId) {
-        var shop = Store.getShopById(shopId);
+        var shop = findShop(shopId);
         if (!shop) return;
 
-        var products = Store.getProductsByShop(shop.id);
-        var revenue = Store.getShopRevenue(shop.id);
+        var revenue = shop.revenue;
 
         document.getElementById("modalTitle").textContent = "Shop Details";
 
@@ -253,7 +248,7 @@ Auth.requirePermission("shops.view");
             + '</div>'
             + '<div class="modal-detail-row">'
             + '<span class="modal-detail-label">Products</span>'
-            + '<span class="modal-detail-value">' + products.length + '</span>'
+            + '<span class="modal-detail-value">' + shop.productCount + '</span>'
             + '</div>'
             + '<div class="modal-detail-row">'
             + '<span class="modal-detail-label">Revenue</span>'
@@ -293,7 +288,7 @@ Auth.requirePermission("shops.view");
         document.getElementById("formShopId").value = "";
 
         if (shopId) {
-            var shop = Store.getShopById(shopId);
+            var shop = findShop(shopId);
             if (!shop) return;
             document.getElementById("formModalTitle").textContent = "Edit Shop";
             document.getElementById("formSubmitBtn").textContent = "Save Changes";
@@ -324,7 +319,7 @@ Auth.requirePermission("shops.view");
         if (e.target === this) closeFormModal();
     });
 
-    document.getElementById("formSubmitBtn").addEventListener("click", function () {
+    document.getElementById("formSubmitBtn").addEventListener("click", async function () {
         var shopId = document.getElementById("formShopId").value;
         var shopName = document.getElementById("formShopName").value.trim();
         var ownerName = document.getElementById("formOwnerName").value.trim();
@@ -339,49 +334,67 @@ Auth.requirePermission("shops.view");
             return;
         }
 
-        if (shopId) {
-            Store.updateUser(Number(shopId), {
-                shopName: shopName,
-                shopPhone: phone,
-                shopAddress: address,
-                shopDescription: description
-            });
-        } else {
-            var existing = Store.getUserByEmail(email);
-            if (existing) {
-                errorEl.textContent = "A user with this email already exists.";
-                return;
+        try {
+            if (shopId) {
+                await Api.adminShops.update(Number(shopId), {
+                    shopName: shopName,
+                    shopPhone: phone,
+                    shopAddress: address,
+                    shopDescription: description
+                });
+            } else {
+                var created = await Api.adminShops.create({
+                    name: ownerName,
+                    shopName: shopName,
+                    email: email,
+                    shopPhone: phone,
+                    shopAddress: address,
+                    shopDescription: description
+                });
+                // The owner needs this to sign in; it is not stored anywhere and cannot be shown again.
+                alert("Shop created (pending approval).\n\nUsername: " + created.shop.username +
+                      "\nTemporary password: " + created.temporaryPassword +
+                      "\n\nShare it with the owner now - it will not be shown again.");
             }
-            Store.addUser({
-                name: ownerName,
-                username: ownerName.toLowerCase().replace(/\s+/g, ""),
-                email: email,
-                password: "shop123",
-                role: "shop",
-                shopName: shopName,
-                shopPhone: phone,
-                shopAddress: address,
-                shopDescription: description,
-                shopStatus: "pending"
-            });
+        } catch (e) {
+            errorEl.textContent = e.message;
+            return;
         }
 
         closeFormModal();
-        refresh();
+        await load();
     });
 
 
-   
+
 
     function refresh() {
         renderStats();
         renderTable();
     }
 
+    async function load() {
+        try {
+            allShops = await Api.adminShops.list();
+        } catch (e) {
+            alert("Could not load shops: " + e.message);
+        }
+        refresh();
+    }
+
+    async function changeStatus(id, shopStatus) {
+        try {
+            await Api.adminShops.setStatus(id, shopStatus);
+        } catch (e) {
+            alert(e.message);
+        }
+        await load();
+    }
+
 
     // Khoi tao
 
     renderTopbar();
-    refresh();
+    load();
 
 })();

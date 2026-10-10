@@ -27,9 +27,19 @@ Api.products = (function () {
         };
     }
 
-    // Transitional: cart and orders still read products from the local store until they move to the API.
+    // addtocart.js builds cart lines from this browser-side cache of products the shopper has seen.
+    // Prices are only for display: checkout prices every line again on the server.
     function mirror(products) {
-        if (typeof Store !== "undefined" && Store.mergeProducts) Store.mergeProducts(products);
+        try {
+            var stored = JSON.parse(localStorage.getItem("ecshop_products") || "[]");
+            var index = {};
+            stored.forEach(function (p, i) { index[p.id] = i; });
+            products.forEach(function (p) {
+                if (index[p.id] === undefined) { index[p.id] = stored.length; stored.push(p); }
+                else { stored[index[p.id]] = p; }
+            });
+            localStorage.setItem("ecshop_products", JSON.stringify(stored));
+        } catch (e) { /* storage full or blocked: this product just cannot be added to the cart */ }
         return products;
     }
 

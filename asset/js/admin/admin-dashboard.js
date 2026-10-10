@@ -14,6 +14,8 @@
         _cachedOrders: []
     };
 
+    var dash = null; // overview + reports numbers from /api/admin/dashboard
+
     var revenueChartInstance = null;
     var trendChartInstance = null;
 
@@ -80,27 +82,20 @@
 
 
     function renderStatCards() {
-        var shops     = Store.getShops();
-        var products  = Store.getProducts();
-        var orders    = Store.getOrders();
-        var customers = Store.getCustomers();
-        var revenue   = Store.getTotalRevenue();
-        var statusCounts = Store.getOrderCountByStatus();
-
-        document.getElementById("statShops").textContent = shops.length;
-        document.getElementById("statProducts").textContent = products.length;
-        document.getElementById("statOrders").textContent = orders.length;
-        document.getElementById("statRevenue").textContent = formatCurrency(revenue);
-        document.getElementById("statCustomers").textContent = customers.length;
-        document.getElementById("statPending").textContent = statusCounts.pending;
+        document.getElementById("statShops").textContent = dash.shops;
+        document.getElementById("statProducts").textContent = dash.products;
+        document.getElementById("statOrders").textContent = dash.orders;
+        document.getElementById("statRevenue").textContent = formatCurrency(dash.revenue);
+        document.getElementById("statCustomers").textContent = dash.customers;
+        document.getElementById("statPending").textContent = dash.statusCounts.pending;
     }
 
 
     //Order status stats
 
     function renderOrderStatus() {
-        var counts = Store.getOrderCountByStatus();
-        var total  = Store.getOrders().length;
+        var counts = dash.statusCounts;
+        var total  = dash.orders;
         var container = document.getElementById("orderStatusList");
         var statuses = ["pending", "confirmed", "shipped", "delivered", "cancelled"];
         var html = "";
@@ -127,7 +122,7 @@
     // top products
 
     function renderTopProducts() {
-        var topItems = Store.getTopProducts(5);
+        var topItems = dash.topProducts;
         var container = document.getElementById("topProductsList");
         var html = "";
 
@@ -157,12 +152,16 @@
     //Product category stats
 
     function renderCategoryBreakdown() {
-        var counts = Store.getProductCountByCategory();
+        var counts = dash.categoryCounts;
         var container = document.getElementById("categoryList");
-        var total = Store.getProducts().length;
+        var total = dash.products;
 
         var categoryIcons = {
             smartphone: "fa-mobile-screen",
+            wearables:  "fa-clock",
+            laptops:    "fa-laptop",
+            audio:      "fa-headphones",
+            cameras:    "fa-camera",
             laptop:     "fa-laptop",
             tablet:     "fa-tablet-screen-button",
             headphone:  "fa-headphones",
@@ -199,22 +198,15 @@
     // Order table 
 
     function renderRecentOrders() {
-        var orders = Store.getOrders();
         var tbody  = document.getElementById("recentOrdersBody");
-
-        orders.sort(function (a, b) {
-            return new Date(b.createdAt) - new Date(a.createdAt);
-        });
-        var recent = orders.slice(0, 5);
+        var recent = dash.recentOrders;
 
         var html = "";
 
         for (var i = 0; i < recent.length; i++) {
             var o = recent[i];
-            var customer = Store.getUserById(Store.getOrderCustomerId(o));
-            var shop = Store.getShopById(o.shopId);
-            var customerName = customer ? escapeHtml(customer.name) : "Unknown";
-            var shopName = shop ? escapeHtml(shop.shopName) : "Unknown";
+            var customerName = o.customer ? escapeHtml(o.customer.name) : "Unknown";
+            var shopName = o.shop ? escapeHtml(o.shop.shopName || "Unknown") : "Unknown";
 
             html += '<tr>'
                   +   '<td><span class="order-id">#' + o.id + '</span></td>'
@@ -229,9 +221,7 @@
         tbody.innerHTML = html;
     }
 
-    function renderFinanceStats(filters) {
-        var summary = Store.getFinanceSummary(filters);
-
+    function renderFinanceStats(summary) {
         document.getElementById("financeTotalRevenue").textContent = formatCurrency(summary.totalRevenue);
         document.getElementById("financePaidOrders").textContent = summary.paidOrders;
         document.getElementById("financeAvgOrder").textContent = formatCurrency(summary.avgOrderValue);
@@ -341,8 +331,7 @@
         });
     }
 
-    function renderRevenueByShop(filters) {
-        var rows = Store.getRevenueByShop(filters);
+    function renderRevenueByShop(rows) {
         var tbody = document.getElementById("financeRevenueBody");
 
         if (!tbody) return;
@@ -388,14 +377,11 @@
             var html = "";
             for (var i = 0; i < pageOrders.length; i++) {
                 var order = pageOrders[i];
-                var customer = Store.getUserById(Store.getOrderCustomerId(order));
-                var shop = Store.getShopById(order.shopId);
-
                 html += "<tr>"
                     + '<td><span class="order-id">#' + order.id + '</span></td>'
-                    + '<td>' + escapeHtml(customer ? customer.name : "Unknown") + '</td>'
-                    + '<td>' + escapeHtml(shop ? (shop.shopName || shop.name) : "Unknown") + '</td>'
-                    + '<td>' + ((order.items && order.items.length) || 0) + '</td>'
+                    + '<td>' + escapeHtml(order.customer ? order.customer.name : "Unknown") + '</td>'
+                    + '<td>' + escapeHtml(order.shop ? (order.shop.shopName || "Unknown") : "Unknown") + '</td>'
+                    + '<td>' + (order.itemCount || 0) + '</td>'
                     + '<td>' + formatCurrency(Number(order.total) || 0) + '</td>'
                     + '<td>' + formatDate(order.createdAt) + '</td>'
                     + "</tr>";
@@ -420,14 +406,11 @@
 
         for (var i = 0; i < orders.length; i++) {
             var order = orders[i];
-            var customer = Store.getUserById(Store.getOrderCustomerId(order));
-            var shop = Store.getShopById(order.shopId);
-
             rows.push([
                 "#" + order.id,
-                customer ? customer.name : "Unknown",
-                shop ? (shop.shopName || shop.name) : "Unknown",
-                (order.items && order.items.length) || 0,
+                order.customer ? order.customer.name : "Unknown",
+                order.shop ? (order.shop.shopName || "Unknown") : "Unknown",
+                order.itemCount || 0,
                 "$" + (Number(order.total) || 0),
                 order.status,
                 order.createdAt ? order.createdAt.split("T")[0] : ""
@@ -456,9 +439,14 @@
         URL.revokeObjectURL(url);
     }
 
-    function populateFinanceShopFilter() {
+    async function populateFinanceShopFilter() {
         var select = document.getElementById("financeShopFilter");
-        var revenueRows = Store.getRevenueByShop({ shopId: "all", dateFrom: null, dateTo: null });
+        var revenueRows = [];
+        try {
+            revenueRows = (await Api.adminStats.finance({ shopId: "all" })).revenueByShop;
+        } catch (e) {
+            revenueRows = [];
+        }
         var options = ['<option value="all">All Shops</option>'];
 
         for (var i = 0; i < revenueRows.length; i++) {
@@ -470,12 +458,19 @@
         financeState.shopsLoaded = true;
     }
 
-    function refreshFinance() {
+    async function refreshFinance() {
         var filters = getFinanceFilters();
-        var orders  = Store.getTransactions(filters);
+        var finance;
+        try {
+            finance = await Api.adminStats.finance(filters);
+        } catch (e) {
+            alert("Could not load finance data: " + e.message);
+            return;
+        }
+        var orders = finance.transactions;
         financeState._cachedOrders = orders;
-        renderFinanceStats(filters);
-        renderRevenueByShop(filters);
+        renderFinanceStats(finance.summary);
+        renderRevenueByShop(finance.revenueByShop);
         renderTrendChart(orders, financeState.timeRange);
         renderTransactions(orders, filters);
     }
@@ -524,22 +519,18 @@
     }
 
     function renderReportsTab() {
-        var orders = Store.getOrders();
-        var customers = Store.getCustomers();
-        var shops = Store.getShops();
-        var products = Store.getProducts();
-        var statusCounts = Store.getOrderCountByStatus();
+        var statusCounts = dash.statusCounts;
         var summaryBody = document.getElementById("reportSummaryBody");
 
         var metrics = [
-            { label: "Total Customers", value: customers.length },
-            { label: "Total Shops", value: shops.length },
-            { label: "Total Products", value: products.length },
-            { label: "Total Orders", value: orders.length },
+            { label: "Total Customers", value: dash.customers },
+            { label: "Total Shops", value: dash.shops },
+            { label: "Total Products", value: dash.products },
+            { label: "Total Orders", value: dash.orders },
             { label: "Pending Orders", value: statusCounts.pending || 0 },
             { label: "Delivered Orders", value: statusCounts.delivered || 0 },
             { label: "Cancelled Orders", value: statusCounts.cancelled || 0 },
-            { label: "Total Revenue", value: formatCurrency(Store.getTotalRevenue()) }
+            { label: "Total Revenue", value: formatCurrency(dash.revenue) }
         ];
 
         var html = "";
@@ -552,19 +543,22 @@
         summaryBody.innerHTML = html;
     }
 
-    function exportOrdersCsv() {
-        var orders = Store.getOrders();
+    async function exportOrdersCsv() {
+        var orders;
+        try {
+            orders = await Api.orders.adminList();
+        } catch (e) {
+            alert("Could not export orders: " + e.message);
+            return;
+        }
         var rows = [["Order ID", "Customer", "Shop", "Total", "Status", "Created At"]];
 
         for (var i = 0; i < orders.length; i++) {
             var order = orders[i];
-            var customer = Store.getUserById(Store.getOrderCustomerId(order));
-            var shop = Store.getShopById(order.shopId);
-
             rows.push([
                 order.id,
-                customer ? customer.name : "Unknown",
-                shop ? shop.shopName : "Unknown",
+                order.customer ? order.customer.name : "Unknown",
+                order.shop ? order.shop.shopName : "Unknown",
                 order.total,
                 order.status,
                 formatDate(order.createdAt)
@@ -674,15 +668,25 @@
 
     // khoi tao
 
-    renderTopbarUser();
-    renderStatCards();
-    renderOrderStatus();
-    renderTopProducts();
-    renderCategoryBreakdown();
-    renderRecentOrders();
-    renderReportsTab();
-    bindDashboardTabs();
-    bindFinanceEvents();
-    bindReportActions();
+    async function init() {
+        renderTopbarUser();
+        try {
+            dash = await Api.adminStats.dashboard();
+        } catch (e) {
+            alert("Could not load the dashboard: " + e.message);
+            return;
+        }
+        renderStatCards();
+        renderOrderStatus();
+        renderTopProducts();
+        renderCategoryBreakdown();
+        renderRecentOrders();
+        renderReportsTab();
+        bindDashboardTabs();
+        bindFinanceEvents();
+        bindReportActions();
+    }
+
+    init();
 
 })();

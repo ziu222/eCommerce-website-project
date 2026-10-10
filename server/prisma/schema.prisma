@@ -74,6 +74,7 @@ model User {
   adminRole       AdminRole?
   status          String      @default("active")
   avatar          String?
+  coverPhoto      String?
   shopName        String?
   shopDescription String?
   shopAddress     String?

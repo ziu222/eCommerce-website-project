@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Product } from '../generated/prisma/client.js';
 import { toCents } from '../common/money.js';
+import { NotificationsService, type SystemNotification } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
   AdminListProductsQuery,
@@ -88,7 +89,10 @@ export function toProductDto(p: WithShop): ProductDto {
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   private async paged(where: Prisma.ProductWhereInput, orderBy: Prisma.ProductOrderByWithRelationInput[], page: number, limit: number): Promise<Page<ProductDto>> {
     const [rows, total] = await this.prisma.$transaction([
@@ -245,6 +249,20 @@ export class ProductsService {
       data: { adminStatus: to, adminNote: note, reviewedBy: reviewer, reviewedAt: new Date() },
     });
     if (!count) throw new ConflictException(conflict);
-    return toProductDto(await this.prisma.product.findUniqueOrThrow({ where: { id }, include: WITH_SHOP }));
+    const updated = await this.prisma.product.findUniqueOrThrow({ where: { id }, include: WITH_SHOP });
+    await this.notifications.notify(decisionNotice(updated, from === 'suspended' && to === 'approved' ? 'restored' : to, note));
+    return toProductDto(updated);
   }
+}
+
+/** What the shop is told when an admin decides on one of its products. */
+function decisionNotice(p: Product, event: 'approved' | 'rejected' | 'suspended' | 'restored', note: string): SystemNotification {
+  const reason = note || 'No note provided.';
+  const notice = {
+    approved: { type: 'info', title: 'Product approved', message: `Your product "${p.name}" has been approved and is now visible to customers.` },
+    rejected: { type: 'warning', title: 'Product rejected', message: `Your product "${p.name}" was rejected. Reason: ${reason}` },
+    suspended: { type: 'warning', title: 'Product suspended', message: `Your product "${p.name}" has been suspended. Reason: ${reason}` },
+    restored: { type: 'info', title: 'Product restored', message: `Your product "${p.name}" has been restored and is live again.` },
+  } as const;
+  return { targetRole: 'shop', targetId: p.shopId, ...notice[event] };
 }
