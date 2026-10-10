@@ -11,7 +11,8 @@ Auth.requirePermission("orders.view");
         dateFrom: "",
         dateTo: "",
         searchText: "",
-        selectedOrderId: null
+        selectedOrderId: null,
+        orders: []
     };
 
     function formatCurrency(amount) {
@@ -46,7 +47,7 @@ Auth.requirePermission("orders.view");
     }
 
     function renderStats() {
-        var orders = Store.getOrders();
+        var orders = state.orders;
         var pending = 0;
         var delivered = 0;
         var cancelled = 0;
@@ -65,12 +66,19 @@ Auth.requirePermission("orders.view");
     }
 
     function renderShopFilter() {
-        var shops = Store.getShops();
+        var seen = {};
+        var shops = [];
+        for (var k = 0; k < state.orders.length; k++) {
+            var s = state.orders[k].shop;
+            if (s && !seen[s.id]) { seen[s.id] = true; shops.push(s); }
+        }
+        shops.sort(function (a, b) { return a.id - b.id; });
+
         var select = document.getElementById("shopFilter");
         var html = '<option value="all">All Shops</option>';
 
         for (var i = 0; i < shops.length; i++) {
-            html += '<option value="' + shops[i].id + '">' + escapeHtml(shops[i].shopName || shops[i].name || "Unknown") + "</option>";
+            html += '<option value="' + shops[i].id + '">' + escapeHtml(shops[i].shopName || "Unknown") + "</option>";
         }
 
         select.innerHTML = html;
@@ -78,7 +86,7 @@ Auth.requirePermission("orders.view");
     }
 
     function getFilteredOrders() {
-        var orders = Store.getOrders().slice();
+        var orders = state.orders.slice();
         var results = [];
 
         orders.sort(function (a, b) {
@@ -87,11 +95,8 @@ Auth.requirePermission("orders.view");
 
         for (var i = 0; i < orders.length; i++) {
             var order = orders[i];
-            var customer = Store.getUserById(Store.getOrderCustomerId(order));
-            var shop = Store.getShopById(order.shopId);
-
-            var customerName = customer ? customer.name : "";
-            var shopName = shop ? (shop.shopName || shop.name || "") : "";
+            var customerName = order.customer ? order.customer.name : "";
+            var shopName = order.shop ? (order.shop.shopName || "") : "";
             var searchTarget = ("#" + order.id + " " + customerName + " " + shopName).toLowerCase();
             var orderDate = order.createdAt || "";
 
@@ -126,10 +131,8 @@ Auth.requirePermission("orders.view");
         var html = "";
         for (var i = 0; i < orders.length; i++) {
             var order = orders[i];
-            var customer = Store.getUserById(Store.getOrderCustomerId(order));
-            var shop = Store.getShopById(order.shopId);
-            var customerName = customer ? customer.name : "Unknown";
-            var shopName = shop ? (shop.shopName || shop.name || "Unknown") : "Unknown";
+            var customerName = order.customer ? order.customer.name : "Unknown";
+            var shopName = order.shop ? (order.shop.shopName || "Unknown") : "Unknown";
             var itemCount = order.items ? order.items.length : 0;
 
             html += "<tr>"
@@ -156,10 +159,9 @@ Auth.requirePermission("orders.view");
 
         for (var i = 0; i < order.items.length; i++) {
             var item = order.items[i];
-            var product = Store.getProductById(item.productId);
-            var name = product ? product.name : "Unknown product";
+            var name = item.name || "Unknown product";
             var qty = Number(item.qty || 0);
-            var price = Number(item.price || (product ? product.price : 0));
+            var price = Number(item.price || 0);
             var subtotal = qty * price;
 
             html += "<tr>"
@@ -190,17 +192,14 @@ Auth.requirePermission("orders.view");
     }
 
     function openOrderModal(orderId) {
-        var order = Store.getOrderById(Number(orderId));
+        var order = state.orders.find(function (o) { return o.id === Number(orderId); });
         if (!order) return;
 
         state.selectedOrderId = order.id;
 
-        var customer = Store.getUserById(Store.getOrderCustomerId(order));
-        var shop = Store.getShopById(order.shopId);
-
-        var customerName = customer ? customer.name : "Unknown";
-        var customerEmail = customer ? customer.email : "-";
-        var shopName = shop ? (shop.shopName || shop.name || "Unknown") : "Unknown";
+        var customerName = order.customer ? order.customer.name : "Unknown";
+        var customerEmail = order.customer ? order.customer.email : "-";
+        var shopName = order.shop ? (order.shop.shopName || "Unknown") : "Unknown";
 
         document.getElementById("orderModalTitle").textContent = "Order #" + order.id;
 
@@ -220,10 +219,19 @@ Auth.requirePermission("orders.view");
 
         var btnUpdate = document.getElementById("btnUpdateOrderStatus");
         if (btnUpdate) {
-            btnUpdate.addEventListener("click", function() {
+            btnUpdate.addEventListener("click", async function() {
                 var newStatus = document.getElementById("orderStatusSelect").value;
-                var updated = Store.updateOrderStatus(state.selectedOrderId, newStatus, "admin");
-                if (updated) {
+                var result = await Api.orders.adminSetStatus(state.selectedOrderId, newStatus);
+                if (!result.success) {
+                    alert(result.error);
+                    document.getElementById("orderStatusSelect").value = order.status;
+                    return;
+                }
+                if (result.success) {
+                    for (var n = 0; n < state.orders.length; n++) {
+                        if (state.orders[n].id === result.order.id) state.orders[n] = result.order;
+                    }
+                    order = result.order;
                     var badge = document.querySelector("#orderModalBody .badge");
                     if (badge) {
                         badge.className = "badge badge-" + newStatus;
@@ -319,10 +327,19 @@ Auth.requirePermission("orders.view");
 
     window.closeOrderModal = closeOrderModal;
 
+    async function load() {
+        try {
+            state.orders = await Api.orders.adminList();
+        } catch (e) {
+            alert("Could not load orders: " + e.message);
+        }
+        renderStats();
+        renderShopFilter();
+        renderOrdersTable();
+    }
+
     renderTopbarUser();
-    renderStats();
-    renderShopFilter();
-    renderOrdersTable();
     bindEvents();
+    load();
 
 })();
