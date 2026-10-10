@@ -30,6 +30,13 @@ var Api = (function () {
         return data;
     }
 
-    return { ApiError: ApiError, request: request };
+    // Shop-authored text (names, descriptions) must never reach innerHTML unescaped.
+    function escapeHtml(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    }
+
+    return { ApiError: ApiError, request: request, escapeHtml: escapeHtml };
 
 })();
