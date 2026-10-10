@@ -98,12 +98,9 @@
                     <div class="panel-head"><h2 id="adTitle">Addresses</h2><p class="muted">Where we deliver your orders. The default one is picked at checkout.</p></div>
                     <form class="card block addr-form" id="addrForm" hidden novalidate>
                         <h3 id="addrFormTitle">New address</h3>
-                        <div class="form-grid">
+                        <div class="form-grid" id="afGrid">
                             <div class="field"><label for="afLabel">Label <span class="muted">(optional)</span></label><input class="input" id="afLabel" maxlength="40" placeholder="Home, Office"></div>
-                            <div class="field"><label for="afRecipient">Full name</label><input class="input" id="afRecipient" maxlength="100" autocomplete="name"></div>
-                            <div class="field"><label for="afPhone">Phone</label><input class="input" id="afPhone" maxlength="20" autocomplete="tel" inputmode="tel"></div>
-                            <div class="field"><label for="afCity">City</label><input class="input" id="afCity" maxlength="100" autocomplete="address-level2"></div>
-                            <div class="field field--wide"><label for="afLine">Street and number</label><input class="input" id="afLine" maxlength="200" autocomplete="address-line1"></div>
+                            <div class="field"><label for="afRecipient">Full name</label><input class="input" id="afRecipient" maxlength="100" autocomplete="name" placeholder="Nguyễn Văn A"></div>
                         </div>
                         <label class="check"><input type="checkbox" id="afDefault"> Use as my default address</label>
                         <p class="error" id="afError" role="alert" hidden></p>
@@ -192,6 +189,7 @@
     <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
+    <script src="../asset/js/user/vn-address.js"></script>
     <script src="../asset/js/user/orders.js"></script>
     <script src="../asset/js/user/profile.js"></script>
     <script src="../asset/js/api/support.js"></script>

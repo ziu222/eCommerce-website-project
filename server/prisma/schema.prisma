@@ -293,6 +293,7 @@ model Address {
   recipient String
   phone     String
   line1     String
+  ward      String   @default("")
   city      String
   isDefault Boolean  @default(false)
   createdAt DateTime @default(now())

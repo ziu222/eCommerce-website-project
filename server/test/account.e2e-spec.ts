@@ -27,7 +27,7 @@ describe('customer account: addresses, wishlist, membership, sessions', () => {
   const tranthib = () => login('tranthib', 'user123'); // id 3
   const apple = () => login('apple', 'shop123'); // shop 5
 
-  const home = { label: 'Home', recipient: 'Le Van C', phone: '0901 234 567', line1: '12 Nguyen Hue', city: 'Ho Chi Minh City' };
+  const home = { label: 'Home', recipient: 'Le Van C', phone: '0901 234 567', line1: '12 Nguyen Hue', ward: 'Phuong Sai Gon', city: 'Ho Chi Minh City' };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -96,11 +96,11 @@ describe('customer account: addresses, wishlist, membership, sessions', () => {
       const productId = (await prisma.product.create({ data: { shopId: 5, name: 'Ship test', price: '10.00', imageUrl: 'x.png', category: 'audio', stock: 5, adminStatus: 'approved' } })).id;
 
       const res = await agent.post('/api/orders/checkout').send({ paymentMethod: 'cod', addressId: addr.id, items: [{ productId, qty: 1 }] }).expect(201);
-      expect(res.body.orders[0].shipping).toEqual({ name: 'Le Van C', phone: '0901 234 567', address: '12 Nguyen Hue, Ho Chi Minh City' });
+      expect(res.body.orders[0].shipping).toEqual({ name: 'Le Van C', phone: '0901 234 567', address: '12 Nguyen Hue, Phuong Sai Gon, Ho Chi Minh City' });
 
       // editing the address book later does not rewrite the order
       await agent.patch(`/api/users/me/addresses/${addr.id}`).send({ city: 'Da Nang' }).expect(200);
-      expect((await prisma.order.findUniqueOrThrow({ where: { id: res.body.orders[0].id } })).shipAddress).toBe('12 Nguyen Hue, Ho Chi Minh City');
+      expect((await prisma.order.findUniqueOrThrow({ where: { id: res.body.orders[0].id } })).shipAddress).toBe('12 Nguyen Hue, Phuong Sai Gon, Ho Chi Minh City');
 
       await (await tranthib()).post('/api/orders/checkout').send({ paymentMethod: 'cod', addressId: addr.id, items: [{ productId, qty: 1 }] }).expect(404);
     });

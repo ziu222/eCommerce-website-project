@@ -15,12 +15,12 @@ export const TIERS = [
 ] as const;
 
 function toAddress(a: Address) {
-  return { id: a.id, label: a.label, recipient: a.recipient, phone: a.phone, line1: a.line1, city: a.city, isDefault: a.isDefault };
+  return { id: a.id, label: a.label, recipient: a.recipient, phone: a.phone, line1: a.line1, ward: a.ward, city: a.city, isDefault: a.isDefault };
 }
 
-/** One line for the order record, e.g. "12 Nguyen Hue, Ho Chi Minh City". */
-export function addressLine(a: Pick<Address, 'line1' | 'city'>): string {
-  return `${a.line1}, ${a.city}`;
+/** One line for the order record, e.g. "12 Nguyễn Huệ, Phường Sài Gòn, Thành phố Hồ Chí Minh". */
+export function addressLine(a: Pick<Address, 'line1' | 'ward' | 'city'>): string {
+  return [a.line1, a.ward, a.city].filter(Boolean).join(', ');
 }
 
 @Injectable()
@@ -41,7 +41,7 @@ export class AccountService {
       // the first address is the default one whatever was asked
       const makeDefault = count === 0 || dto.isDefault === true;
       if (makeDefault) await tx.address.updateMany({ where: { userId, isDefault: true }, data: { isDefault: false } });
-      const row = await tx.address.create({ data: { userId, label: dto.label ?? '', recipient: dto.recipient, phone: dto.phone, line1: dto.line1, city: dto.city, isDefault: makeDefault } });
+      const row = await tx.address.create({ data: { userId, label: dto.label ?? '', recipient: dto.recipient, phone: dto.phone, line1: dto.line1, ward: dto.ward ?? '', city: dto.city, isDefault: makeDefault } });
       return toAddress(row);
     });
   }

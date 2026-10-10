@@ -11,7 +11,7 @@ var CartAddress = (function () {
 
     function line(a) {
         return '<strong>' + esc(a.recipient) + "</strong>" + (a.label ? ' <span class="badge">' + esc(a.label) + "</span>" : "") +
-            '<span class="muted">' + esc(a.phone) + "</span><span>" + esc(a.line1) + ", " + esc(a.city) + "</span>";
+            '<span class="muted">' + esc(a.phone) + "</span><span>" + esc(VNAddress.line(a)) + "</span>";
     }
 
     function render() {
@@ -33,13 +33,12 @@ var CartAddress = (function () {
         } else {
             box.innerHTML = head + "</div>" +
                 '<form class="deliver-form" id="addrForm" novalidate>' +
-                '<div class="field"><label for="adRecipient">Full name</label><input class="input" id="adRecipient" autocomplete="name" required></div>' +
-                '<div class="field"><label for="adPhone">Phone</label><input class="input" id="adPhone" autocomplete="tel" inputmode="tel" required></div>' +
-                '<div class="field"><label for="adLine">Street and number</label><input class="input" id="adLine" autocomplete="address-line1" required></div>' +
-                '<div class="field"><label for="adCity">City</label><input class="input" id="adCity" autocomplete="address-level2" required></div>' +
+                '<div class="field"><label for="adRecipient">Full name</label><input class="input" id="adRecipient" maxlength="100" autocomplete="name" placeholder="Nguyễn Văn A" required></div>' +
+                VNAddress.html("ad") +
                 '<p class="error" id="adError" role="alert" hidden></p>' +
                 '<div class="deliver-actions"><button type="submit" class="btn btn-primary btn-sm">Save address</button>' +
                 (list.length ? '<button type="button" class="btn btn-ghost btn-sm" data-addr="view">Cancel</button>' : "") + "</div></form>";
+            VNAddress.fill(box, "ad", null);
             box.querySelector("#adRecipient").focus();
         }
     }
@@ -66,11 +65,14 @@ var CartAddress = (function () {
         });
         box.addEventListener("submit", async function (e) {
             e.preventDefault();
-            var v = function (id) { return box.querySelector(id).value.trim(); };
             var err = box.querySelector("#adError");
-            if (!v("#adRecipient") || !v("#adPhone") || !v("#adLine") || !v("#adCity")) { err.textContent = "Fill in every field."; err.hidden = false; return; }
+            err.hidden = true;
+            var name = box.querySelector("#adRecipient").value.trim();
+            var place = await VNAddress.read(box, "ad");
+            if (!name) place = { error: "Enter the full name of who receives the order." };
+            if (place.error) { err.textContent = place.error; err.hidden = false; return; }
             try {
-                var added = await Api.account.addresses.add({ recipient: v("#adRecipient"), phone: v("#adPhone"), line1: v("#adLine"), city: v("#adCity") });
+                var added = await Api.account.addresses.add({ recipient: name, phone: place.phone, ward: place.ward, line1: place.line1, city: place.city });
                 list.push(added);
                 chosen = added;
                 mode = "view";

@@ -129,6 +129,18 @@ button { cursor: pointer; }
 /* ---------- Forms ---------- */
 
 .field { display: grid; gap: 6px; }
+
+/* address forms (vn-address.js): +84 in front of the phone box, suggestion list under province / ward */
+.phone-box { display: flex; }
+.phone-box .input { min-width: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; }
+.phone-code { display: inline-flex; align-items: center; padding: 0 14px; border: 1px solid var(--line-2); border-right: 0; border-radius: var(--r) 0 0 var(--r); background: var(--surface-2); color: var(--ink-2); font-weight: 600; }
+.input[readonly] { background: var(--surface-2); color: var(--ink-2); }
+.combo { position: relative; }
+.combo-list { position: absolute; top: 100%; left: 0; right: 0; z-index: 30; max-height: 264px; margin: 6px 0 0; padding: 6px; overflow-y: auto; list-style: none; border: 1px solid var(--line-2); border-radius: var(--r); background: var(--surface); box-shadow: 0 12px 28px rgba(21, 27, 26, 0.12); }
+.combo-list[hidden] { display: none; }
+.combo-list li { padding: 9px 12px; border-radius: var(--r-sm); font-size: 14px; cursor: pointer; }
+.combo-list [role=option]:hover, .combo-list [aria-selected="true"] { background: var(--brand-soft); color: var(--brand-2); }
+.combo-list .combo-empty { color: var(--ink-3); cursor: default; }
 .field > label, .label, .label-row label { font-size: 14px; font-weight: 600; color: var(--ink); }
 .field .hint { font-size: 13px; color: var(--ink-3); }
 .field .error { font-size: 13px; color: var(--danger); }
