@@ -37,11 +37,22 @@
 
     // ── Render ────────────────────────────────────────────────
 
+    // Latest wallet data from the server, rendered by renderBalance / renderHistory
+    var snapshot = { balance: 0, transactions: [] };
+
+    async function refresh() {
+        try {
+            snapshot = await Api.wallet.get();
+        } catch (e) {
+            if (e.status === 401 || e.status === 403) { window.location.href = "login.html"; return; }
+            showToast(e.message);
+        }
+        renderBalance();
+        renderHistory();
+    }
+
     function renderBalance() {
-        var user = getCurrentUser();
-        if (!user) return;
-        var bal = Store.getWalletBalance(user.id);
-        var display = fmt(bal);
+        var display = fmt(snapshot.balance);
 
         var heroEl    = document.getElementById("heroBalance");
         var balanceEl = document.getElementById("walletBalance");
@@ -50,9 +61,7 @@
     }
 
     function renderHistory() {
-        var user = getCurrentUser();
-        if (!user) return;
-        var txs  = Store.getWalletTransactions(user.id);
+        var txs  = snapshot.transactions;
         var list = document.getElementById("txList");
         if (!list) return;
 
@@ -174,16 +183,19 @@
         var btnConfirm = document.getElementById("btnConfirm");
         if (!btnConfirm) return;
 
-        btnConfirm.addEventListener("click", function () {
+        btnConfirm.addEventListener("click", async function () {
             var user = getCurrentUser();
             if (!user) return;
 
-            var desc = "Nạp tiền qua " + selectedLabel;
-            Store.topUpWallet(user.id, selectedAmount, desc);
+            try {
+                await Api.wallet.topUp(selectedAmount, selectedGateway);
+            } catch (e) {
+                showToast(e.message);
+                return;
+            }
 
             // Refresh UI
-            renderBalance();
-            renderHistory();
+            await refresh();
             resetDeposit();
 
             var modalMessage = "Bạn đã nạp " + fmt(selectedAmount) + " vào ví thành công.";
@@ -234,9 +246,7 @@
             return;
         }
 
-        Store.seed();
-        renderBalance();
-        renderHistory();
+        refresh();
         setupPresets();
         setupNavigation();
         setupConfirm();

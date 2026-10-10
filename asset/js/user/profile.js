@@ -1,4 +1,7 @@
-document.addEventListener("DOMContentLoaded", function () {
+// Wallet data from the server, read by renderBalance and getRank
+var walletSnapshot = { balance: 0, transactions: [] };
+
+document.addEventListener("DOMContentLoaded", async function () {
 
     // ── Auth guard ────────────────────────────────────────
     var session = getCurrentUser();
@@ -14,6 +17,8 @@ document.addEventListener("DOMContentLoaded", function () {
         window.location.href = "login.html";
         return;
     }
+
+    try { walletSnapshot = await Api.wallet.get(); } catch (e) { /* shown as an empty wallet */ }
 
     // ── Render profile ────────────────────────────────────
     renderProfile(fullUser);
@@ -179,7 +184,7 @@ function renderCoverPhoto(user) {
 }
 
 function renderBalance(userId) {
-    var balance = Store.getWalletBalance(userId) || 0;
+    var balance = walletSnapshot.balance || 0;
     var el = document.getElementById("profileBalance");
     if (el) el.textContent = "$" + Number(balance).toLocaleString("en-US", { minimumFractionDigits: 2 });
 }
@@ -251,7 +256,7 @@ function updateSession(user) {
 }
 
 function getRank(userId) {
-    var txns = Store.getWalletTransactions(userId) || [];
+    var txns = walletSnapshot.transactions || [];
     var spent = txns
         .filter(function (t) { return t.type === "payment"; })
         .reduce(function (sum, t) { return sum + Math.abs(t.amount); }, 0);
