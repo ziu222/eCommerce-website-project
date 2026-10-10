@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EC SHOP - Support Inbox</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../asset/css/admin-dashboard.css">
+    <link rel="stylesheet" href="../asset/css/admin-support.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <a href="dashboard.html" class="sidebar-logo-text">EC SHOP</a>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="support.html" class="nav-item active" data-permission="support.view"><i class="fa-solid fa-headset"></i> Support</a>
+        <a href="shops-manage.html" class="nav-item"><i class="fa-solid fa-store"></i> Shops</a>
+        <a href="products.html" class="nav-item"><i class="fa-solid fa-box"></i> Products</a>
+        <a href="orders-manage.html" class="nav-item"><i class="fa-solid fa-receipt"></i> Orders</a>
+        <a href="users-manage.html" class="nav-item"><i class="fa-solid fa-users"></i> Users</a>
+        <a href="notifications.html" class="nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+        <a href="coupons.html" class="nav-item"><i class="fa-solid fa-tag"></i> Coupons</a>
+    </nav>
+</aside>
+
+<header class="topbar">
+    <h1 class="topbar-title">Support Inbox</h1>
+    <div class="topbar-right">
+        <div class="topbar-user">
+            <div class="topbar-avatar" id="topbarAvatar">A</div>
+            <span id="topbarUserName">Admin</span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<main class="main-content support-layout">
+
+    <section class="support-list" aria-label="Conversations">
+        <div class="filter-tabs support-tabs" id="supportTabs">
+            <button class="filter-tab active" type="button" data-status="open">Waiting <span class="support-count" id="countOpen">0</span></button>
+            <button class="filter-tab" type="button" data-status="answered">Answered <span class="support-count" id="countAnswered">0</span></button>
+            <button class="filter-tab" type="button" data-status="closed">Closed</button>
+            <button class="filter-tab" type="button" data-status="">All</button>
+        </div>
+        <div class="support-items" id="threadList"></div>
+        <p class="support-empty" id="listEmpty" hidden>No conversations here.</p>
+    </section>
+
+    <section class="support-detail" aria-label="Conversation">
+        <div class="support-placeholder" id="detailPlaceholder">
+            <i class="fa-solid fa-headset"></i>
+            <p>Pick a conversation to read and reply.</p>
+        </div>
+
+        <div class="support-thread" id="threadPane" hidden>
+            <header class="support-thread-head">
+                <div>
+                    <h2 id="threadSubject"></h2>
+                    <p class="support-meta" id="threadMeta"></p>
+                </div>
+                <div class="support-thread-actions">
+                    <span class="badge" id="threadStatus"></span>
+                    <button type="button" class="btn-danger" id="btnClose"><i class="fa-solid fa-check"></i> Close</button>
+                </div>
+            </header>
+
+            <details class="support-bot" id="botBox">
+                <summary>Chat with the assistant before this message</summary>
+                <div id="botTranscript"></div>
+            </details>
+
+            <div class="support-messages" id="threadMessages" aria-live="polite"></div>
+
+            <form class="support-reply" id="replyForm">
+                <label for="replyBody" class="support-sr">Your reply</label>
+                <textarea id="replyBody" rows="3" maxlength="2000" placeholder="Write a reply…"></textarea>
+                <div class="support-reply-row">
+                    <span class="support-meta" id="replyHint">Enter to send, Shift+Enter for a new line</span>
+                    <button type="submit" class="btn-primary" id="btnReply"><i class="fa-solid fa-paper-plane"></i> Send reply</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</main>
+
+<script src="../asset/js/api/client.js"></script>
+<script src="../asset/js/api/auth.js"></script>
+<script src="../asset/js/api/support.js"></script>
+<script src="../asset/js/core/auth.js"></script>
+<script src="../asset/js/admin/admin-common.js"></script>
+<script src="../asset/js/admin/admin-support.js"></script>
+</body>
+</html>
