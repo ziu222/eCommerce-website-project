@@ -19,6 +19,7 @@ enum AdminRole {
   ba
   hr
   staff
+  support
 }
 
 enum ShopStatus {
@@ -214,4 +215,17 @@ model WalletTransaction {
   createdAt    DateTime     @default(now())
 
   @@index([userId, createdAt])
+}
+
+// Support policies the assistant answers from. searchText is the folded (lowercase, accent-free) title + body;
+// search is generated from it by the migration, so it is never written by the app.
+model PolicyChunk {
+  id         Int                      @id @default(autoincrement())
+  slug       String                   @unique
+  title      String
+  body       String
+  searchText String
+  search     Unsupported("tsvector")?
+
+  @@index([search], type: Gin)
 }

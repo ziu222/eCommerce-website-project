@@ -35,7 +35,7 @@ describe('database seed', () => {
 
   it('stores argon2 hashes, never the plaintext password', async () => {
     const users = await prisma.user.findMany();
-    expect(users).toHaveLength(14);
+    expect(users).toHaveLength(15);
     expect(users.every((u) => u.passwordHash.startsWith('$argon2'))).toBe(true);
     expect(users.find((u) => u.username === 'admin1')?.adminRole).toBe('staff');
     expect(users.find((u) => u.username === 'hr_user')?.adminRole).toBe('hr');

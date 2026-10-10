@@ -2,7 +2,7 @@ import { IsEmail, IsIn, IsOptional, IsString, Length, Matches, MinLength } from 
 import { Type } from 'class-transformer';
 import { IsInt, Min } from 'class-validator';
 
-export const ADMIN_ROLE_KEYS = ['super_admin', 'pm', 'ba', 'hr', 'staff'] as const;
+export const ADMIN_ROLE_KEYS = ['super_admin', 'pm', 'ba', 'hr', 'staff', 'support'] as const;
 
 export class AdminUsersQuery {
   @IsOptional() @IsIn(['customer', 'shop', 'admin']) role?: 'customer' | 'shop' | 'admin';
