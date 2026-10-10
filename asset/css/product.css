@@ -1,6 +1,6 @@
 /* product.css — layout of customer/product.html (the catalogue) */
 
-.filters { position: sticky; top: var(--nav-h); z-index: 20; display: grid; gap: 12px; margin-inline: calc(var(--gutter) * -1); padding: 12px var(--gutter); background: rgba(246, 245, 241, 0.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.filters { display: grid; gap: 12px; margin-inline: calc(var(--gutter) * -1); padding: 12px var(--gutter); background: rgba(246, 245, 241, 0.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
 .filters-row { display: grid; grid-template-columns: 1fr; gap: 10px; }
 .filter-search { position: relative; }
 .filter-search .ms { position: absolute; left: 14px; top: 12px; font-size: 20px; color: var(--ink-3); pointer-events: none; }
@@ -21,6 +21,7 @@
 .pagination .page-info { color: var(--ink-3); font-size: 14px; }
 
 @media (min-width: 720px) {
+    .filters { position: sticky; top: var(--nav-h); z-index: 20; }
     .filters-row { grid-template-columns: minmax(220px, 380px) 200px; }
 }
 @media (min-width: 960px) {

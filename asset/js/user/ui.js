@@ -161,6 +161,8 @@ var UI = (function () {
                 toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
                 toggle.firstChild.textContent = open ? "close" : "menu";
             });
+            // The shop page has its own search box, so the header one would only repeat it.
+            if (document.getElementById("filter-search")) h.querySelector(".nav-search").hidden = true;
             var q = new URLSearchParams(location.search).get("q");
             if (q) h.querySelector(".nav-search input").value = q;
         }
