@@ -50,7 +50,7 @@ describe('dashboard and finance', () => {
       const res = (await (await pm()).get('/api/admin/dashboard').expect(200)).body;
       expect(res.topProducts).toHaveLength(5);
       expect(res.topProducts[0].sold).toBe(best);
-      expect(res.topProducts.map((t: { sold: number }) => t.sold)).toEqual(res.topProducts.map((t: { sold: number }) => t.sold).sort((a, b) => b - a));
+      expect(res.topProducts.map((t: { sold: number }) => t.sold)).toEqual(res.topProducts.map((t: { sold: number }) => t.sold).sort((a: number, b: number) => b - a));
       expect(res.topProducts.every((t: { product: { id: number }; sold: number }) => sold.get(t.product.id) === t.sold)).toBe(true);
       expect(res.topProducts[0].product).toEqual({ id: expect.any(Number), name: expect.any(String), category: expect.any(String) });
     });
