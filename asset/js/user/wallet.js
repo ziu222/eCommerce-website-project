@@ -121,17 +121,21 @@
         btn.addEventListener("click", async function () {
             if (!getCurrentUser()) return;
             btn.disabled = true;
+            var label = btn.innerHTML;
+            btn.innerHTML = UI.loader(24, "Adding money") + "Adding money";
             try {
                 await Api.wallet.topUp(selectedAmount, selectedGateway);
             } catch (e) {
                 UI.toast(e.message, "error");
                 btn.disabled = false;
+                btn.innerHTML = label;
                 return;
             }
             var added = selectedAmount;
             await refresh();
             resetDeposit();
             btn.disabled = false;
+            btn.innerHTML = label;
             UI.toast(fmt(added) + " added to your wallet");
             UI.confetti();
         });
@@ -149,6 +153,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("txList").innerHTML = UI.skeletonList("row", 4);
         if (!getCurrentUser()) {
             UI.requireLogin();
             return;

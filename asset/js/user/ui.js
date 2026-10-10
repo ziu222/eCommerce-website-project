@@ -106,8 +106,35 @@ var UI = (function () {
             "</div></div></article>";
     }
 
+    // Placeholders shaped like the cards they stand in for. Their bars light up one after another (--k).
+    function skelBar(k, cls) {
+        return '<span class="sk' + (cls ? " " + cls : "") + '" style="--k:' + k + '"></span>';
+    }
+
     function skeletons(n) {
-        return new Array(n + 1).join('<div class="skel pcard-skel"></div>');
+        var card = '<div class="sk-card" aria-hidden="true">' + skelBar(0, "sk-media") +
+            '<div class="sk-body">' + skelBar(1, "sk-line sk-short") + skelBar(2, "sk-line") + skelBar(3, "sk-line sk-mid") +
+            '<div class="sk-foot">' + skelBar(4, "sk-line sk-price") + skelBar(5, "sk-dot") + "</div></div></div>";
+        return new Array(n + 1).join(card);
+    }
+
+    // kind: "order" | "row"
+    function skeletonList(kind, n) {
+        var one = kind === "order"
+            ? '<div class="card sk-order" aria-hidden="true"><div class="sk-row">' + skelBar(0, "sk-line sk-mid") + skelBar(1, "sk-pill") + "</div>" +
+                '<div class="sk-steps">' + skelBar(2, "sk-line") + skelBar(3, "sk-line") + skelBar(4, "sk-line") + skelBar(5, "sk-line") + "</div>" +
+                '<div class="sk-row">' + skelBar(2, "sk-thumb") + '<div class="sk-col">' + skelBar(3, "sk-line") + skelBar(4, "sk-line sk-short") + "</div></div></div>"
+            : '<div class="sk-row sk-tx" aria-hidden="true">' + skelBar(0, "sk-dot") + '<div class="sk-col">' + skelBar(1, "sk-line sk-mid") + skelBar(2, "sk-line sk-short") + "</div>" + skelBar(3, "sk-line sk-price") + "</div>";
+        return '<div class="sk-list" role="status" aria-label="Loading">' + new Array(n + 1).join(one) + "</div>";
+    }
+
+    // The loading ring: a teal arc that grows and shrinks, a spark running around it and a bolt beating in the middle.
+    function loader(size, label) {
+        return '<span class="loader" role="status" aria-label="' + esc(label || "Loading") + '" style="--size:' + (size || 48) + 'px">' +
+            '<svg viewBox="0 0 50 50" aria-hidden="true"><circle class="loader-track" cx="25" cy="25" r="20"/>' +
+            '<circle class="loader-arc" cx="25" cy="25" r="20"/>' +
+            '<g class="loader-orbit"><circle class="loader-spark" cx="25" cy="5" r="2.6"/></g>' +
+            '<path class="loader-bolt" d="M27 15l-7 11h5l-2 9 8-12h-5l2-8z"/></svg></span>';
     }
 
     // ---------- toast
@@ -428,6 +455,6 @@ var UI = (function () {
         });
     }).observe(document.body, { childList: true, subtree: true });
 
-    return { mascot: mascot, errorState: errorState, openAuth: openAuth, requireLogin: requireLogin, preloadAuth: preloadAuth, motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
+    return { loader: loader, skeletonList: skeletonList, mascot: mascot, errorState: errorState, openAuth: openAuth, requireLogin: requireLogin, preloadAuth: preloadAuth, motion: motionMode, countTo: countTo, confetti: confetti, isPlaceholder: isPlaceholder, CATEGORIES: CATEGORIES, categoryLabel: categoryLabel, money: money, stars: stars, discount: discount, productCard: productCard, skeletons: skeletons, toast: toast, fallbackFor: fallbackFor };
 
 })();

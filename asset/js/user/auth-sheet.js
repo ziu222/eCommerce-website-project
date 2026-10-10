@@ -25,14 +25,14 @@ var AuthSheet = (function () {
 
     // Volt watches the form: its eyes follow what you type, it covers them for the password,
     // peeks when the password is shown, looks sorry at an error and cheers when you are in.
-    var VOLT = '<svg class="as-volt" viewBox="0 0 96 84" aria-hidden="true">' +
-        '<line x1="48" y1="14" x2="48" y2="7" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>' +
-        '<circle class="v-bulb" cx="48" cy="6" r="4" fill="#f2a516"/>' +
+    var VOLT = '<svg class="as-volt volt" viewBox="0 0 96 84" aria-hidden="true">' +
+        '<g class="volt-antenna"><line x1="48" y1="14" x2="48" y2="7" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>' +
+        '<circle class="v-bulb volt-bulb" cx="48" cy="6" r="4" fill="#f2a516"/></g>' +
         '<rect x="12" y="34" width="8" height="16" rx="4" fill="#084f4b"/><rect x="76" y="34" width="8" height="16" rx="4" fill="#084f4b"/>' +
         '<rect x="17" y="14" width="62" height="54" rx="20" fill="#0b6b66"/>' +
         '<rect class="v-screen" x="25" y="23" width="46" height="35" rx="12" fill="#e9f4f2"/>' +
-        '<g class="v-brows"><path d="M31 31l9 3M65 31l-9 3" stroke="#151b1a" stroke-width="2.4" stroke-linecap="round"/></g>' +
-        '<g class="v-eyes"><g class="v-look"><ellipse cx="38" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/><ellipse cx="58" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/></g></g>' +
+        '<g class="v-brows"><path d="M31 33l9-3.5M65 33l-9-3.5" stroke="#151b1a" stroke-width="2.4" stroke-linecap="round"/></g>' +
+        '<g class="volt-glance"><g class="v-eyes volt-eyes"><g class="v-look"><ellipse cx="38" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/><ellipse cx="58" cy="38" rx="3.6" ry="4.4" fill="#151b1a"/></g></g></g>' +
         '<g class="v-joy"><path d="M33 39q5-6 10 0M53 39q5-6 10 0" fill="none" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/></g>' +
         '<circle cx="31" cy="46" r="2.8" fill="#f4a58a"/><circle cx="65" cy="46" r="2.8" fill="#f4a58a"/>' +
         '<path class="v-smile" d="M42 47q6 4.6 12 0" fill="none" stroke="#151b1a" stroke-width="2.6" stroke-linecap="round"/>' +
@@ -54,7 +54,8 @@ var AuthSheet = (function () {
     function lookAt(input) {
         if (!volt) return;
         var look = volt.querySelector(".v-look");
-        if (!input) { look.style.transform = ""; return; }
+        if (!input) { look.style.transform = ""; delete volt.dataset.watch; return; }
+        volt.dataset.watch = "1";
         var ratio = Math.min(1, (input.value.length || 0) / 28);
         look.style.transform = "translate(" + (-4 + ratio * 8).toFixed(1) + "px, 3px)";
     }
@@ -94,7 +95,7 @@ var AuthSheet = (function () {
         }
         function submit(label) {
             return '<p class="as-error as-item" role="alert" hidden></p>' +
-                '<button type="submit" class="btn btn-primary btn-lg btn-block as-submit as-item"><span class="as-label">' + label + '</span><span class="as-spin" aria-hidden="true"></span></button>';
+                '<button type="submit" class="btn btn-primary btn-lg btn-block as-submit as-item"><span class="as-label">' + label + '</span><span class="as-spin">' + UI.loader(26, "Signing in") + '</span></button>';
         }
         return '<div class="as-backdrop" data-as-close></div>' +
             '<section class="as-sheet" role="dialog" aria-modal="true" aria-labelledby="asTitle">' +

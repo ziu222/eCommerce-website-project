@@ -43,6 +43,7 @@
     var list = document.getElementById("orderList");
 
     async function load() {
+        list.innerHTML = UI.skeletonList("order", 2);
         try {
             var orders = await Api.orders.mine();
             document.getElementById("orderCount").textContent = orders.length ? orders.length + (orders.length === 1 ? " order" : " orders") : "";

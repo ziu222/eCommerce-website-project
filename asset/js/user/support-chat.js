@@ -25,11 +25,11 @@ var SupportChat = (function () {
 
     // Volt drawn inline so its eyes can blink and its antenna bulb can glow while it thinks.
     var VOLT = '<svg viewBox="0 0 64 64" aria-hidden="true" class="volt">' +
-        '<line x1="32" y1="11" x2="32" y2="5" stroke="#151b1a" stroke-width="2.2" stroke-linecap="round"/>' +
-        '<circle class="volt-bulb" cx="32" cy="4.5" r="3.2" fill="#f2a516"/>' +
+        '<g class="volt-antenna"><line x1="32" y1="11" x2="32" y2="5" stroke="#151b1a" stroke-width="2.2" stroke-linecap="round"/>' +
+        '<circle class="volt-bulb" cx="32" cy="4.5" r="3.2" fill="#f2a516"/></g>' +
         '<rect x="5" y="25" width="6" height="12" rx="3" fill="#084f4b"/><rect x="53" y="25" width="6" height="12" rx="3" fill="#084f4b"/>' +
         '<rect x="9" y="10" width="46" height="40" rx="15" fill="#0b6b66"/><rect x="15" y="17" width="34" height="25" rx="9" fill="#e9f4f2"/>' +
-        '<g class="volt-eyes"><ellipse cx="25" cy="27.5" rx="2.7" ry="3.3" fill="#151b1a"/><ellipse cx="39" cy="27.5" rx="2.7" ry="3.3" fill="#151b1a"/></g>' +
+        '<g class="volt-glance"><g class="volt-eyes"><ellipse cx="25" cy="27.5" rx="2.7" ry="3.3" fill="#151b1a"/><ellipse cx="39" cy="27.5" rx="2.7" ry="3.3" fill="#151b1a"/></g></g>' +
         '<circle cx="20.5" cy="33" r="2.2" fill="#f4a58a"/><circle cx="43.5" cy="33" r="2.2" fill="#f4a58a"/>' +
         '<path d="M27.5 34q4.5 3.6 9 0" fill="none" stroke="#151b1a" stroke-width="2.2" stroke-linecap="round"/>' +
         '<rect x="24" y="50" width="16" height="7" rx="3.5" fill="#084f4b"/></svg>';
@@ -137,7 +137,7 @@ var SupportChat = (function () {
 
         turns.push({ role: "user", content: text });
         bubble("", esc(text), true);
-        var thinking = bubble("Volt", '<span class="typing" role="status">Volt is thinking</span>', false);
+        var thinking = bubble("Volt", '<span class="thinking">' + UI.loader(22, "Volt is thinking") + '<span class="typing">Volt is thinking</span></span>', false);
         panel.classList.add("is-thinking");
 
         try {

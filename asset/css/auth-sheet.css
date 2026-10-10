@@ -36,8 +36,8 @@ html.as-lock { overflow: hidden; }
 .as-volt { width: 100%; height: 100%; overflow: hidden; }
 .as-volt .v-look { transition: transform 0.25s var(--ease); }
 .as-volt .v-hand { transition: transform 0.45s var(--ease); }
-.as-volt .v-hand--l { transform: translate(-14px, 46px) rotate(-20deg); }
-.as-volt .v-hand--r { transform: translate(14px, 46px) rotate(20deg); }
+.as-volt .v-hand--l { transform: translate(-10px, 70px); }
+.as-volt .v-hand--r { transform: translate(10px, 70px); }
 .as-volt[data-mood="shy"] .v-hand--l, .as-volt[data-mood="shy"] .v-hand--r { transform: none; }
 .as-volt[data-mood="peek"] .v-hand--l { transform: none; }
 .as-volt[data-mood="peek"] .v-hand--r { transform: translate(8px, 16px) rotate(18deg); }
@@ -52,9 +52,11 @@ html.as-lock { overflow: hidden; }
 .as-volt[data-mood="sad"] .v-bulb { fill: #9aa4a1; }
 .as-volt[data-mood="shy"] .v-bulb { fill: #f4a58a; }
 @keyframes volt-hop { 40% { transform: translateY(-8px); } }
-.as-volt .v-eyes { transform-box: fill-box; transform-origin: center; animation: volt-blink 4.5s infinite; }
-@keyframes volt-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
-html[data-motion="reduced"] .as-volt .v-eyes, html[data-motion="reduced"] .as-volt[data-mood="happy"] { animation: none; }
+/* while Volt watches a field, or shows a feeling, it stops glancing around */
+.as-volt[data-watch] .volt-glance, .as-volt:is([data-mood="shy"], [data-mood="peek"], [data-mood="sad"], [data-mood="happy"]) .volt-glance { animation: none; }
+.as-volt[data-mood="sad"] .volt-antenna { animation: none; rotate: 14deg; }
+.as-volt[data-mood="happy"] .volt-antenna { animation-duration: 0.35s; }
+html[data-motion="reduced"] .as-volt[data-mood="happy"] { animation: none; }
 .as-head h2 { margin-top: 8px; font-size: 1.6rem; }
 .as-head p { font-size: 15px; }
 .as-head h2, .as-head p { transition: opacity 0.2s, transform 0.3s var(--ease); }
@@ -82,10 +84,9 @@ html[data-motion="reduced"] .as-volt .v-eyes, html[data-motion="reduced"] .as-vo
 
 .as-submit { position: relative; overflow: hidden; }
 .as-spin { position: absolute; inset: 0; display: none; place-items: center; }
-.as-spin::before { content: ""; width: 22px; height: 22px; border: 3px solid rgba(255, 255, 255, 0.35); border-top-color: #fff; border-radius: 50%; animation: as-turn 0.7s linear infinite; }
+.as-spin .loader { --loader-track: rgba(255, 255, 255, 0.25); --loader-arc: #fff; }
 .as-submit.is-busy .as-label { opacity: 0; }
 .as-submit.is-busy .as-spin { display: grid; }
-@keyframes as-turn { to { transform: rotate(360deg); } }
 
 .as-done { justify-items: center; padding-block: 12px 8px; text-align: center; }
 .as-done h3 { font-size: 1.3rem; }
