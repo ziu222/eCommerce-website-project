@@ -19,6 +19,7 @@
         <a href="orders.html" class="nav-item"><i class="fa-solid fa-receipt"></i> My Orders</a>
         <a href="products.html" class="nav-item active"><i class="fa-solid fa-box"></i> My Products</a>
         <a href="coupons.html" class="nav-item"><i class="fa-solid fa-tag"></i> My Coupons</a>
+        <a href="penalties.html" class="nav-item"><i class="fa-solid fa-scale-balanced"></i> Penalty Points</a>
         <div class="nav-section-label">Account</div>
         <a href="#" class="nav-item" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
     </nav>
@@ -58,11 +59,11 @@
         </div>
         <div class="stat-card">
             <div class="stat-card-header">
-                <span class="stat-card-label">In Review</span>
+                <span class="stat-card-label">Checking</span>
                 <div class="stat-card-icon orange"><i class="fa-solid fa-hourglass-half"></i></div>
             </div>
             <div class="stat-card-value" id="statPending">0</div>
-            <div class="stat-card-sub">Waiting for an admin</div>
+            <div class="stat-card-sub">Automatic check or an admin</div>
         </div>
         <div class="stat-card">
             <div class="stat-card-header">
@@ -70,7 +71,7 @@
                 <div class="stat-card-icon purple"><i class="fa-solid fa-triangle-exclamation"></i></div>
             </div>
             <div class="stat-card-value" id="statAttention">0</div>
-            <div class="stat-card-sub">Rejected or suspended</div>
+            <div class="stat-card-sub">Shown lower, refused or suspended</div>
         </div>
     </div>
 
@@ -79,7 +80,7 @@
             <div class="filter-tabs">
                 <button class="filter-tab active" type="button" data-filter="all">All</button>
                 <button class="filter-tab" type="button" data-filter="approved">Live</button>
-                <button class="filter-tab" type="button" data-filter="pending">In Review</button>
+                <button class="filter-tab" type="button" data-filter="pending">Checking</button>
                 <button class="filter-tab" type="button" data-filter="attention">Needs Attention</button>
             </div>
         </div>
@@ -125,8 +126,8 @@
             <button class="modal-close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <p class="form-hint" id="reviewHint" style="display:none;margin:0 0 12px;font-size:13px;color:#b45309;">
-                Saving changes sends this product back to an admin for review.
+            <p class="form-hint" id="reviewHint" style="display:none;margin:0 0 12px;font-size:13px;color:#3d4744;">
+                Saving checks the listing again. Customers cannot see it for the few seconds the check takes.
             </p>
             <div class="form-group">
                 <label class="form-label">Name</label>
@@ -174,7 +175,7 @@
                 </div>
                 <input type="text" class="form-input" id="modalImageUrl" style="margin-top:8px;" placeholder="or paste an https:// image link" />
             </div>
-            <div id="modalError" style="display:none;color:#c0392b;font-size:13px;"></div>
+            <div id="modalError" role="alert" style="display:none;color:#b42318;font-size:13px;white-space:pre-line;line-height:1.5;"></div>
         </div>
         <div class="modal-footer">
             <button class="modal-btn close" type="button" onclick="closeModal()">Cancel</button>
@@ -188,5 +189,7 @@
 <script src="../asset/js/api/products.js"></script>
 <script src="../asset/js/core/auth.js"></script>
 <script src="../asset/js/shop/shop-products.js"></script>
+<div class="live-toasts" id="liveToasts" aria-live="polite"></div>
+
 </body>
 </html>
