@@ -131,6 +131,7 @@ var AdminModal = (function () {
         var NAV_PERMISSIONS = {
             "shops-manage.html": "shops.view",
             "products.html":     "products.view",
+            "moderation.html":   "products.view",
             "orders-manage.html":"orders.view",
             "users-manage.html": "users.view",
             "notifications.html":"notifications.view",

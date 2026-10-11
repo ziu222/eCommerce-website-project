@@ -3,10 +3,12 @@
 var Api = (function () {
 
     class ApiError extends Error {
-        constructor(status, message) {
+        constructor(status, message, body) {
             super(message);
             this.name = "ApiError";
             this.status = status;
+            // the parsed error body, e.g. { reasons } when the listing rules refuse a product
+            this.body = body || null;
         }
     }
 
@@ -25,7 +27,7 @@ var Api = (function () {
 
         if (!res.ok) {
             const msg = data && data.message;
-            throw new ApiError(res.status, Array.isArray(msg) ? msg.join(", ") : (msg || res.statusText));
+            throw new ApiError(res.status, Array.isArray(msg) ? msg.join(", ") : (msg || res.statusText), data);
         }
         return data;
     }
