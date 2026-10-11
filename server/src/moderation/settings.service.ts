@@ -17,6 +17,13 @@ export const DEFAULT_SETTINGS = {
   reportThreshold: 3,
   priceLowPct: 20,
   priceHighPct: 500,
+  // penalty points (they expire at the end of the quarter) and what each level costs a shop
+  capProductsAt: 3,
+  productLimit: 200,
+  noCouponsAt: 3,
+  freezeAt: 6,
+  freezeDays: 14,
+  suspendAt: 9,
   listingRules:
     'No prohibited goods under Vietnamese law. No counterfeit, replica or "1:1" items. No misleading prices. ' +
     'No phone numbers, links or other ways to trade outside EC SHOP. The title and description must describe the product truthfully, ' +

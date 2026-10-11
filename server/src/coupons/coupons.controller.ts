@@ -4,6 +4,7 @@ import { RequirePermission } from '../auth/permissions.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import type { SessionUser } from '../auth/session-user.js';
 import { centsToString } from '../common/money.js';
+import { PenaltiesService } from '../moderation/penalties.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { ProductsService } from '../products/products.service.js';
 import { CouponsService } from './coupons.service.js';
@@ -50,7 +51,10 @@ export class CouponsController {
 @Controller('shop/coupons')
 @Roles('shop')
 export class ShopCouponsController {
-  constructor(private readonly coupons: CouponsService) {}
+  constructor(
+    private readonly coupons: CouponsService,
+    private readonly penalties: PenaltiesService,
+  ) {}
 
   @Get()
   list(@CurrentUser() user: SessionUser) {
@@ -58,7 +62,8 @@ export class ShopCouponsController {
   }
 
   @Post()
-  create(@CurrentUser() user: SessionUser, @Body() dto: CreateCouponDto) {
+  async create(@CurrentUser() user: SessionUser, @Body() dto: CreateCouponDto) {
+    await this.penalties.assertCan(user.id, 'createCoupon');
     return this.coupons.create(dto, user.id);
   }
 

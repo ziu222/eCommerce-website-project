@@ -101,6 +101,7 @@ model User {
   addresses          Address[]
   wishlist           WishlistItem[]
   productReports     ProductReport[]
+  penalties          ShopPenalty[]
 }
 
 model Product {
@@ -437,4 +438,43 @@ model ModerationSetting {
   key       String   @id
   value     Json
   updatedAt DateTime @updatedAt
+}
+
+enum AppealStatus {
+  open
+  accepted
+  refused
+}
+
+/// Penalty points of a shop (the marketplace's "Sao Quả Tạ"); they expire at the end of the quarter.
+model ShopPenalty {
+  id         Int            @id @default(autoincrement())
+  shopId     Int
+  shop       User           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  points     Int
+  reason     String
+  flagId     Int?
+  productId  Int?
+  createdBy  String
+  createdAt  DateTime       @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  revokeNote String         @default("")
+  appeal     PenaltyAppeal?
+
+  @@index([shopId, expiresAt])
+}
+
+model PenaltyAppeal {
+  id        Int          @id @default(autoincrement())
+  penaltyId Int          @unique
+  penalty   ShopPenalty  @relation(fields: [penaltyId], references: [id], onDelete: Cascade)
+  message   String
+  status    AppealStatus @default(open)
+  note      String       @default("")
+  decidedBy String?
+  decidedAt DateTime?
+  createdAt DateTime     @default(now())
+
+  @@index([status, createdAt])
 }

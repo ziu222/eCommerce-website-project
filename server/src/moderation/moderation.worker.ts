@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import { AiGate } from './ai-gate.js';
 import { AiReviewer, AiUnavailable, costMicros, type AiVerdict } from './ai-reviewer.js';
 import { ModerationService } from './moderation.service.js';
+import { PenaltiesService } from './penalties.service.js';
 import type { Reason } from './rules.js';
 import { ModerationSettings, type Settings } from './settings.service.js';
 
@@ -29,6 +30,7 @@ export class ModerationWorker implements OnModuleInit, OnModuleDestroy {
     private readonly gate: AiGate,
     private readonly reviewer: AiReviewer,
     private readonly moderation: ModerationService,
+    private readonly penalties: PenaltiesService,
   ) {}
 
   onModuleInit() {
@@ -131,9 +133,10 @@ export class ModerationWorker implements OnModuleInit, OnModuleDestroy {
     return null;
   }
 
-  /** Low risk while the AI is out: an established shop with a clean record and a modest price. */
+  /** Low risk while the AI is out: an established shop with no penalty points and a modest price. */
   private async trusted(p: Product, s: Settings): Promise<boolean> {
     if (Number(p.price) >= s.trustedMaxPrice) return false;
+    if ((await this.penalties.current(p.shopId)) > 0) return false;
     const shop = await this.prisma.user.findUnique({ where: { id: p.shopId }, select: { createdAt: true } });
     if (!shop || Date.now() - shop.createdAt.getTime() < s.trustedMinDays * 86_400_000) return false;
     const live = await this.prisma.product.count({ where: { shopId: p.shopId, adminStatus: 'approved', id: { not: p.id } } });

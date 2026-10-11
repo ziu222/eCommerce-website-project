@@ -6,6 +6,7 @@ import { toProductDto } from '../products/products.service.js';
 import type { DecideFlagDto, FlagsQuery, KeywordDto, ReportProductDto } from './dto/moderation.dto.js';
 import { ModerationService } from './moderation.service.js';
 import { fold } from './rules.js';
+import { PenaltiesService } from './penalties.service.js';
 import { ModerationSettings } from './settings.service.js';
 
 const DECISION_STATUS: Record<DecideFlagDto['decision'], FlagStatus> = { dismiss: 'dismissed', minor: 'minor', violation: 'violation', severe: 'severe' };
@@ -20,6 +21,7 @@ export class FlagsService {
     private readonly moderation: ModerationService,
     private readonly settings: ModerationSettings,
     private readonly notifications: NotificationsService,
+    private readonly penalties: PenaltiesService,
   ) {}
 
   // ---- customer reports
@@ -70,13 +72,14 @@ export class FlagsService {
 
   /**
    * dismiss: the product is fine and goes back to normal. minor: it stays demoted until the shop fixes it.
-   * violation / severe: the product is suspended. Penalty points come with phase 3.
+   * violation / severe: the product is suspended and the shop gets penalty points (1–2, or 3 for severe).
    */
   async decide(id: number, admin: string, dto: DecideFlagDto) {
     const note = (dto.note ?? '').trim();
     if (dto.decision !== 'dismiss' && !note) throw new BadRequestException('A note is required for this decision');
 
-    const flag = await this.prisma.$transaction(async (tx) => {
+    const points = dto.decision === 'severe' ? 3 : dto.decision === 'violation' ? (dto.points ?? 1) : 0;
+    const { flag, penalty } = await this.prisma.$transaction(async (tx) => {
       // the status in the WHERE makes this atomic: of two admins deciding at once, one wins
       const { count } = await tx.productFlag.updateMany({
         where: { id, status: 'open' },
@@ -98,8 +101,12 @@ export class FlagsService {
       await tx.moderationCheck.create({
         data: { productId: f.productId, layer: 'admin', outcome: dto.decision, reasons: f.reasons as Prisma.InputJsonValue, decidedBy: admin },
       });
-      return f;
+      const penalty = points
+        ? await this.penalties.add(tx, f.product.shopId, points, `"${f.product.name}": ${note}`, { flagId: f.id, productId: f.productId }, admin)
+        : null;
+      return { flag: f, penalty };
     });
+    if (penalty) await this.penalties.announce(flag.product.shopId, points, `"${flag.product.name}": ${note}`, penalty);
 
     const message = {
       dismiss: `"${flag.product.name}" was checked and is shown normally again.`,
@@ -111,7 +118,7 @@ export class FlagsService {
       targetRole: 'shop', targetId: flag.product.shopId, type: dto.decision === 'dismiss' ? 'info' : 'warning',
       title: dto.decision === 'dismiss' ? 'Product cleared' : 'Product review decision', message,
     });
-    return { id, status: DECISION_STATUS[dto.decision], productId: flag.productId };
+    return { id, status: DECISION_STATUS[dto.decision], productId: flag.productId, points, shopPoints: penalty?.total ?? null, shopSuspended: penalty?.suspended ?? false };
   }
 
   // ---- keywords
