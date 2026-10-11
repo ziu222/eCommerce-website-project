@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { centsToString, toCents } from '../common/money.js';
 import { CouponsService } from '../coupons/coupons.service.js';
 import type { Order, OrderStatus, Prisma } from '../generated/prisma/client.js';
+import { LiveService } from '../notifications/live.service.js';
 import { NotificationsService, type SystemNotification } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { addressLine } from '../users/account.service.js';
@@ -75,6 +76,7 @@ export class OrdersService {
     private readonly coupons: CouponsService,
     private readonly notifications: NotificationsService,
     private readonly wallet: WalletService,
+    private readonly live: LiveService,
   ) {}
 
   /**
@@ -165,7 +167,7 @@ export class OrdersService {
 
   /** Customers and shops only reach their own orders; anything else is a 404, not a 403. */
   async changeStatus(actor: Actor, orderId: number, to: OrderStatus) {
-    await this.prisma.$transaction(async (tx) => {
+    const parties = await this.prisma.$transaction(async (tx) => {
       const scope: Prisma.OrderWhereInput = actor.role === 'customer' ? { customerId: actor.id } : actor.role === 'shop' ? { shopId: actor.id } : {};
       const order = await tx.order.findFirst({ where: { id: orderId, ...scope }, include: { items: true } });
       if (!order) throw new NotFoundException('Order not found');
@@ -184,7 +186,11 @@ export class OrdersService {
       if (to === 'delivered' && order.paymentMethod === 'cod') {
         await tx.order.update({ where: { id: orderId }, data: { paymentStatus: 'paid' } });
       }
+      return [order.customerId, order.shopId];
     });
+    // only after the commit, so a page that reloads on the event already reads the new status;
+    // whoever made the change already sees it
+    for (const userId of parties) if (userId !== actor.id) this.live.emit({ userId, type: 'order', data: { orderId, status: to } });
     return toOrderDto(await this.prisma.order.findUniqueOrThrow({ where: { id: orderId }, include: INCLUDE }));
   }
 

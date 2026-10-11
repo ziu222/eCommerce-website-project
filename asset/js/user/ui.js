@@ -142,7 +142,33 @@ var UI = (function () {
         var bell = document.getElementById("navBell");
         if (!bell || !isCustomer() || !Api.account) return;
         bell.hidden = false;
+        refreshBell();
+        listenLive();
+    }
+
+    function refreshBell() {
         Api.account.notifications.unread().then(function (r) { setBell(r.count); }).catch(function () { /* ignore */ });
+    }
+
+    // ---------- live order updates (server-sent events)
+
+    var LIVE_NOTE = { confirmed: "was confirmed by the seller", shipped: "is on the way", delivered: "was delivered", cancelled: "was cancelled" };
+    var live = null;
+
+    // One stream per page. EventSource reconnects by itself; after a drop the bell is
+    // fetched again because events sent while offline are not replayed.
+    function listenLive() {
+        if (live || !window.EventSource) return;
+        live = new EventSource("/api/notifications/stream");
+        var dropped = false;
+        live.addEventListener("error", function () { dropped = true; });
+        live.addEventListener("open", function () { if (dropped) { dropped = false; refreshBell(); } });
+        live.addEventListener("order", function (e) {
+            var d = JSON.parse(e.data);
+            toast("Order #" + d.orderId + " " + (LIVE_NOTE[d.status] || "changed to " + d.status), d.status === "cancelled" ? "error" : "success");
+            refreshBell();
+            document.dispatchEvent(new CustomEvent("order:change", { detail: d }));
+        });
     }
 
     function setBell(n) {
@@ -153,6 +179,9 @@ var UI = (function () {
         count.style.display = n ? "inline-block" : "none";
         bell.setAttribute("aria-label", n ? "Notifications, " + n + " unread" : "Notifications");
         bell.classList.toggle("ring", n > 0);
+        // the account page repeats the count in its sidebar
+        var side = document.getElementById("unreadCount");
+        if (side) { side.textContent = n; side.hidden = !n; }
     }
 
     // ---------- product card (home, catalogue, related)

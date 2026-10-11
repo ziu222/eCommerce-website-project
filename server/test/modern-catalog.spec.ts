@@ -54,10 +54,10 @@ describe('modern catalog fixture', () => {
     expect(modern.every((p) => p.rating >= 3.5 && p.rating <= 5 && p.reviewCount >= 0)).toBe(true);
   });
 
-  it('points at placeholder images that exist', () => {
+  it('points at local images that exist, a product photo or the category drawing', () => {
     const repoRoot = resolve(process.cwd(), '..');
     for (const p of modern) {
-      expect(p.imageUrl.startsWith('../asset/img/placeholder/')).toBe(true);
+      expect(p.imageUrl).toMatch(/^\.\.\/asset\/img\/(products|placeholder)\//);
       expect(existsSync(resolve(repoRoot, p.imageUrl.replace('../', '')))).toBe(true);
     }
   });

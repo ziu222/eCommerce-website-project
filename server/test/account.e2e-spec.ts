@@ -162,6 +162,29 @@ describe('customer account: addresses, wishlist, membership, sessions', () => {
       await agent.post(`/api/orders/${second.id}/cancel`).expect(201);
       expect(await count()).toBe(start + 1);
     });
+
+    it('pushes the new status to the customer over server-sent events', async () => {
+      await request(server()).get('/api/notifications/stream').expect(401);
+
+      const login = await request(server()).post('/api/auth/login').send({ identifier: 'levanc', password: 'user123' }).expect(200);
+      const cookie = [login.headers['set-cookie']].flat().map((c) => String(c).split(';')[0]).join('; ');
+      const productId = (await prisma.product.create({ data: { shopId: 5, name: 'Live test', price: '10.00', imageUrl: 'x.png', category: 'audio', stock: 5, adminStatus: 'approved' } })).id;
+      const order = (await request(server()).post('/api/orders/checkout').set('Cookie', cookie).send({ paymentMethod: 'cod', items: [{ productId, qty: 1 }] }).expect(201)).body.orders[0];
+
+      await new Promise<void>((done) => server().listen(0, done));
+      const { port } = server().address() as { port: number };
+      const abort = new AbortController();
+      const res = await fetch(`http://127.0.0.1:${port}/api/notifications/stream`, { headers: { Cookie: cookie }, signal: abort.signal });
+      expect(res.headers.get('content-type')).toContain('text/event-stream');
+
+      await (await apple()).patch(`/api/shop/orders/${order.id}/status`).send({ status: 'confirmed' }).expect(200);
+      const reader = res.body!.getReader();
+      let text = '';
+      while (!text.includes(`"orderId":${order.id}`)) text += new TextDecoder().decode((await reader.read()).value);
+      abort.abort();
+      expect(text).toContain('event: order');
+      expect(text).toContain('"status":"confirmed"');
+    });
   });
 
   describe('sign out everywhere', () => {

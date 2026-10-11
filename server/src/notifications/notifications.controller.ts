@@ -1,15 +1,25 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query, Sse } from '@nestjs/common';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { RequirePermission } from '../auth/permissions.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import type { SessionUser } from '../auth/session-user.js';
 import { HistoryQuery, RecipientsQuery, SendNotificationDto } from './dto/notification.dto.js';
+import { LiveService } from './live.service.js';
 import { NotificationsService } from './notifications.service.js';
 
 @Controller('notifications')
 @Roles('customer', 'shop')
 export class NotificationsController {
-  constructor(private readonly notifications: NotificationsService) {}
+  constructor(
+    private readonly notifications: NotificationsService,
+    private readonly live: LiveService,
+  ) {}
+
+  /** Server-sent events for the signed-in user, e.g. an order changing status. */
+  @Sse('stream')
+  stream(@CurrentUser() user: SessionUser) {
+    return this.live.stream(user.id);
+  }
 
   @Get()
   inbox(@CurrentUser() user: SessionUser) {
