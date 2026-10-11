@@ -55,7 +55,8 @@
             '<button type="button" class="btn btn-ghost btn-lg" id="btnBuyNow"' + (inStock ? "" : " disabled") + ">Buy now</button>" + UI.heart(p.id, p.name, "detail-heart") + "</div>" +
             '<ul class="detail-perks"><li><span class="ms">local_shipping</span>Free delivery on every order</li>' +
             '<li><span class="ms">autorenew</span>30-day returns</li>' +
-            '<li><span class="ms">support_agent</span>Questions? <a href="#" data-open-support>Ask our assistant</a></li></ul>' +
+            '<li><span class="ms">support_agent</span>Questions? <a href="#" data-open-support>Ask our assistant</a></li>' +
+            '<li><span class="ms">warning</span>Something wrong with this listing? <button type="button" class="report-link" id="btnReport">Report it</button></li></ul>' +
             specsHtml(p.specs) + "</div>";
 
         var qty = 1;
@@ -90,6 +91,76 @@
             add();
             location.href = "cart.html";
         });
+        document.getElementById("btnReport").addEventListener("click", function () { openReport(p); });
+    }
+
+    // ---------- report a listing (customers only; three reports send it to the moderation queue)
+
+    var REPORT_REASONS = [
+        ["counterfeit", "Fake or a copy of a brand"],
+        ["prohibited", "Not allowed to be sold"],
+        ["misleading", "Wrong photo, title or price"],
+        ["offplatform", "Asks to pay or chat outside EC SHOP"],
+        ["other", "Something else"]
+    ];
+
+    function openReport(p) {
+        var user = getCurrentUser();
+        if (!user) { UI.openAuth("login"); return; }
+        if (user.role !== "customer") { UI.toast("Only customer accounts can report a listing", "error"); return; }
+
+        var dlg = document.createElement("dialog");
+        dlg.className = "addr-dialog report-dialog";
+        dlg.setAttribute("aria-labelledby", "rpTitle");
+        dlg.innerHTML = '<form class="addr-dialog-form" novalidate>' +
+            '<header class="addr-dialog-head"><h2 id="rpTitle">Report this listing</h2>' +
+            '<button type="button" class="icon-btn" data-close aria-label="Close"><span class="ms">close</span></button></header>' +
+            '<div class="addr-dialog-body">' +
+            '<p class="report-lead">Our team reviews reported listings. The seller is not told who reported it.</p>' +
+            '<p class="report-product"><img src="' + esc(p.image) + '" alt=""><span>' + esc(p.name) + "</span></p>" +
+            '<fieldset class="report-reasons"><legend>What is wrong?</legend>' +
+            REPORT_REASONS.map(function (r, i) {
+                return '<label class="report-reason"><input type="radio" name="reason" value="' + r[0] + '"' + (i === 0 ? " required" : "") + "><span>" + r[1] + "</span></label>";
+            }).join("") + "</fieldset>" +
+            '<div class="field"><label for="rpNote">Details <span class="muted">(optional)</span></label>' +
+            '<textarea class="textarea" id="rpNote" rows="3" maxlength="500" placeholder="What did you notice?"></textarea></div>' +
+            '<p class="error" id="rpError" role="alert" hidden></p></div>' +
+            '<footer class="addr-dialog-foot"><button type="button" class="btn btn-ghost" data-close>Cancel</button>' +
+            '<button type="submit" class="btn btn-primary">Send report</button></footer></form>';
+        document.body.appendChild(dlg);
+        dlg.addEventListener("close", function () { dlg.remove(); });
+        dlg.addEventListener("click", function (e) { if (e.target === dlg || e.target.closest("[data-close]")) dlg.close(); });
+        dlg.querySelector("form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            var picked = dlg.querySelector('input[name="reason"]:checked');
+            var err = dlg.querySelector("#rpError");
+            err.hidden = true;
+            if (!picked) {
+                err.textContent = "Choose what is wrong with the listing.";
+                err.hidden = false;
+                dlg.querySelector('input[name="reason"]').focus();
+                return;
+            }
+            var btn = dlg.querySelector('[type="submit"]');
+            btn.disabled = true;
+            try {
+                await Api.moderation.report(p.id, picked.value, dlg.querySelector("#rpNote").value.trim());
+                dlg.close();
+                UI.toast("Thanks, our team will take a look");
+                document.getElementById("btnReport").outerHTML = '<span class="report-done">Reported, thank you</span>';
+            } catch (ex) {
+                if (ex.status === 409) {
+                    dlg.close();
+                    UI.toast("You already reported this listing");
+                    return;
+                }
+                err.textContent = ex.message;
+                err.hidden = false;
+                btn.disabled = false;
+            }
+        });
+        dlg.showModal();
+        dlg.querySelector('input[name="reason"]').focus();
     }
 
     async function renderRelated(p) {
