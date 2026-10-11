@@ -73,10 +73,16 @@ export class PenaltiesService {
   // ---- shop side
 
   async listForShop(shopId: number) {
-    const items = await this.prisma.shopPenalty.findMany({ where: { shopId }, orderBy: { createdAt: 'desc' }, include: { appeal: true } });
+    const [items, s] = await Promise.all([
+      this.prisma.shopPenalty.findMany({ where: { shopId }, orderBy: { createdAt: 'desc' }, include: { appeal: true } }),
+      this.settings.get(),
+    ]);
     const now = new Date();
     return {
       current: await this.current(shopId),
+      // what each level costs, so the shop page shows the admin's numbers
+      levels: { capProductsAt: s.capProductsAt, productLimit: s.productLimit, noCouponsAt: s.noCouponsAt, freezeAt: s.freezeAt, freezeDays: s.freezeDays, suspendAt: s.suspendAt },
+      quarterEndsAt: quarterEnd(now),
       items: items.map((p) => ({ ...p, counts: !p.revokedAt && p.expiresAt > now })),
     };
   }

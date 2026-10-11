@@ -90,6 +90,8 @@ describe('shop penalty points and appeals', () => {
     await give(5, 1);
     const body = (await (await apple()).get('/api/shop/penalties').expect(200)).body;
     expect(body.current).toBe(1);
+    expect(body.levels).toMatchObject({ noCouponsAt: 3, freezeAt: 6, suspendAt: 9 });
+    expect(new Date(body.quarterEndsAt).getTime()).toBeGreaterThan(Date.now());
     expect(body.items).toHaveLength(3);
     expect(body.items.filter((p: { counts: boolean }) => p.counts)).toHaveLength(1);
   });

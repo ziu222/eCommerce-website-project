@@ -71,7 +71,7 @@ export class FlagsService {
   }
 
   /**
-   * dismiss: the product is fine and goes back to normal. minor: it stays demoted until the shop fixes it.
+   * dismiss: the product is fine and goes back to normal, even one the AI refused. minor: it stays demoted until the shop fixes it.
    * violation / severe: the product is suspended and the shop gets penalty points (1–2, or 3 for severe).
    */
   async decide(id: number, admin: string, dto: DecideFlagDto) {
@@ -92,7 +92,7 @@ export class FlagsService {
       const f = await tx.productFlag.findUniqueOrThrow({ where: { id }, include: { product: true } });
       const next: ProductStatus | null =
         dto.decision === 'dismiss' ? 'approved' : dto.decision === 'minor' ? 'limited' : 'suspended';
-      if (['pending', 'approved', 'limited', 'review'].includes(f.product.adminStatus)) {
+      if (['pending', 'approved', 'limited', 'review', 'rejected'].includes(f.product.adminStatus)) {
         await tx.product.update({
           where: { id: f.productId },
           data: { adminStatus: next, rankPenalty: next === 'limited' ? 1 : 0, provisional: false, adminNote: note, reviewedBy: admin, reviewedAt: new Date() },
