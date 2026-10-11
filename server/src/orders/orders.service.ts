@@ -2,7 +2,9 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { centsToString, toCents } from '../common/money.js';
 import { CouponsService } from '../coupons/coupons.service.js';
 import type { Order, OrderStatus, Prisma } from '../generated/prisma/client.js';
+import { NotificationsService, type SystemNotification } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { addressLine } from '../users/account.service.js';
 import { ProductsService } from '../products/products.service.js';
 import { WalletService } from '../wallet/wallet.service.js';
 import type { AdminOrdersQuery, CheckoutDto } from './dto/order.dto.js';
@@ -40,6 +42,7 @@ export function toOrderDto(o: FullOrder) {
     status: o.status,
     paymentMethod: o.paymentMethod,
     paymentStatus: o.paymentStatus,
+    shipping: o.shipAddress ? { name: o.shipName, phone: o.shipPhone, address: o.shipAddress } : null,
     createdAt: o.createdAt,
     items: o.items.map((i) => ({
       productId: i.productId,
@@ -52,12 +55,25 @@ export function toOrderDto(o: FullOrder) {
   };
 }
 
+const ORDER_NOTICE: Partial<Record<OrderStatus, { title: string; message: string; type: 'info' | 'warning' }>> = {
+  confirmed: { title: 'Order confirmed', message: 'The seller confirmed your order #{id} and is preparing it.', type: 'info' },
+  shipped: { title: 'Order on its way', message: 'Your order #{id} has been shipped.', type: 'info' },
+  delivered: { title: 'Order delivered', message: 'Your order #{id} was delivered. Enjoy!', type: 'info' },
+  cancelled: { title: 'Order cancelled', message: 'Your order #{id} was cancelled. Any wallet payment has been refunded.', type: 'warning' },
+};
+
+function orderNotice(customerId: number, orderId: number, status: OrderStatus): SystemNotification {
+  const n = ORDER_NOTICE[status] ?? { title: 'Order updated', message: 'Your order #{id} changed to ' + status + '.', type: 'info' as const };
+  return { targetRole: 'customer', targetId: customerId, type: n.type, title: n.title, message: n.message.replace('{id}', String(orderId)) };
+}
+
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly products: ProductsService,
     private readonly coupons: CouponsService,
+    private readonly notifications: NotificationsService,
     private readonly wallet: WalletService,
   ) {}
 
@@ -68,6 +84,12 @@ export class OrdersService {
   async checkout(customerId: number, dto: CheckoutDto) {
     const orders = await this.prisma.$transaction(
       async (tx) => {
+        let ship: { shipName: string; shipPhone: string; shipAddress: string } | null = null;
+        if (dto.addressId) {
+          const a = await tx.address.findFirst({ where: { id: dto.addressId, userId: customerId } });
+          if (!a) throw new NotFoundException('Address not found');
+          ship = { shipName: a.recipient, shipPhone: a.phone, shipAddress: addressLine(a) };
+        }
         const lines = await this.products.priceLines(tx, dto.items, true);
         for (const l of lines) {
           if (l.stock < l.qty) throw new ConflictException(`Not enough stock for ${l.name}`);
@@ -100,6 +122,7 @@ export class OrdersService {
               couponCode: discount > 0 ? couponCode : null,
               paymentMethod: dto.paymentMethod,
               paymentStatus: dto.paymentMethod === 'wallet' ? 'paid' : 'pending',
+              ...ship,
               items: {
                 create: lines
                   .filter((l) => l.shopId === g.shopId)
@@ -156,6 +179,8 @@ export class OrdersService {
       await tx.orderStatusHistory.create({ data: { orderId, status: to, changedBy: actor.role } });
 
       if (to === 'cancelled') await this.cancelEffects(tx, order);
+      // the customer hears about changes made by the shop or an admin
+      if (actor.role !== 'customer') await this.notifications.notify(orderNotice(order.customerId, orderId, to), tx);
       if (to === 'delivered' && order.paymentMethod === 'cod') {
         await tx.order.update({ where: { id: orderId }, data: { paymentStatus: 'paid' } });
       }

@@ -46,3 +46,5 @@
     .detail { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; padding-top: 28px; }
     .detail-media { position: sticky; top: calc(var(--nav-h) + 24px); align-self: start; }
 }
+
+.detail-heart { flex: none; width: 52px; height: 52px; border: 1px solid var(--line-2); box-shadow: none; }

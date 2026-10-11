@@ -8,9 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,menu_book,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,refresh,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,devices,done_all,edit,error,expand_more,favorite,forum,headphones,info,inventory_2,laptop_mac,local_offer,local_shipping,location_on,lock,logout,mail,menu,menu_book,notifications,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,refresh,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,space_dashboard,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
     <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/profile.css">
+    <link rel="stylesheet" href="../asset/css/orders.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
 </head>
 
@@ -18,61 +19,127 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <header id="site-header" data-active="profile"></header>
 
-    <main id="main" class="container">
-        <div class="page-head">
-            <h1>My account</h1>
-        </div>
+    <main id="main" class="container account">
+        <section class="card identity" aria-label="Your profile">
+            <button type="button" class="cover" id="profileCover" aria-label="Change cover photo">
+                <span class="cover-hint"><span class="ms">photo_camera</span>Change cover</span>
+            </button>
+            <input type="file" id="coverInput" accept="image/*" hidden>
+            <div class="identity-row">
+                <button type="button" class="avatar-btn" id="avatarWrap" aria-label="Change profile photo">
+                    <span class="avatar" id="profileAvatar">?</span>
+                    <span class="avatar-edit"><span class="ms">photo_camera</span></span>
+                </button>
+                <input type="file" id="avatarInput" accept="image/*" hidden>
+                <div class="identity-text">
+                    <h1 id="profileDisplayName">—</h1>
+                    <p class="muted"><span id="profileDisplayUsername">@—</span> · Member since <span id="metaMember">—</span></p>
+                </div>
+                <span class="tier-badge" id="tierBadge" data-tier="member"><span class="ms ms-fill">workspace_premium</span><span id="tierName">Member</span></span>
+            </div>
+        </section>
 
-        <div class="profile-layout">
-            <div class="profile-main">
-                <section class="card identity" aria-label="Profile photo and name">
-                    <button type="button" class="cover" id="profileCover" aria-label="Change cover photo">
-                        <span class="cover-hint"><span class="ms">photo_camera</span>Change cover</span>
-                    </button>
-                    <input type="file" id="coverInput" accept="image/*" hidden>
-                    <div class="identity-row">
-                        <button type="button" class="avatar-btn" id="avatarWrap" aria-label="Change profile photo">
-                            <span class="avatar" id="profileAvatar">?</span>
-                            <span class="avatar-edit"><span class="ms">photo_camera</span></span>
-                        </button>
-                        <input type="file" id="avatarInput" accept="image/*" hidden>
+        <div class="account-layout">
+            <nav class="account-nav" aria-label="Account sections">
+                <a href="#overview" data-panel="overview"><span class="ms">space_dashboard</span>Overview</a>
+                <a href="#orders" data-panel="orders"><span class="ms">receipt_long</span>Orders</a>
+                <a href="#wishlist" data-panel="wishlist"><span class="ms">favorite</span>Wishlist<span class="nav-count" id="savedCount" hidden></span></a>
+                <a href="#addresses" data-panel="addresses"><span class="ms">location_on</span>Addresses</a>
+                <a href="#notifications" data-panel="notifications"><span class="ms">notifications</span>Notifications<span class="nav-count nav-count--alert" id="unreadCount" hidden></span></a>
+                <a href="#personal" data-panel="personal"><span class="ms">person</span>Personal info</a>
+                <a href="#security" data-panel="security"><span class="ms">shield</span>Security</a>
+            </nav>
+
+            <div class="account-panels">
+                <section class="panel" id="panel-overview" aria-labelledby="ovTitle">
+                    <div class="greet">
+                        <img src="../asset/brand/mascot-happy.svg" alt="" width="72" height="72" class="mascot">
                         <div>
-                            <h2 id="profileDisplayName">—</h2>
-                            <p class="muted" id="profileDisplayUsername">@—</p>
+                            <h2 id="ovTitle"><span id="greeting">Hello</span>, <span id="greetName">there</span></h2>
+                            <p class="muted">Here is your account at a glance.</p>
                         </div>
                     </div>
+
+                    <div class="stats">
+                        <a class="stat" href="wallet.html"><span class="ms">account_balance_wallet</span><span class="stat-label">Wallet</span><strong id="statWallet">$0.00</strong></a>
+                        <a class="stat" href="#orders"><span class="ms">local_shipping</span><span class="stat-label">On the way</span><strong id="statActive">0</strong></a>
+                        <div class="stat"><span class="ms">receipt_long</span><span class="stat-label">Spent</span><strong id="statSpent">$0</strong></div>
+                        <a class="stat" href="#wishlist"><span class="ms">favorite</span><span class="stat-label">Saved</span><strong id="statSaved">0</strong></a>
+                    </div>
+
+                    <div class="ov-grid">
+                        <article class="card block" aria-labelledby="activeTitle">
+                            <div class="block-head"><h3 id="activeTitle">Latest order</h3><a class="link-more" href="#orders">All orders <span class="ms">arrow_forward</span></a></div>
+                            <div id="activeOrder"></div>
+                        </article>
+                        <article class="card block tier-card" aria-labelledby="tierTitle">
+                            <div class="block-head"><h3 id="tierTitle">Membership</h3></div>
+                            <div id="tierBox"></div>
+                        </article>
+                    </div>
+
+                    <article class="card block" aria-labelledby="recentTitle">
+                        <div class="block-head"><h3 id="recentTitle">Recent notifications</h3><a class="link-more" href="#notifications">See all <span class="ms">arrow_forward</span></a></div>
+                        <div id="recentNotes"></div>
+                    </article>
                 </section>
 
-                <form id="profileForm" novalidate>
-                    <section class="card block" aria-labelledby="personalTitle">
-                        <h2 id="personalTitle">Personal information</h2>
+                <section class="panel" id="panel-orders" aria-labelledby="orTitle" hidden>
+                    <div class="panel-head"><h2 id="orTitle">Orders</h2><p class="muted" id="orderCount" aria-live="polite">Track and manage what you bought.</p></div>
+                    <div class="order-list" id="orderList" aria-live="polite"></div>
+                </section>
 
+                <section class="panel" id="panel-wishlist" aria-labelledby="wlTitle" hidden>
+                    <div class="panel-head"><h2 id="wlTitle">Wishlist</h2><p class="muted">Products you saved for later.</p></div>
+                    <div class="pgrid" id="wishGrid"></div>
+                </section>
+
+                <section class="panel" id="panel-addresses" aria-labelledby="adTitle" hidden>
+                    <div class="panel-head"><h2 id="adTitle">Addresses</h2><p class="muted">Where we deliver your orders. The default one is picked at checkout.</p></div>
+                    <form class="card block addr-form" id="addrForm" hidden novalidate>
+                        <h3 id="addrFormTitle">New address</h3>
+                        <div id="afFields"></div>
+                        <label class="check"><input type="checkbox" id="afDefault"> Use as my default address</label>
+                        <p class="error" id="afError" role="alert" hidden></p>
+                        <div class="form-actions"><button type="submit" class="btn btn-primary">Save address</button><button type="button" class="btn btn-ghost" id="afCancel">Cancel</button></div>
+                    </form>
+                    <div class="addr-grid" id="addrGrid"></div>
+                </section>
+
+                <section class="panel" id="panel-notifications" aria-labelledby="ntTitle" hidden>
+                    <div class="panel-head panel-head--row">
+                        <div><h2 id="ntTitle">Notifications</h2><p class="muted">Order updates and news from EC SHOP.</p></div>
+                        <button type="button" class="btn btn-ghost btn-sm" id="readAll"><span class="ms">done_all</span>Mark all as read</button>
+                    </div>
+                    <div class="card note-list" id="noteList"></div>
+                </section>
+
+                <section class="panel" id="panel-personal" aria-labelledby="piTitle" hidden>
+                    <div class="panel-head"><h2 id="piTitle">Personal info</h2><p class="muted">Your name and email as sellers and our staff see them.</p></div>
+                    <form class="card block" id="profileForm" novalidate>
                         <div class="field">
                             <label for="inputName">Full name</label>
-                            <input class="input profile-input" type="text" id="inputName" placeholder="Your full name" autocomplete="name">
+                            <input class="input profile-input" type="text" id="inputName" autocomplete="name">
                             <div class="profile-field-error error" id="errorName"></div>
                         </div>
-
                         <div class="field">
-                            <div class="label-row">
-                                <label for="inputEmail">Email</label>
-                                <button type="button" class="link-btn" id="emailEditBtn"><span class="ms">edit</span>Edit</button>
-                            </div>
-                            <input class="input profile-input profile-input--readonly" type="email" id="inputEmail" placeholder="you@example.com" autocomplete="email" readonly>
+                            <label for="inputEmail">Email</label>
+                            <input class="input profile-input" type="email" id="inputEmail" autocomplete="email">
                             <div class="profile-field-error error" id="errorEmail"></div>
                         </div>
-
                         <div class="field">
                             <label for="inputUsername">Username</label>
                             <input class="input profile-input profile-input--readonly" type="text" id="inputUsername" autocomplete="username" readonly>
                             <p class="hint">Your username cannot be changed.</p>
                         </div>
-                    </section>
+                        <button type="submit" class="btn btn-primary save-btn"><span class="ms">save</span>Save changes</button>
+                    </form>
+                </section>
 
-                    <section class="card block" aria-labelledby="passwordTitle">
-                        <h2 id="passwordTitle">Change password</h2>
-                        <p class="hint">Leave these empty to keep your current password.</p>
-
+                <section class="panel" id="panel-security" aria-labelledby="scTitle" hidden>
+                    <div class="panel-head"><h2 id="scTitle">Security</h2><p class="muted">Your password and where you are signed in.</p></div>
+                    <form class="card block" id="passwordForm" novalidate>
+                        <h3>Change password</h3>
                         <div class="field">
                             <label for="inputCurrentPw">Current password</label>
                             <input class="input profile-input" type="password" id="inputCurrentPw" autocomplete="current-password">
@@ -88,31 +155,23 @@
                             <input class="input profile-input" type="password" id="inputConfirmPw" autocomplete="new-password">
                             <div class="profile-field-error error" id="errorConfirmPw"></div>
                         </div>
-                    </section>
-
-                    <button type="submit" class="btn btn-primary btn-lg save-btn"><span class="ms">save</span>Save changes</button>
-                </form>
+                        <button type="submit" class="btn btn-primary save-btn"><span class="ms">lock</span>Update password</button>
+                    </form>
+                    <article class="card block sessions">
+                        <div class="session-row">
+                            <span class="session-icon"><span class="ms">devices</span></span>
+                            <div>
+                                <h3>Signed in devices</h3>
+                                <p class="muted">Last sign in: <span id="lastLogin">—</span></p>
+                            </div>
+                        </div>
+                        <p class="muted">Lost a phone or used a shared computer? Sign out everywhere else. You stay signed in here.</p>
+                        <div class="form-actions" id="logoutAllBox">
+                            <button type="button" class="btn btn-ghost" id="logoutAll"><span class="ms">logout</span>Sign out of other devices</button>
+                        </div>
+                    </article>
+                </section>
             </div>
-
-            <aside class="profile-side">
-                <section class="balance" aria-label="Wallet balance">
-                    <p class="balance-label">Wallet balance</p>
-                    <p class="balance-amount" id="profileBalance">$0.00</p>
-                    <a class="btn btn-sm balance-btn" href="wallet.html">Add money</a>
-                </section>
-
-                <section class="card block meta" aria-label="Membership">
-                    <div class="meta-row"><span class="ms">calendar_month</span><span>Member since</span><strong id="metaMember">—</strong></div>
-                    <div class="meta-row"><span class="ms">workspace_premium</span><span>Rank</span><span class="rank-badge rank-normal" id="profileRank">Normal</span></div>
-                </section>
-
-                <nav class="card block quick" aria-label="Quick links">
-                    <a href="orders.html"><span class="ms">receipt_long</span>My orders<span class="ms chev">chevron_right</span></a>
-                    <a href="wallet.html"><span class="ms">account_balance_wallet</span>Wallet<span class="ms chev">chevron_right</span></a>
-                    <a href="cart.html"><span class="ms">shopping_bag</span>My cart<span class="ms chev">chevron_right</span></a>
-                    <a href="#" data-open-support><span class="ms">forum</span>Support messages<span class="ms chev">chevron_right</span></a>
-                </nav>
-            </aside>
         </div>
     </main>
 
@@ -122,9 +181,13 @@
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/admin.js"></script>
     <script src="../asset/js/api/commerce.js"></script>
+    <script src="../asset/js/api/products.js"></script>
+    <script src="../asset/js/api/account.js"></script>
     <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
+    <script src="../asset/js/user/vn-address.js"></script>
+    <script src="../asset/js/user/orders.js"></script>
     <script src="../asset/js/user/profile.js"></script>
     <script src="../asset/js/api/support.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>

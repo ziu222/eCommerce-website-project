@@ -97,6 +97,7 @@ Api.orders = (function () {
             status: o.status,
             paymentMethod: o.paymentMethod,
             paymentStatus: o.paymentStatus,
+            shipping: o.shipping || null,
             createdAt: String(o.createdAt).slice(0, 10),
             items: o.items.map(function (i) {
                 return { productId: i.productId, name: i.name, image: i.imageUrl, qty: i.qty, price: i.price };
@@ -106,10 +107,11 @@ Api.orders = (function () {
     }
 
     // Resolves to { orders, total }; one order is created per shop in the cart.
-    async function checkout(cart, paymentMethod, couponCode) {
+    async function checkout(cart, paymentMethod, couponCode, addressId) {
         var res = await Api.request("POST", "/orders/checkout", {
             paymentMethod: paymentMethod,
             couponCode: couponCode || undefined,
+            addressId: addressId || undefined,
             items: cart.map(function (i) { return { productId: i.id, qty: i.quantity }; })
         });
         return { orders: res.orders.map(toLegacy), total: res.total };

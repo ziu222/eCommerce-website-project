@@ -1,4 +1,4 @@
-// orders.js — the customer's own orders: status, items, total, and cancelling a pending order.
+// orders.js — the Orders panel of the account hub: status, items, total, and cancelling a pending order.
 
 (function () {
 
@@ -29,10 +29,11 @@
         var shop = o.shop && o.shop.shopName ? " · " + esc(o.shop.shopName) : "";
         var paid = o.paymentStatus === "refunded" ? "Refunded" : o.paymentStatus === "paid" ? "Paid" : "Pay on delivery";
         return '<article class="card order">' +
-            '<header class="order-head"><div><h2>Order #' + o.id + "</h2><p class=\"muted\">" + esc(date(o.createdAt)) + shop + "</p></div>" +
+            '<header class="order-head"><div><h3>Order #' + o.id + "</h3><p class=\"muted\">" + esc(date(o.createdAt)) + shop + "</p></div>" +
             '<span class="badge ' + (BADGE[o.status] || "") + '">' + esc(o.status.charAt(0).toUpperCase() + o.status.slice(1)) + "</span></header>" +
             tracker(o) +
             '<ul class="order-items">' + items + "</ul>" +
+            (o.shipping ? '<p class="order-ship"><span class="ms">location_on</span>' + esc(o.shipping.name) + " · " + esc(o.shipping.phone) + " · " + esc(o.shipping.address) + "</p>" : "") +
             '<footer class="order-foot"><div class="muted">' + esc(PAY[o.paymentMethod] || o.paymentMethod) + " · " + paid +
             (o.discount > 0 ? " · saved " + UI.money(o.discount) : "") + "</div>" +
             '<div class="order-total"><span>Total</span><strong>' + UI.money(o.total) + "</strong></div>" +
@@ -46,7 +47,7 @@
         list.innerHTML = UI.skeletonList("order", 2);
         try {
             var orders = await Api.orders.mine();
-            document.getElementById("orderCount").textContent = orders.length ? orders.length + (orders.length === 1 ? " order" : " orders") : "";
+            if (orders.length) document.getElementById("orderCount").textContent = orders.length + (orders.length === 1 ? " order" : " orders") + " so far.";
             list.innerHTML = orders.length ? orders.map(card).join("") :
                 '<div class="empty card"><span class="anim" data-lottie="empty-box" data-loop style="--size:160px"><span class="ms">receipt_long</span></span><h3>No orders yet</h3><p>When you check out, your orders show up here.</p><a class="btn btn-primary" href="product.html">Start shopping</a></div>';
         } catch (e) {
@@ -70,10 +71,7 @@
         }
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
-        var u = getCurrentUser();
-        if (!u || u.role !== "customer") { UI.requireLogin(); return; }
-        load();
-    });
+    // profile.js calls this the first time the Orders panel opens
+    window.Orders = { load: load };
 
 })();

@@ -52,7 +52,7 @@
             '<div class="qty" role="group" aria-label="Quantity"><button type="button" id="qtyDec" aria-label="Decrease quantity">−</button>' +
             '<output id="qtyVal" aria-live="polite">1</output><button type="button" id="qtyInc" aria-label="Increase quantity">+</button></div>' +
             '<button type="button" class="btn btn-primary btn-lg" id="btnAddCart"' + (inStock ? "" : " disabled") + '><span class="ms">add_shopping_cart</span>Add to cart</button>' +
-            '<button type="button" class="btn btn-ghost btn-lg" id="btnBuyNow"' + (inStock ? "" : " disabled") + ">Buy now</button></div>" +
+            '<button type="button" class="btn btn-ghost btn-lg" id="btnBuyNow"' + (inStock ? "" : " disabled") + ">Buy now</button>" + UI.heart(p.id, p.name, "detail-heart") + "</div>" +
             '<ul class="detail-perks"><li><span class="ms">local_shipping</span>Free delivery on every order</li>' +
             '<li><span class="ms">autorenew</span>30-day returns</li>' +
             '<li><span class="ms">support_agent</span>Questions? <a href="#" data-open-support>Ask our assistant</a></li></ul>' +

@@ -1,9 +1,9 @@
-/* orders.css — layout of customer/orders.html */
+/* orders.css — the Orders panel of customer/profile.html */
 
-.order-list { display: grid; gap: 16px; padding-top: 8px; }
+.order-list { display: grid; gap: 16px; }
 .order { display: grid; gap: 18px; padding: 22px; }
 .order-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.order-head h2 { font-size: 1.1rem; }
+.order-head h3 { font-size: 1.1rem; }
 .order-head .muted { margin-top: 2px; font-size: 14px; }
 
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0; padding: 0; list-style: none; }
@@ -25,6 +25,8 @@ html[data-motion="reduced"] .steps li.done::after, html[data-motion="reduced"] .
 .order-items a:hover { color: var(--brand); }
 .order-items span { color: var(--ink-3); font-size: 14px; white-space: nowrap; }
 
+.order-ship { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-size: 14px; }
+.order-ship .ms { color: var(--brand); font-size: 20px; }
 .order-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14px; }
 .order-total { display: flex; align-items: baseline; gap: 8px; margin-left: auto; }
 .order-total strong { font-size: 1.2rem; }

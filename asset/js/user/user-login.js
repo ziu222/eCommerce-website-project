@@ -58,7 +58,7 @@ function renderUser() {
         <span class="ms udm-icon">account_circle</span>
         View Profile
       </button>
-      <button class="udm-item" onclick="window.location.href='orders.html'">
+      <button class="udm-item" onclick="window.location.href='profile.html#orders'">
         <span class="ms udm-icon">receipt_long</span>
         My Orders
       </button>

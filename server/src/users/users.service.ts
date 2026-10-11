@@ -13,6 +13,7 @@ function toProfile(u: User) {
     role: u.role,
     avatar: u.avatar,
     coverPhoto: u.coverPhoto,
+    lastLoginAt: u.lastLoginAt,
     createdAt: u.createdAt,
   };
 }

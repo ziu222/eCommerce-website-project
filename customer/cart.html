@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,edit,error,expand_more,forum,headphones,info,inventory_2,laptop_mac,local_shipping,lock,logout,mail,menu,menu_book,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,refresh,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@400,0..1&icon_names=account_balance_wallet,account_circle,add,add_shopping_cart,arrow_downward,arrow_forward,arrow_upward,autorenew,calendar_month,cancel,check,check_circle,chevron_left,chevron_right,close,cloud_off,delete,devices,done_all,edit,error,expand_more,favorite,forum,headphones,info,inventory_2,laptop_mac,local_offer,local_shipping,location_on,lock,logout,mail,menu,menu_book,notifications,pause,person,photo_camera,play_arrow,qr_code_2,receipt_long,refresh,save,schedule,search,search_off,send,shield,shopping_bag,smart_toy,smartphone,space_dashboard,sports_esports,support_agent,undo,verified,visibility,visibility_off,warning,watch,workspace_premium&display=block" rel="stylesheet">
     <link rel="stylesheet" href="../asset/css/ui.css">
     <link rel="stylesheet" href="../asset/css/cart.css">
     <link rel="stylesheet" href="../asset/css/support-chat.css">
@@ -29,8 +29,12 @@
                 <div id="cart-items"></div>
             </section>
 
-            <aside class="card summary" aria-labelledby="summaryTitle">
-                <h2 id="summaryTitle">Order summary</h2>
+            <aside class="card summary" aria-labelledby="summaryTitle" data-step="review">
+                <ol class="checkout-steps" aria-label="Checkout steps">
+                    <li class="is-now" aria-current="step"><span>1</span>Review</li>
+                    <li><span>2</span>Payment</li>
+                </ol>
+                <h2 id="summaryTitle" tabindex="-1">Order summary</h2>
 
                 <dl class="summary-rows">
                     <div><dt>Items</dt><dd id="total-items">0</dd></div>
@@ -38,6 +42,24 @@
                     <div id="discountRow" style="display:none"><dt>Discount (<span id="couponCodeLabel">—</span>)</dt><dd class="free" id="discountAmount">−$0</dd></div>
                     <div class="total"><dt>Total</dt><dd id="total-price">$0</dd></div>
                 </dl>
+
+                <div class="step" id="stepReview">
+                <section class="deliver" id="deliverTo" aria-label="Delivery address"></section>
+
+                <div class="field">
+                    <label for="couponInput">Discount code</label>
+                    <div class="coupon">
+                        <input type="text" class="input" id="couponInput" placeholder="Enter code" autocomplete="off">
+                        <button type="button" class="btn btn-ghost" id="btnApplyCoupon">Apply</button>
+                    </div>
+                    <p class="coupon-feedback" id="couponFeedback" role="status"></p>
+                </div>
+
+                <button type="button" class="btn btn-primary btn-lg btn-block" id="btnContinue">Continue to payment<span class="ms">arrow_forward</span></button>
+                </div>
+
+                <div class="step" id="stepPay" hidden>
+                <div class="deliver-recap"><span class="ms">location_on</span><div id="deliverRecap"></div><button type="button" class="link-btn" id="btnBack">Change</button></div>
 
                 <fieldset class="pay">
                     <legend>Payment method</legend>
@@ -55,17 +77,9 @@
                     <p class="pay-warning hidden" id="pmWarning" role="alert"><span class="ms">warning</span>Your wallet balance is too low for this order. <a href="wallet.html">Add funds</a></p>
                 </fieldset>
 
-                <div class="field">
-                    <label for="couponInput">Discount code</label>
-                    <div class="coupon">
-                        <input type="text" class="input" id="couponInput" placeholder="Enter code" autocomplete="off">
-                        <button type="button" class="btn btn-ghost" id="btnApplyCoupon">Apply</button>
-                    </div>
-                    <p class="coupon-feedback" id="couponFeedback" role="status"></p>
-                </div>
-
-                <button type="button" class="btn btn-primary btn-lg btn-block" id="btnCheckout"><span class="ms">lock</span>Check out</button>
+                <button type="button" class="btn btn-primary btn-lg btn-block" id="btnCheckout"><span class="ms">lock</span>Place order</button>
                 <p class="secure"><span class="ms">shield</span>Secure checkout. Prices are confirmed again when you pay.</p>
+                </div>
             </aside>
         </div>
     </main>
@@ -81,7 +95,7 @@
                 <div class="total"><dt>Total</dt><dd id="modalTotal">$0</dd></div>
             </dl>
             <div class="order-actions">
-                <a class="btn btn-primary btn-block" href="orders.html">View my orders</a>
+                <a class="btn btn-primary btn-block" href="profile.html#orders">View my orders</a>
                 <a class="btn btn-ghost btn-block" href="product.html">Keep shopping</a>
             </div>
         </div>
@@ -93,9 +107,13 @@
     <script src="../asset/js/api/auth.js"></script>
     <script src="../asset/js/api/commerce.js"></script>
     <script src="../asset/js/core/auth.js"></script>
+    <script src="../asset/js/api/products.js"></script>
+    <script src="../asset/js/api/account.js"></script>
     <script src="../asset/js/user/ui.js"></script>
     <script src="../asset/js/user/user-login.js"></script>
     <script src="../asset/js/user/addtocart.js"></script>
+    <script src="../asset/js/user/vn-address.js"></script>
+    <script src="../asset/js/user/cart-address.js"></script>
     <script src="../asset/js/user/cart.js"></script>
     <script src="../asset/js/api/support.js"></script>
     <script src="../asset/js/user/support-chat.js"></script>
