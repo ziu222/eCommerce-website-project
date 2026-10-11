@@ -143,6 +143,15 @@ Api.orders = (function () {
         return toLegacy(await Api.request("POST", "/orders/" + encodeURIComponent(id) + "/cancel"));
     }
 
-    return { checkout: checkout, mine: mine, cancel: cancel, adminList: adminList, adminSetStatus: adminSetStatus };
+    // The signed-in shop's orders, newest first, and moving one on (confirm, ship, deliver, cancel).
+    async function shopList() {
+        return (await Api.request("GET", "/shop/orders")).map(toLegacy);
+    }
+
+    async function shopSetStatus(id, status) {
+        return toLegacy(await Api.request("PATCH", "/shop/orders/" + encodeURIComponent(id) + "/status", { status: status }));
+    }
+
+    return { checkout: checkout, mine: mine, cancel: cancel, adminList: adminList, adminSetStatus: adminSetStatus, shopList: shopList, shopSetStatus: shopSetStatus };
 
 })();
