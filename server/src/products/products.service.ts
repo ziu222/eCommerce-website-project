@@ -1,6 +1,8 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, type Product } from '../generated/prisma/client.js';
 import { toCents } from '../common/money.js';
+import { ModerationService } from '../moderation/moderation.service.js';
+import type { Reason } from '../moderation/rules.js';
 import { NotificationsService, type SystemNotification } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type {
@@ -28,6 +30,8 @@ export interface ProductDto {
   specs: unknown;
   adminStatus: string;
   adminNote: string;
+  /** reasons from the automatic checks; only on the shop's and the admins' views */
+  moderationReasons?: unknown;
   reviewedBy: string | null;
   reviewedAt: Date | null;
   createdAt: Date;
@@ -51,8 +55,8 @@ export interface Page<T> {
   limit: number;
 }
 
-// Public visibility: approved by an admin and sold by an active shop.
-const PUBLIC: Prisma.ProductWhereInput = { adminStatus: 'approved', shop: { shopStatus: 'active' } };
+// Public visibility: passed the checks (limited ones too, listed last) and sold by an active shop.
+const PUBLIC: Prisma.ProductWhereInput = { adminStatus: { in: ['approved', 'limited'] }, shop: { shopStatus: 'active' } };
 const WITH_SHOP = { shop: { select: { id: true, shopName: true } } } as const;
 
 const ORDER_BY: Record<string, Prisma.ProductOrderByWithRelationInput[]> = {
@@ -62,8 +66,17 @@ const ORDER_BY: Record<string, Prisma.ProductOrderByWithRelationInput[]> = {
   rating: [{ rating: 'desc' }, { id: 'asc' }],
   newest: [{ createdAt: 'desc' }, { id: 'desc' }],
 };
+// demoted (limited) products come after the others whatever the sort
+const DEMOTED_LAST: Prisma.ProductOrderByWithRelationInput = { rankPenalty: 'asc' };
 
-export function toProductDto(p: WithShop): ProductDto {
+/** What a shop sees when the rules refuse a listing. */
+export class ListingBlockedException extends BadRequestException {
+  constructor(reasons: Reason[]) {
+    super({ statusCode: 400, error: 'Bad Request', message: reasons.map((r) => r.message).join(' '), reasons });
+  }
+}
+
+export function toProductDto(p: WithShop, internal = false): ProductDto {
   return {
     id: p.id,
     shopId: p.shopId,
@@ -82,6 +95,7 @@ export function toProductDto(p: WithShop): ProductDto {
     adminNote: p.adminNote,
     reviewedBy: p.reviewedBy,
     reviewedAt: p.reviewedAt,
+    ...(internal && { moderationReasons: p.moderationReasons ?? [] }),
     createdAt: p.createdAt,
     updatedAt: p.updatedAt,
   };
@@ -92,14 +106,15 @@ export class ProductsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly moderation: ModerationService,
   ) {}
 
-  private async paged(where: Prisma.ProductWhereInput, orderBy: Prisma.ProductOrderByWithRelationInput[], page: number, limit: number): Promise<Page<ProductDto>> {
+  private async paged(where: Prisma.ProductWhereInput, orderBy: Prisma.ProductOrderByWithRelationInput[], page: number, limit: number, internal = false): Promise<Page<ProductDto>> {
     const [rows, total] = await this.prisma.$transaction([
       this.prisma.product.findMany({ where, orderBy, skip: (page - 1) * limit, take: limit, include: WITH_SHOP }),
       this.prisma.product.count({ where }),
     ]);
-    return { items: rows.map(toProductDto), total, page, limit };
+    return { items: rows.map((r) => toProductDto(r, internal)), total, page, limit };
   }
 
   // ---- public
@@ -113,7 +128,7 @@ export class ProductsService {
         price: { ...(q.minPrice !== undefined && { gte: q.minPrice }), ...(q.maxPrice !== undefined && { lte: q.maxPrice }) },
       }),
     };
-    return this.paged(where, ORDER_BY[q.sort ?? 'default'], q.page, q.limit);
+    return this.paged(where, [DEMOTED_LAST, ...ORDER_BY[q.sort ?? 'default']], q.page, q.limit);
   }
 
   async detail(id: number): Promise<ProductDto> {
@@ -164,26 +179,35 @@ export class ProductsService {
 
   async listOwn(shopId: number): Promise<ProductDto[]> {
     const rows = await this.prisma.product.findMany({ where: { shopId }, orderBy: { id: 'asc' }, include: WITH_SHOP });
-    return rows.map(toProductDto);
+    return rows.map((r) => toProductDto(r, true));
   }
 
+  /** The rules run first: a blocked listing is refused and nothing is saved. */
   async create(shopId: number, dto: CreateProductDto): Promise<ProductDto> {
-    const row = await this.prisma.product.create({
-      data: { ...dto, shopId, adminStatus: 'pending' },
-      include: WITH_SHOP,
-    });
-    return toProductDto(row);
+    const checks = await this.moderation.precheck(shopId, { ...dto, description: dto.description ?? '' });
+    if (checks.block.length) throw new ListingBlockedException(checks.block);
+    const row = await this.prisma.product.create({ data: { ...dto, shopId, adminStatus: 'pending' } });
+    await this.moderation.decide(row.id, checks.flag, null);
+    return this.own(row.id);
   }
 
+  /** Every edit is checked again, the same way as a new listing. */
   async update(shopId: number, id: number, dto: UpdateProductDto): Promise<ProductDto> {
-    await this.ownedOrThrow(shopId, id);
-    // Any edit goes back through review.
-    const row = await this.prisma.product.update({
+    const current = await this.prisma.product.findFirst({ where: { id, shopId } });
+    if (!current) throw new NotFoundException('Product not found');
+    const next = { name: current.name, description: current.description, price: Number(current.price), imageUrl: current.imageUrl, category: current.category, ...dto };
+    const checks = await this.moderation.precheck(shopId, next, id);
+    if (checks.block.length) throw new ListingBlockedException(checks.block);
+    await this.prisma.product.update({
       where: { id },
       data: { ...dto, adminStatus: 'pending', adminNote: '', reviewedBy: null, reviewedAt: null },
-      include: WITH_SHOP,
     });
-    return toProductDto(row);
+    await this.moderation.decide(id, checks.flag, current.adminStatus);
+    return this.own(id);
+  }
+
+  private async own(id: number): Promise<ProductDto> {
+    return toProductDto(await this.prisma.product.findUniqueOrThrow({ where: { id }, include: WITH_SHOP }), true);
   }
 
   async remove(shopId: number, id: number): Promise<void> {
@@ -210,12 +234,12 @@ export class ProductsService {
       ...(q.status && { adminStatus: q.status }),
       ...(q.q && { name: { contains: q.q, mode: 'insensitive' } }),
     };
-    return this.paged(where, ORDER_BY.default, q.page, q.limit);
+    return this.paged(where, ORDER_BY.default, q.page, q.limit, true);
   }
 
   async stats() {
     const rows = await this.prisma.product.groupBy({ by: ['adminStatus'], _count: { _all: true } });
-    const counts = { total: 0, pending: 0, approved: 0, rejected: 0, suspended: 0 };
+    const counts = { total: 0, pending: 0, approved: 0, limited: 0, review: 0, rejected: 0, suspended: 0 };
     for (const r of rows) {
       counts[r.adminStatus] = r._count._all;
       counts.total += r._count._all;
@@ -226,32 +250,32 @@ export class ProductsService {
   review(id: number, reviewer: string, decision: 'approved' | 'rejected', note?: string) {
     const trimmed = (note ?? '').trim();
     if (decision === 'rejected' && !trimmed) throw new BadRequestException('Rejection note is required.');
-    return this.transition(id, reviewer, 'pending', decision, trimmed, 'Only pending products can be reviewed.');
+    return this.transition(id, reviewer, ['pending', 'review'], decision, trimmed, 'Only products waiting for review can be reviewed.');
   }
 
   suspend(id: number, reviewer: string, note?: string) {
     const trimmed = (note ?? '').trim();
     if (!trimmed) throw new BadRequestException('Suspend note is required.');
-    return this.transition(id, reviewer, 'approved', 'suspended', trimmed, 'Only approved products can be suspended.');
+    return this.transition(id, reviewer, ['approved', 'limited'], 'suspended', trimmed, 'Only live products can be suspended.');
   }
 
   restore(id: number, reviewer: string) {
-    return this.transition(id, reviewer, 'suspended', 'approved', '', 'Only suspended products can be restored.');
+    return this.transition(id, reviewer, ['suspended'], 'approved', '', 'Only suspended products can be restored.');
   }
 
-  private async transition(id: number, reviewer: string, from: string, to: 'approved' | 'rejected' | 'suspended', note: string, conflict: string): Promise<ProductDto> {
+  private async transition(id: number, reviewer: string, from: Product['adminStatus'][], to: 'approved' | 'rejected' | 'suspended', note: string, conflict: string): Promise<ProductDto> {
     const current = await this.prisma.product.findUnique({ where: { id }, select: { adminStatus: true } });
     if (!current) throw new NotFoundException('Product not found');
-    if (current.adminStatus !== from) throw new ConflictException(conflict);
+    if (!from.includes(current.adminStatus)) throw new ConflictException(conflict);
     // updateMany keeps the transition atomic: a concurrent review loses instead of overwriting.
     const { count } = await this.prisma.product.updateMany({
-      where: { id, adminStatus: from as Product['adminStatus'] },
-      data: { adminStatus: to, adminNote: note, reviewedBy: reviewer, reviewedAt: new Date() },
+      where: { id, adminStatus: current.adminStatus },
+      data: { adminStatus: to, adminNote: note, reviewedBy: reviewer, reviewedAt: new Date(), rankPenalty: 0 },
     });
     if (!count) throw new ConflictException(conflict);
     const updated = await this.prisma.product.findUniqueOrThrow({ where: { id }, include: WITH_SHOP });
-    await this.notifications.notify(decisionNotice(updated, from === 'suspended' && to === 'approved' ? 'restored' : to, note));
-    return toProductDto(updated);
+    await this.notifications.notify(decisionNotice(updated, current.adminStatus === 'suspended' && to === 'approved' ? 'restored' : to, note));
+    return toProductDto(updated, true);
   }
 }
 

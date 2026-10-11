@@ -31,6 +31,8 @@ enum ShopStatus {
 enum ProductStatus {
   pending
   approved
+  limited
+  review
   rejected
   suspended
 }
@@ -98,33 +100,44 @@ model User {
   assignedThreads    SupportThread[]     @relation("ThreadAgent")
   addresses          Address[]
   wishlist           WishlistItem[]
+  productReports     ProductReport[]
 }
 
 model Product {
-  id          Int           @id @default(autoincrement())
-  shopId      Int
-  shop        User          @relation(fields: [shopId], references: [id])
-  name        String
-  price       Decimal       @db.Decimal(12, 2)
-  oldPrice    Decimal?      @db.Decimal(12, 2)
-  imageUrl    String
-  category    String
-  rating      Float         @default(0)
-  reviewCount Int           @default(0)
-  stock       Int           @default(0)
-  description String        @default("")
-  specs       Json?
-  adminStatus ProductStatus @default(pending)
-  adminNote   String        @default("")
-  reviewedBy  String?
-  reviewedAt  DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id                Int           @id @default(autoincrement())
+  shopId            Int
+  shop              User          @relation(fields: [shopId], references: [id])
+  name              String
+  price             Decimal       @db.Decimal(12, 2)
+  oldPrice          Decimal?      @db.Decimal(12, 2)
+  imageUrl          String
+  category          String
+  rating            Float         @default(0)
+  reviewCount       Int           @default(0)
+  stock             Int           @default(0)
+  description       String        @default("")
+  specs             Json?
+  adminStatus       ProductStatus @default(pending)
+  adminNote         String        @default("")
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  /// 1 while the product is demoted (limited); the catalogue lists it last
+  rankPenalty       Int           @default(0)
+  /// approved by the backup standard while the AI was down; the AI checks it again later
+  provisional       Boolean       @default(false)
+  /// latest reasons from the automatic checks, shown to the shop
+  moderationReasons Json?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
-  orderItems   OrderItem[]
-  wishlistedBy WishlistItem[]
+  orderItems    OrderItem[]
+  wishlistedBy  WishlistItem[]
+  moderationJob ModerationJob?
+  checks        ModerationCheck[]
+  flags         ProductFlag[]
+  reports       ProductReport[]
 
-  @@index([adminStatus, category])
+  @@index([adminStatus, category, rankPenalty])
   @@index([shopId])
 }
 
@@ -255,17 +268,17 @@ enum SupportAuthor {
 
 // A customer's conversation with the support staff. The bot chat before it is kept as botTranscript for context.
 model SupportThread {
-  id                    Int             @id @default(autoincrement())
+  id                    Int              @id @default(autoincrement())
   customerId            Int
-  customer              User            @relation("ThreadCustomer", fields: [customerId], references: [id])
+  customer              User             @relation("ThreadCustomer", fields: [customerId], references: [id])
   assignedToId          Int?
-  assignedTo            User?           @relation("ThreadAgent", fields: [assignedToId], references: [id])
+  assignedTo            User?            @relation("ThreadAgent", fields: [assignedToId], references: [id])
   subject               String
-  status                SupportStatus   @default(open)
+  status                SupportStatus    @default(open)
   botTranscript         String?
-  customerReadMessageId Int             @default(0)
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @default(now())
+  customerReadMessageId Int              @default(0)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @default(now())
   messages              SupportMessage[]
 
   @@index([status, updatedAt])
@@ -310,4 +323,118 @@ model WishlistItem {
   createdAt DateTime @default(now())
 
   @@id([userId, productId])
+}
+
+// ---- listing moderation (docs/superpowers/specs/2026-10-12-listing-moderation-design.md)
+
+enum ModerationLayer {
+  rules
+  ai
+  fallback
+  admin
+}
+
+enum FlagSource {
+  rules
+  ai
+  report
+  fallback
+}
+
+enum FlagStatus {
+  open
+  dismissed
+  minor
+  violation
+  severe
+}
+
+enum ReportReason {
+  counterfeit
+  prohibited
+  misleading
+  offplatform
+  other
+}
+
+enum KeywordSeverity {
+  block
+  flag
+}
+
+/// A product waiting for the AI check; the table is the queue.
+model ModerationJob {
+  productId     Int       @id
+  product       Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  trigger       String
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now())
+  lockedUntil   DateTime?
+  firstQueuedAt DateTime  @default(now())
+
+  @@index([nextAttemptAt])
+}
+
+/// One decision by one layer, kept for audit and AI spend.
+model ModerationCheck {
+  id           Int             @id @default(autoincrement())
+  productId    Int
+  product      Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  layer        ModerationLayer
+  outcome      String
+  reasons      Json
+  model        String?
+  inputTokens  Int?
+  outputTokens Int?
+  costMicros   Int?
+  latencyMs    Int?
+  decidedBy    String?
+  createdAt    DateTime        @default(now())
+
+  @@index([productId])
+  @@index([layer, createdAt])
+}
+
+/// A case in the admin queue. At most one open flag per product (partial unique index in the migration).
+model ProductFlag {
+  id        Int        @id @default(autoincrement())
+  productId Int
+  product   Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  source    FlagSource
+  reasons   Json
+  status    FlagStatus @default(open)
+  note      String     @default("")
+  decidedBy String?
+  decidedAt DateTime?
+  createdAt DateTime   @default(now())
+
+  @@index([status, createdAt])
+}
+
+model ProductReport {
+  id         Int          @id @default(autoincrement())
+  productId  Int
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  reporterId Int
+  reporter   User         @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+  reason     ReportReason
+  note       String       @default("")
+  createdAt  DateTime     @default(now())
+
+  @@unique([productId, reporterId])
+}
+
+model BannedKeyword {
+  id        Int             @id @default(autoincrement())
+  /// stored folded: lower case, no accents
+  phrase    String          @unique
+  severity  KeywordSeverity
+  createdBy String
+  createdAt DateTime        @default(now())
+}
+
+model ModerationSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
 }
