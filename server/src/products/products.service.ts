@@ -2,6 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Prisma, type Product } from '../generated/prisma/client.js';
 import { toCents } from '../common/money.js';
 import { ModerationService } from '../moderation/moderation.service.js';
+import { PenaltiesService } from '../moderation/penalties.service.js';
 import type { Reason } from '../moderation/rules.js';
 import { NotificationsService, type SystemNotification } from '../notifications/notifications.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
@@ -107,6 +108,7 @@ export class ProductsService {
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
     private readonly moderation: ModerationService,
+    private readonly penalties: PenaltiesService,
   ) {}
 
   private async paged(where: Prisma.ProductWhereInput, orderBy: Prisma.ProductOrderByWithRelationInput[], page: number, limit: number, internal = false): Promise<Page<ProductDto>> {
@@ -184,6 +186,7 @@ export class ProductsService {
 
   /** The rules run first: a blocked listing is refused and nothing is saved. */
   async create(shopId: number, dto: CreateProductDto): Promise<ProductDto> {
+    await this.penalties.assertCan(shopId, 'createProduct');
     const checks = await this.moderation.precheck(shopId, { ...dto, description: dto.description ?? '' });
     if (checks.block.length) throw new ListingBlockedException(checks.block);
     const row = await this.prisma.product.create({ data: { ...dto, shopId, adminStatus: 'pending' } });
@@ -195,6 +198,7 @@ export class ProductsService {
   async update(shopId: number, id: number, dto: UpdateProductDto): Promise<ProductDto> {
     const current = await this.prisma.product.findFirst({ where: { id, shopId } });
     if (!current) throw new NotFoundException('Product not found');
+    await this.penalties.assertCan(shopId, 'editProduct');
     const next = { name: current.name, description: current.description, price: Number(current.price), imageUrl: current.imageUrl, category: current.category, ...dto };
     const checks = await this.moderation.precheck(shopId, next, id);
     if (checks.block.length) throw new ListingBlockedException(checks.block);

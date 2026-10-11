@@ -19,6 +19,8 @@ export class FlagsQuery {
 export class DecideFlagDto {
   @IsIn(FLAG_DECISIONS) decision!: (typeof FLAG_DECISIONS)[number];
   @IsOptional() @IsString() @MaxLength(500) note?: string;
+  /** points for a violation (1 or 2, default 1); a severe decision always costs 3 */
+  @IsOptional() @IsInt() @Min(1) @Max(2) points?: number;
 }
 
 export class KeywordDto {
@@ -42,4 +44,27 @@ export class SettingsDto {
   @IsOptional() @IsNumber() @Min(0) priceLowPct?: number;
   @IsOptional() @IsNumber() @Min(100) priceHighPct?: number;
   @IsOptional() @IsString() @MaxLength(4000) listingRules?: string;
+  @IsOptional() @IsInt() @Min(1) capProductsAt?: number;
+  @IsOptional() @IsInt() @Min(1) productLimit?: number;
+  @IsOptional() @IsInt() @Min(1) noCouponsAt?: number;
+  @IsOptional() @IsInt() @Min(1) freezeAt?: number;
+  @IsOptional() @IsInt() @Min(1) freezeDays?: number;
+  @IsOptional() @IsInt() @Min(1) suspendAt?: number;
+}
+
+export class AppealDto {
+  @IsString() @Length(10, 1000) message!: string;
+}
+
+export class AppealsQuery {
+  @IsOptional() @IsIn(['open', 'accepted', 'refused']) status?: 'open' | 'accepted' | 'refused';
+}
+
+export class DecideAppealDto {
+  @IsBoolean() accept!: boolean;
+  @IsString() @Length(1, 500) note!: string;
+}
+
+export class PenaltiesQuery {
+  @Type(() => Number) @IsInt() @Min(1) shopId!: number;
 }

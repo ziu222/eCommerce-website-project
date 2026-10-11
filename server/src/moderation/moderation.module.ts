@@ -6,13 +6,15 @@ import { AiReviewer } from './ai-reviewer.js';
 import { FlagsService } from './flags.service.js';
 import { ModerationService } from './moderation.service.js';
 import { ModerationWorker } from './moderation.worker.js';
+import { AdminPenaltiesController, ShopPenaltiesController } from './penalties.controller.js';
+import { PenaltiesService } from './penalties.service.js';
 import { ReportsController } from './reports.controller.js';
 import { ModerationSettings } from './settings.service.js';
 
 @Module({
   imports: [NotificationsModule],
-  controllers: [ReportsController, AdminModerationController],
-  providers: [ModerationService, ModerationSettings, FlagsService, AiGate, AiReviewer, ModerationWorker],
-  exports: [ModerationService, ModerationSettings],
+  controllers: [ReportsController, AdminModerationController, ShopPenaltiesController, AdminPenaltiesController],
+  providers: [ModerationService, ModerationSettings, FlagsService, AiGate, AiReviewer, ModerationWorker, PenaltiesService],
+  exports: [ModerationService, ModerationSettings, PenaltiesService],
 })
 export class ModerationModule {}
