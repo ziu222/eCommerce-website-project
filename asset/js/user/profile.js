@@ -220,6 +220,15 @@
             : '<div style="grid-column:1/-1">' + empty("favorite", "Nothing saved yet", "Tap the heart on any product to keep it here.", '<a class="btn btn-primary" href="product.html">Browse the shop</a>') + "</div>";
     }
 
+    // an order changed status (ui.js got it over the live stream): the open section reloads,
+    // the other sections that show orders reload the next time they open
+    document.addEventListener("order:change", function () {
+        ["overview", "orders", "notifications"].forEach(function (p) {
+            if (!loaded[p]) return;
+            if (document.getElementById("panel-" + p).hidden) loaded[p] = false; else LOADERS[p]();
+        });
+    });
+
     // a product unsaved from the wishlist tab leaves the grid
     document.addEventListener("wishlist:change", function (e) {
         var n = Number(document.getElementById("statSaved").textContent) + (e.detail.saved ? 1 : -1);
