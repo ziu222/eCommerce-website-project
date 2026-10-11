@@ -20,6 +20,7 @@ Api.products = (function () {
             specs: p.specs || {},
             adminStatus: p.adminStatus,
             adminNote: p.adminNote || "",
+            moderationReasons: p.moderationReasons || [],
             reviewedBy: p.reviewedBy,
             reviewedAt: p.reviewedAt,
             createdAt: String(p.createdAt).slice(0, 10),

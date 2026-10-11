@@ -1,4 +1,5 @@
-// shop-products.js — a shop manages its own products. Every save goes back to the admin review queue.
+// shop-products.js — a shop manages its own products. Every save is checked again by the rules and the AI;
+// the result arrives over the live stream and the table updates itself.
 
 var productCache  = [];
 var currentFilter = "all";
@@ -7,7 +8,9 @@ var editingId     = null;
 var uploading     = false;
 
 var DEFAULT_IMAGE = "../asset/img/placeholder/audio.svg";
-var STATUS_LABEL  = { approved: "Live", pending: "In review", rejected: "Rejected", suspended: "Suspended" };
+var STATUS_LABEL  = { approved: "Live", pending: "Checking…", limited: "Shown lower", review: "Waiting for an admin", rejected: "Refused", suspended: "Suspended" };
+var CHECKING      = ["pending", "review"];
+var ATTENTION     = ["limited", "rejected", "suspended"];
 
 function money(n) {
     return "$" + Number(n).toLocaleString("en-US", { maximumFractionDigits: 2 });
@@ -23,15 +26,16 @@ async function loadProducts() {
 }
 
 function renderStats() {
-    var count = function (status) { return productCache.filter(function (p) { return p.adminStatus === status; }).length; };
+    var count = function (list) { return productCache.filter(function (p) { return list.indexOf(p.adminStatus) !== -1; }).length; };
     document.getElementById("statTotal").textContent     = productCache.length;
-    document.getElementById("statApproved").textContent  = count("approved");
-    document.getElementById("statPending").textContent   = count("pending");
-    document.getElementById("statAttention").textContent = count("rejected") + count("suspended");
+    document.getElementById("statApproved").textContent  = count(["approved"]);
+    document.getElementById("statPending").textContent   = count(CHECKING);
+    document.getElementById("statAttention").textContent = count(ATTENTION);
 }
 
 function matchesFilter(p) {
-    if (currentFilter === "attention") return p.adminStatus === "rejected" || p.adminStatus === "suspended";
+    if (currentFilter === "attention") return ATTENTION.indexOf(p.adminStatus) !== -1;
+    if (currentFilter === "pending") return CHECKING.indexOf(p.adminStatus) !== -1;
     return currentFilter === "all" || p.adminStatus === currentFilter;
 }
 
@@ -52,9 +56,7 @@ function renderTable() {
     empty.style.display = "none";
 
     tbody.innerHTML = rows.map(function (p) {
-        var note = p.adminNote && (p.adminStatus === "rejected" || p.adminStatus === "suspended")
-            ? '<div style="font-size:12px;color:#8a6d3b;margin-top:4px;">Admin note: ' + Api.escapeHtml(p.adminNote) + '</div>'
-            : "";
+        var note = whyHtml(p);
         return '<tr>' +
             '<td><div style="display:flex;gap:10px;align-items:center;">' +
                 '<img src="' + Api.escapeHtml(p.image) + '" alt="" onerror="this.onerror=null;this.src=\'../asset/img/404.png\'" style="width:44px;height:44px;object-fit:cover;border-radius:8px;background:#f1f3f5;">' +
@@ -62,13 +64,30 @@ function renderTable() {
             '<td>' + Api.escapeHtml(p.category) + '</td>' +
             '<td>' + money(p.price) + (p.oldPrice ? ' <s style="color:#6b7280;">' + money(p.oldPrice) + '</s>' : '') + '</td>' +
             '<td>' + p.stock + '</td>' +
-            '<td><span class="badge badge-' + p.adminStatus + '">' + (STATUS_LABEL[p.adminStatus] || p.adminStatus) + '</span>' + note + '</td>' +
+            '<td class="status-cell"><span class="badge badge-ps-' + p.adminStatus + (p.adminStatus === "pending" ? " is-checking" : "") + '">' + (STATUS_LABEL[p.adminStatus] || p.adminStatus) + '</span>' + note + '</td>' +
             '<td>' +
                 '<button class="icon-btn icon-btn-edit" onclick="openModal(' + p.id + ')" title="Edit"><i class="fa-solid fa-pen"></i></button>' +
                 '<button class="icon-btn icon-btn-suspend" onclick="deleteProduct(' + p.id + ')" title="Delete"><i class="fa-solid fa-trash"></i></button>' +
             '</td>' +
         '</tr>';
     }).join("");
+}
+
+// Why a product is not simply live: the checks' reasons or the admin's note, with what to do next.
+function whyHtml(p) {
+    var esc = Api.escapeHtml;
+    if (p.adminStatus === "approved" || p.adminStatus === "pending") return "";
+    var lines = (p.moderationReasons || []).map(function (r) { return "<li>" + esc(r.message) + "</li>"; });
+    if (p.adminNote && (p.adminStatus === "suspended" || p.adminStatus === "rejected" || p.adminStatus === "limited")) {
+        lines.push("<li><strong>Admin:</strong> " + esc(p.adminNote) + "</li>");
+    }
+    var next = {
+        limited: "Customers can still buy it. Fix the points below and save to show it normally.",
+        review: "An admin will look at it soon.",
+        rejected: "Edit the listing to try again.",
+        suspended: "Edit the listing; an admin will review it again."
+    }[p.adminStatus] || "";
+    return '<div class="why">' + (lines.length ? "<ul>" + lines.join("") + "</ul>" : "") + (next ? "<p>" + next + "</p>" : "") + "</div>";
 }
 
 function setPreview(url) {
@@ -155,12 +174,43 @@ async function saveModal() {
             await Api.shopProducts.create(data);
         }
     } catch (e) {
-        showModalError(e.message);
+        // the listing rules list every problem; show them as a list
+        var reasons = e.body && e.body.reasons;
+        if (reasons && reasons.length) {
+            showModalError("This listing can't be published:\n• " + reasons.map(function (r) { return r.message; }).join("\n• "));
+        } else {
+            showModalError(e.message);
+        }
         return;
     }
 
     closeModal();
+    toast(editingId ? "Saved. Checking the listing…" : "Listing saved. Checking it now…");
     await loadProducts();
+}
+
+function toast(text, isError) {
+    var box = document.getElementById("liveToasts");
+    if (!box) return;
+    var t = document.createElement("div");
+    t.className = "live-toast" + (isError ? " is-error" : "");
+    t.textContent = text;
+    box.appendChild(t);
+    setTimeout(function () { t.classList.add("is-leaving"); }, 4000);
+    setTimeout(function () { t.remove(); }, 4500);
+}
+
+// The verdict of the automatic check arrives a few seconds after a save.
+function listenLive() {
+    if (!window.EventSource) return;
+    var es = new EventSource("/api/notifications/stream");
+    var VERDICT = { approved: "is live", limited: "is shown lower, see why in the table", review: "is waiting for an admin", rejected: "was refused, see why in the table", suspended: "was suspended" };
+    es.addEventListener("product", function (e) {
+        var d = JSON.parse(e.data);
+        var p = productCache.find(function (x) { return x.id === d.productId; });
+        if (VERDICT[d.status]) toast((p ? '"' + p.name + '"' : "Your product") + " " + VERDICT[d.status], d.status === "rejected" || d.status === "suspended");
+        loadProducts();
+    });
 }
 
 async function deleteProduct(id) {
@@ -187,6 +237,7 @@ document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("topbarUserName").textContent = user.shopName || user.name || "Shop";
 
     loadProducts();
+    listenLive();
 
     document.getElementById("btnNewProduct").addEventListener("click", function () { openModal(null); });
     document.getElementById("btnSaveProduct").addEventListener("click", saveModal);

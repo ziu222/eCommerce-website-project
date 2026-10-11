@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EC SHOP - Moderation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../asset/css/admin-dashboard.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <a href="dashboard.html" class="sidebar-logo-text">EC SHOP</a>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="nav-item">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+        </a>
+        <a href="shops-manage.html" class="nav-item">
+            <i class="fa-solid fa-store"></i> Shops
+        </a>
+        <a href="products.html" class="nav-item">
+            <i class="fa-solid fa-box-open"></i> Products
+        </a>
+        <a href="moderation.html" class="nav-item active">
+            <i class="fa-solid fa-shield-halved"></i> Moderation <span class="nav-badge" id="navOpenCases" hidden></span>
+        </a>
+        <a href="orders-manage.html" class="nav-item">
+            <i class="fa-solid fa-clipboard-list"></i> Orders
+        </a>
+        <a href="users-manage.html" class="nav-item">
+            <i class="fa-solid fa-users"></i> Users
+        </a>
+        <a href="notifications.html" class="nav-item">
+            <i class="fa-solid fa-bell"></i> Notifications
+        </a>
+        <a href="support.html" class="nav-item" data-permission="support.view">
+            <i class="fa-solid fa-headset"></i> Support
+        </a>
+        <a href="coupons.html" class="nav-item">
+            <i class="fa-solid fa-tag"></i> Coupons
+        </a>
+    </nav>
+</aside>
+
+<header class="topbar">
+    <h1 class="topbar-title">Moderation</h1>
+    <div class="topbar-right">
+        <div class="topbar-user">
+            <div class="topbar-avatar" id="topbarAvatar">A</div>
+            <span id="topbarUserName">Admin</span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <section class="ai-strip" id="aiStrip" data-state="loading" aria-live="polite">
+        <span class="ai-strip-icon"><i class="fa-solid fa-robot" aria-hidden="true"></i></span>
+        <div class="ai-strip-text">
+            <strong id="aiTitle">Checking the AI moderation status…</strong>
+            <span id="aiDetail"></span>
+        </div>
+        <button class="btn-reset" type="button" id="refreshBtn"><i class="fa-solid fa-rotate"></i> Refresh</button>
+    </section>
+
+    <div class="stats-row stats-row-4">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Open cases</span>
+                <div class="stat-card-icon orange"><i class="fa-solid fa-flag"></i></div>
+            </div>
+            <div class="stat-card-value" id="statOpen">0</div>
+            <div class="stat-card-sub">Shown lower until you decide</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">From customers</span>
+                <div class="stat-card-icon red"><i class="fa-solid fa-bullhorn"></i></div>
+            </div>
+            <div class="stat-card-value" id="statReports">0</div>
+            <div class="stat-card-sub">Reported by several buyers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">From the AI</span>
+                <div class="stat-card-icon purple"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            </div>
+            <div class="stat-card-value" id="statAi">0</div>
+            <div class="stat-card-sub">Suspected by the automatic check</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Open appeals</span>
+                <div class="stat-card-icon blue"><i class="fa-solid fa-scale-balanced"></i></div>
+            </div>
+            <div class="stat-card-value" id="statAppeals">0</div>
+            <div class="stat-card-sub">Shops asking to remove points</div>
+        </div>
+    </div>
+
+    <div class="card mod-card">
+        <div class="mod-tabs" role="tablist" aria-label="Moderation sections">
+            <button type="button" role="tab" id="tab-queue" aria-controls="panel-queue" aria-selected="true">
+                <i class="fa-solid fa-list-check"></i> Queue <span class="tab-count" id="countQueue"></span>
+            </button>
+            <button type="button" role="tab" id="tab-appeals" aria-controls="panel-appeals" aria-selected="false" tabindex="-1">
+                <i class="fa-solid fa-scale-balanced"></i> Appeals <span class="tab-count" id="countAppeals"></span>
+            </button>
+            <button type="button" role="tab" id="tab-keywords" aria-controls="panel-keywords" aria-selected="false" tabindex="-1">
+                <i class="fa-solid fa-ban"></i> Keywords
+            </button>
+            <button type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" tabindex="-1">
+                <i class="fa-solid fa-sliders"></i> Settings
+            </button>
+        </div>
+
+        <section class="mod-panel" id="panel-queue" role="tabpanel" aria-labelledby="tab-queue">
+            <div class="mod-toolbar">
+                <div class="filter-tabs" role="group" aria-label="Where the case came from">
+                    <button class="filter-tab active" type="button" data-source="">All</button>
+                    <button class="filter-tab" type="button" data-source="report">Customers</button>
+                    <button class="filter-tab" type="button" data-source="ai">AI</button>
+                    <button class="filter-tab" type="button" data-source="rules">Rules</button>
+                    <button class="filter-tab" type="button" data-source="fallback">Waiting for review</button>
+                </div>
+                <label class="mod-select">
+                    <span>Show</span>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="open">Open cases</option>
+                        <option value="dismissed">Dismissed</option>
+                        <option value="minor">Minor</option>
+                        <option value="violation">Violation</option>
+                        <option value="severe">Severe</option>
+                    </select>
+                </label>
+            </div>
+            <div class="mod-list" id="flagList" aria-live="polite"></div>
+        </section>
+
+        <section class="mod-panel" id="panel-appeals" role="tabpanel" aria-labelledby="tab-appeals" hidden>
+            <div class="mod-toolbar">
+                <p class="mod-hint">Accepting an appeal removes the penalty points. A shop suspended at the top level stays suspended until you restore it on the Shops page.</p>
+                <label class="mod-select">
+                    <span>Show</span>
+                    <select class="filter-select" id="appealFilter">
+                        <option value="open">Open</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="refused">Refused</option>
+                    </select>
+                </label>
+            </div>
+            <div class="mod-list" id="appealList" aria-live="polite"></div>
+        </section>
+
+        <section class="mod-panel" id="panel-keywords" role="tabpanel" aria-labelledby="tab-keywords" hidden>
+            <p class="mod-hint">Matched in titles and descriptions without accents or capitals: "hang fake" also catches "HÀNG FAKE". <strong>Block</strong> refuses the listing; <strong>Flag</strong> lets it go live, shown lower, for you to review.</p>
+            <form class="kw-form" id="kwForm" data-manage>
+                <label class="kw-field">
+                    <span class="form-label">Word or phrase</span>
+                    <input class="form-input" id="kwPhrase" maxlength="60" required placeholder="e.g. hàng nhái">
+                </label>
+                <label class="kw-field kw-field--small">
+                    <span class="form-label">Action</span>
+                    <select class="form-input" id="kwSeverity">
+                        <option value="block">Block</option>
+                        <option value="flag">Flag</option>
+                    </select>
+                </label>
+                <button class="btn-primary" type="submit"><i class="fa-solid fa-plus"></i> Add</button>
+            </form>
+            <p class="mod-err" id="kwError" role="alert" hidden></p>
+            <div class="kw-groups">
+                <div>
+                    <h2 class="kw-title"><i class="fa-solid fa-ban"></i> Block</h2>
+                    <ul class="kw-list" id="kwBlock"></ul>
+                </div>
+                <div>
+                    <h2 class="kw-title"><i class="fa-solid fa-flag"></i> Flag</h2>
+                    <ul class="kw-list" id="kwFlag"></ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mod-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden>
+            <form id="settingsForm" class="set-form" novalidate></form>
+        </section>
+    </div>
+
+</main>
+
+<div class="live-toasts" id="toasts" aria-live="polite"></div>
+
+<script src="../asset/js/api/client.js"></script>
+<script src="../asset/js/api/auth.js"></script>
+<script src="../asset/js/api/moderation.js"></script>
+<script src="../asset/js/core/auth.js"></script>
+<script src="../asset/js/admin/admin-common.js"></script>
+<script src="../asset/js/admin/admin-moderation.js"></script>
+
+</body>
+</html>

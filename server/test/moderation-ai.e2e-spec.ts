@@ -98,6 +98,11 @@ describe('listing moderation with the AI check', () => {
     const p = await create();
     await drain();
     expect(await product(p.id)).toMatchObject({ adminStatus: 'rejected' });
+
+    // an admin who finds the AI wrong puts it live
+    const flag = await prisma.productFlag.findFirstOrThrow({ where: { productId: p.id, status: 'open' } });
+    await (await staff()).post(`/api/admin/moderation/flags/${flag.id}/decide`).send({ decision: 'dismiss' }).expect(201);
+    expect(await product(p.id)).toMatchObject({ adminStatus: 'approved' });
   });
 
   describe('when the AI cannot answer', () => {

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penalty Points - EC SHOP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../asset/css/admin-dashboard.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <a href="orders.html" class="sidebar-logo-text">EC SHOP</a>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Shop</div>
+        <a href="orders.html" class="nav-item"><i class="fa-solid fa-receipt"></i> My Orders</a>
+        <a href="products.html" class="nav-item"><i class="fa-solid fa-box"></i> My Products</a>
+        <a href="coupons.html" class="nav-item"><i class="fa-solid fa-tag"></i> My Coupons</a>
+        <a href="penalties.html" class="nav-item active"><i class="fa-solid fa-scale-balanced"></i> Penalty Points</a>
+        <div class="nav-section-label">Account</div>
+        <a href="#" class="nav-item" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+</aside>
+
+<header class="topbar">
+    <h1 class="topbar-title">Penalty Points</h1>
+    <div class="topbar-right">
+        <div class="topbar-user">
+            <div class="topbar-avatar" id="topbarAvatar">S</div>
+            <span id="topbarUserName">Shop</span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <section class="pen-hero" aria-labelledby="penTitle">
+        <div>
+            <div class="pen-score" id="penScore" data-level="0">
+                <span class="points-orb" id="penOrb" aria-hidden="true">0</span>
+                <div>
+                    <h2 id="penTitle">Loading your points…</h2>
+                    <p id="penSummary"></p>
+                </div>
+            </div>
+            <div class="pen-track" id="penTrack" role="img" aria-label="Penalty points on a scale to the suspension level">
+                <div class="pen-fill" id="penFill" data-level="0" style="width:0"></div>
+            </div>
+        </div>
+        <ul class="pen-levels" id="penLevels"></ul>
+    </section>
+
+    <div class="card">
+        <div class="card-title" style="margin-bottom:6px;">History</div>
+        <p class="mod-hint">Points come from an admin decision on one of your listings. They reset at the end of each quarter. If you think a decision is wrong, appeal it once with what the admin should know.</p>
+        <div class="pen-list" id="penList" aria-live="polite"></div>
+    </div>
+
+</main>
+
+<div class="live-toasts" id="liveToasts" aria-live="polite"></div>
+
+<script src="../asset/js/api/client.js"></script>
+<script src="../asset/js/api/auth.js"></script>
+<script src="../asset/js/api/moderation.js"></script>
+<script src="../asset/js/core/auth.js"></script>
+<script src="../asset/js/shop/shop-penalties.js"></script>
+
+</body>
+</html>
