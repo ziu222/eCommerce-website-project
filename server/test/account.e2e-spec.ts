@@ -185,6 +185,26 @@ describe('customer account: addresses, wishlist, membership, sessions', () => {
       expect(text).toContain('event: order');
       expect(text).toContain('"status":"confirmed"');
     });
+
+    it('tells the shop about a new order and about the customer cancelling it', async () => {
+      const shopLogin = await request(server()).post('/api/auth/login').send({ identifier: 'apple', password: 'shop123' }).expect(200);
+      const cookie = [shopLogin.headers['set-cookie']].flat().map((c) => String(c).split(';')[0]).join('; ');
+      if (!server().listening) await new Promise<void>((done) => server().listen(0, done));
+      const { port } = server().address() as { port: number };
+      const abort = new AbortController();
+      const res = await fetch(`http://127.0.0.1:${port}/api/notifications/stream`, { headers: { Cookie: cookie }, signal: abort.signal });
+      const reader = res.body!.getReader();
+      let text = '';
+      const until = async (s: string) => { while (!text.includes(s)) text += new TextDecoder().decode((await reader.read()).value); };
+
+      const customer = await levanc();
+      const productId = (await prisma.product.create({ data: { shopId: 5, name: 'Shop live test', price: '10.00', imageUrl: 'x.png', category: 'audio', stock: 5, adminStatus: 'approved' } })).id;
+      const order = (await customer.post('/api/orders/checkout').send({ paymentMethod: 'cod', items: [{ productId, qty: 1 }] }).expect(201)).body.orders[0];
+      await until(`{"orderId":${order.id},"status":"pending"}`);
+      await customer.post(`/api/orders/${order.id}/cancel`).expect(201);
+      await until(`{"orderId":${order.id},"status":"cancelled"}`);
+      abort.abort();
+    });
   });
 
   describe('sign out everywhere', () => {

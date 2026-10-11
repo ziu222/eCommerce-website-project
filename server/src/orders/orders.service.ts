@@ -143,6 +143,8 @@ export class OrdersService {
       { timeout: 20000 },
     );
 
+    // each shop hears about its new order once it is committed
+    for (const o of orders) this.live.emit({ userId: o.shopId, type: 'order', data: { orderId: o.id, status: o.status } });
     return { orders: orders.map(toOrderDto), total: orders.reduce((s, o) => s + toCents(o.total), 0) / 100 };
   }
 

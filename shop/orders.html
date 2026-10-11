@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - EC SHOP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../asset/css/admin-dashboard.css">
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <a href="orders.html" class="sidebar-logo-text">EC SHOP</a>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section-label">Shop</div>
+        <a href="orders.html" class="nav-item active"><i class="fa-solid fa-receipt"></i> My Orders <span class="nav-badge" id="navPending" hidden></span></a>
+        <a href="products.html" class="nav-item"><i class="fa-solid fa-box"></i> My Products</a>
+        <a href="coupons.html" class="nav-item"><i class="fa-solid fa-tag"></i> My Coupons</a>
+        <div class="nav-section-label">Account</div>
+        <a href="#" class="nav-item" id="logoutLink"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+    </nav>
+</aside>
+
+<header class="topbar">
+    <h1 class="topbar-title">My Orders</h1>
+    <div class="topbar-right">
+        <span class="live-pill" id="livePill" data-state="off" role="status"><span class="live-dot"></span><span id="liveText">Connecting…</span></span>
+        <div class="topbar-user">
+            <div class="topbar-avatar" id="topbarAvatar">S</div>
+            <span id="topbarUserName">Shop</span>
+        </div>
+        <button class="btn-logout" id="logoutBtn">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+    </div>
+</header>
+
+<main class="main-content">
+
+    <div class="stats-row stats-row-4">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">To confirm</span>
+                <div class="stat-card-icon orange"><i class="fa-solid fa-hourglass-half"></i></div>
+            </div>
+            <div class="stat-card-value" id="statPending">0</div>
+            <div class="stat-card-sub">New orders waiting for you</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">To ship</span>
+                <div class="stat-card-icon blue"><i class="fa-solid fa-box-open"></i></div>
+            </div>
+            <div class="stat-card-value" id="statConfirmed">0</div>
+            <div class="stat-card-sub">Confirmed, not sent yet</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">On the way</span>
+                <div class="stat-card-icon purple"><i class="fa-solid fa-truck-fast"></i></div>
+            </div>
+            <div class="stat-card-value" id="statShipped">0</div>
+            <div class="stat-card-sub">Shipped to the customer</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <span class="stat-card-label">Delivered</span>
+                <div class="stat-card-icon green"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+            <div class="stat-card-value" id="statDelivered">0</div>
+            <div class="stat-card-sub">Completed orders</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="toolbar product-toolbar">
+            <div class="filter-tabs">
+                <button class="filter-tab active" type="button" data-status="all">All</button>
+                <button class="filter-tab" type="button" data-status="pending">To confirm</button>
+                <button class="filter-tab" type="button" data-status="confirmed">To ship</button>
+                <button class="filter-tab" type="button" data-status="shipped">On the way</button>
+                <button class="filter-tab" type="button" data-status="delivered">Delivered</button>
+                <button class="filter-tab" type="button" data-status="cancelled">Cancelled</button>
+            </div>
+            <div class="toolbar-right">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="orderSearch" placeholder="Search order or customer..." aria-label="Search orders">
+                </div>
+            </div>
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>Order</th>
+                        <th>Customer</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th>Placed</th>
+                        <th>Next step</th>
+                    </tr>
+                </thead>
+                <tbody id="orderTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="table-empty" id="emptyState" style="display:none;">
+            <i class="fa-solid fa-receipt"></i>
+            <p>No orders here yet. New ones show up the moment a customer checks out.</p>
+        </div>
+    </div>
+
+</main>
+
+<div class="live-toasts" id="liveToasts" aria-live="polite"></div>
+
+<script src="../asset/js/api/client.js"></script>
+<script src="../asset/js/api/auth.js"></script>
+<script src="../asset/js/api/commerce.js"></script>
+<script src="../asset/js/shop/shop-orders.js"></script>
+
+</body>
+</html>
