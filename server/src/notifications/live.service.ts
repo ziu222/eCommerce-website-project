@@ -3,7 +3,7 @@ import { Subject, filter, interval, map, merge, type Observable } from 'rxjs';
 
 export interface LiveEvent {
   userId: number;
-  type: 'order';
+  type: 'order' | 'product';
   data: Record<string, unknown>;
 }
 

@@ -17,7 +17,7 @@ import {
 
 export const CATEGORIES = ['smartphone', 'wearables', 'laptops', 'audio', 'cameras', 'gaming'] as const;
 export const SORTS = ['default', 'price_asc', 'price_desc', 'rating', 'newest'] as const;
-export const PRODUCT_STATUSES = ['pending', 'approved', 'rejected', 'suspended'] as const;
+export const PRODUCT_STATUSES = ['pending', 'approved', 'limited', 'review', 'rejected', 'suspended'] as const;
 
 export class ListProductsQuery {
   @IsOptional() @IsIn(CATEGORIES) category?: (typeof CATEGORIES)[number];

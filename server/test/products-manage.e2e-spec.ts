@@ -30,7 +30,7 @@ describe('shop and admin product management', () => {
     imageUrl: '../asset/img/placeholder/audio.svg',
     category: 'audio',
     stock: 10,
-    description: 'A gadget for tests.',
+    description: 'A small wireless gadget used by the automated tests.',
     specs: { Battery: '10h' },
   };
 
@@ -53,10 +53,10 @@ describe('shop and admin product management', () => {
   });
 
   describe('shop endpoints', () => {
-    it('creates a product as pending, owned by the logged-in shop, invisible to the public', async () => {
+    it('creates a product owned by the logged-in shop that goes live once the automatic check passes', async () => {
       const res = await (await apple()).post('/api/shop/products').send(draft).expect(201);
-      expect(res.body).toMatchObject({ name: 'Test Gadget', shopId: 5, adminStatus: 'pending', price: 99.5 });
-      await request(server()).get(`/api/products/${res.body.id}`).expect(404);
+      expect(res.body).toMatchObject({ name: 'Test Gadget', shopId: 5, adminStatus: 'approved', price: 99.5, moderationReasons: [] });
+      await request(server()).get(`/api/products/${res.body.id}`).expect(200);
     });
 
     it('refuses fields a shop must not set and invalid values', async () => {
@@ -90,12 +90,12 @@ describe('shop and admin product management', () => {
       expect((await prisma.product.findUnique({ where: { id: 1 } }))?.price.toString()).toBe('1199');
     });
 
-    it('sends an approved product back to pending when the shop edits it', async () => {
+    it('checks an edited product again and keeps it live when it still passes', async () => {
       await (await apple()).patch('/api/shop/products/1').send({ price: 1150 }).expect(200);
       const row = await prisma.product.findUnique({ where: { id: 1 } });
-      expect(row).toMatchObject({ adminStatus: 'pending', reviewedAt: null });
+      expect(row).toMatchObject({ adminStatus: 'approved', reviewedAt: null });
       expect(row?.price.toString()).toBe('1150');
-      await request(server()).get('/api/products/1').expect(404);
+      await request(server()).get('/api/products/1').expect(200);
     });
 
     it('deletes an unsold product but not one that has orders', async () => {
