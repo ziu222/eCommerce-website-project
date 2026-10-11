@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post, Put
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { RequirePermission } from '../auth/permissions.decorator.js';
 import type { SessionUser } from '../auth/session-user.js';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { AiGate } from './ai-gate.js';
 import { DecideFlagDto, FlagsQuery, KeywordDto, SettingsDto } from './dto/moderation.dto.js';
 import { FlagsService } from './flags.service.js';
 import { ModerationSettings } from './settings.service.js';
@@ -11,7 +13,28 @@ export class AdminModerationController {
   constructor(
     private readonly flags: FlagsService,
     private readonly settings: ModerationSettings,
+    private readonly gate: AiGate,
+    private readonly prisma: PrismaService,
   ) {}
+
+  /** Whether the AI check is running, what it cost today, and how long products wait for it. */
+  @Get('health')
+  @RequirePermission('products.view')
+  async health() {
+    const [ai, spent, waiting] = await Promise.all([
+      this.gate.state(),
+      this.gate.spentTodayMicros(),
+      this.prisma.moderationJob.aggregate({ where: { trigger: { not: 'recheck' } }, _count: { _all: true }, _min: { firstQueuedAt: true } }),
+    ]);
+    const oldest = waiting._min.firstQueuedAt;
+    return {
+      ai,
+      breakerOpenUntil: this.gate.breakerOpenUntil(),
+      spentTodayUsd: spent / 1_000_000,
+      queueDepth: waiting._count._all,
+      oldestWaitingMinutes: oldest ? Math.floor((Date.now() - oldest.getTime()) / 60_000) : 0,
+    };
+  }
 
   @Get('flags')
   @RequirePermission('products.view')

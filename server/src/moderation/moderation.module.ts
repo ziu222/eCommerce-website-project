@@ -1,15 +1,18 @@
 import { Module } from '@nestjs/common';
 import { NotificationsModule } from '../notifications/notifications.module.js';
 import { AdminModerationController } from './admin-moderation.controller.js';
+import { AiGate } from './ai-gate.js';
+import { AiReviewer } from './ai-reviewer.js';
 import { FlagsService } from './flags.service.js';
 import { ModerationService } from './moderation.service.js';
+import { ModerationWorker } from './moderation.worker.js';
 import { ReportsController } from './reports.controller.js';
 import { ModerationSettings } from './settings.service.js';
 
 @Module({
   imports: [NotificationsModule],
   controllers: [ReportsController, AdminModerationController],
-  providers: [ModerationService, ModerationSettings, FlagsService],
+  providers: [ModerationService, ModerationSettings, FlagsService, AiGate, AiReviewer, ModerationWorker],
   exports: [ModerationService, ModerationSettings],
 })
 export class ModerationModule {}
