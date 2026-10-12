@@ -342,10 +342,10 @@ var UI = (function () {
         return '<div class="container footer-grid">' +
             '<div class="footer-brand"><a class="brand" href="home.html"><img class="brand-logo" src="../asset/brand/logo-mark.svg" alt="" width="36" height="36"><span class="brand-word">EC<svg class="brand-bolt" viewBox="0 0 14 24" aria-hidden="true"><path d="M10 0L2 12h6l-3 11 9-14H8l3-9z"/></svg>SHOP</span></a>' +
             "<p>Phones, laptops, audio and more from verified sellers, with support that answers.</p></div>" +
-            '<div class="footer-col"><h4>Shop</h4><ul>' + shop + "</ul></div>" +
-            '<div class="footer-col"><h4>Help</h4><ul><li><a href="contact.html">Contact us</a></li><li><a href="about.html">About EC SHOP</a></li>' +
+            '<div class="footer-col"><h2>Shop</h2><ul>' + shop + "</ul></div>" +
+            '<div class="footer-col"><h2>Help</h2><ul><li><a href="contact.html">Contact us</a></li><li><a href="about.html">About EC SHOP</a></li>' +
             '<li><a href="#" data-open-support>Chat with support</a></li></ul></div>' +
-            '<div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="wallet.html">Wallet</a></li>' +
+            '<div class="footer-col"><h2>Account</h2><ul><li><a href="profile.html">Profile</a></li><li><a href="wallet.html">Wallet</a></li>' +
             '<li><a href="cart.html">Cart</a></li><li><a href="login.html" data-auth="login">Sign in</a></li></ul></div></div>' +
             '<div class="container footer-base"><span>© 2026 EC SHOP</span><span>Prices in USD</span>' +
             '<button type="button" class="motion-toggle" id="motionToggle" hidden></button></div>';

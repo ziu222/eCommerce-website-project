@@ -364,9 +364,9 @@ body {
     flex-shrink: 0;
 }
 
-.top-product-rank.gold   { background: #fef3e6; color: #e67e22; }
+.top-product-rank.gold   { background: #fef3e6; color: #9a4a00; }
 .top-product-rank.silver { background: #f0f0f0; color: #666; }
-.top-product-rank.bronze { background: #fef0e6; color: #b5651d; }
+.top-product-rank.bronze { background: #fef0e6; color: #8a4a12; }
 
 .top-product-info {
     flex: 1;
@@ -451,16 +451,16 @@ body {
     text-transform: capitalize;
 }
 
-.badge-pending   { background: #fef3e6; color: #e67e22; }
-.badge-confirmed { background: #e8f0fe; color: #1a73e8; }
-.badge-shipped   { background: #f0e8fe; color: #8e44ad; }
-.badge-delivered { background: #e6f8ef; color: #27ae60; }
-.badge-cancelled { background: #fee8e8; color: #e74c3c; }
-.badge-active    { background: #e6f8ef; color: #27ae60; }
-.badge-suspended { background: #fee8e8; color: #e74c3c; }
+.badge-pending   { background: #fef3e6; color: #9a4a00; }
+.badge-confirmed { background: #e8f0fe; color: #1557b0; }
+.badge-shipped   { background: #e6f0f0; color: #0b5c58; }
+.badge-delivered { background: #e6f8ef; color: #17663c; }
+.badge-cancelled { background: #fee8e8; color: #b42318; }
+.badge-active    { background: #e6f8ef; color: #17663c; }
+.badge-suspended { background: #fee8e8; color: #b42318; }
 .badge-banned    { background: #fde8e8; color: #c0392b; }
-.badge-level1    { background: #e8f0fe; color: #1a73e8; }
-.badge-level2    { background: #f0e8fe; color: #8e44ad; }
+.badge-level1    { background: #e8f0fe; color: #1557b0; }
+.badge-level2    { background: #e6f0f0; color: #0b5c58; }
 
 .btn-action {
     padding: 4px 12px;
@@ -500,7 +500,7 @@ body {
 .icon-btn-suspend { background: #fee8e8; color: #e74c3c; }
 .icon-btn-reject  { background: #fde8e8; color: #c0392b; }
 .icon-btn-restore { background: #f0fdf4; color: #16a34a; }
-.icon-btn-edit    { background: #fef3e6; color: #e67e22; }
+.icon-btn-edit    { background: #fef3e6; color: #9a4a00; }
 
 
 
@@ -697,6 +697,7 @@ body {
     border-bottom: 1px solid #f0f0f0;
 }
 
+.modal-header h2,
 .modal-header h3 {
     font-family: "Manrope", sans-serif;
     font-size: 18px;
@@ -707,6 +708,12 @@ body {
 .modal-close {
     background: none;
     border: none;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin: -10px -10px -10px 0;
+    border-radius: 8px;
     font-size: 20px;
     cursor: pointer;
     color: #5f6b67;
@@ -763,8 +770,8 @@ body {
 }
 
 .modal-btn:hover { opacity: 0.85; }
-.modal-btn.approve    { background: #27ae60; color: #fff; }
-.modal-btn.suspend    { background: #e74c3c; color: #fff; }
+.modal-btn.approve    { background: #17663c; color: #fff; }
+.modal-btn.suspend    { background: #b42318; color: #fff; }
 .modal-btn.reactivate { background: #1a73e8; color: #fff; }
 .modal-btn.close      { background: #f0f0f0; color: #555; }
 
@@ -896,7 +903,7 @@ body {
     min-height: 18px;
 }
 
-.action-btn-sm.edit { background: #fef3e6; color: #e67e22; }
+.action-btn-sm.edit { background: #fef3e6; color: #9a4a00; }
 
 .back-link {
     color: #666;
@@ -1059,19 +1066,73 @@ body {
     }
 }
 
+/* Phones: the sidebar becomes a scrollable strip of links under the title bar, so the
+   page gets the full width. Pure CSS, the pages keep their markup. */
 @media (max-width: 768px) {
-    .sidebar {
-        width: 200px;
+    body {
+        display: flex;
+        flex-direction: column;
     }
     .topbar {
-        left: 200px;
+        position: static;
+        order: -1;
+        height: auto;
+        min-height: 56px;
+        gap: 12px;
+        padding: 8px 16px;
+    }
+    .topbar-title {
+        font-size: 18px;
+    }
+    .sidebar {
+        position: sticky;
+        top: 0;
+        width: auto;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid #e8e8e8;
+    }
+    .sidebar-logo,
+    .sidebar-footer,
+    .nav-section-label {
+        display: none;
+    }
+    .sidebar-nav {
+        display: flex;
+        gap: 4px;
+        padding: 8px 12px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .nav-item {
+        flex: none;
+        gap: 8px;
+        min-height: 44px;
+        margin: 0;
+        padding: 0 14px;
+        white-space: nowrap;
     }
     .main-content {
-        margin-left: 200px;
-        padding: 20px;
+        margin: 0;
+        padding: 16px;
+        min-height: 0;
+        min-width: 0;
     }
-    .stats-row {
-        grid-template-columns: 1fr;
+    .stats-row,
+    .stats-row.stats-row-5 {
+        grid-template-columns: 1fr 1fr;
+    }
+    .stats-row > *,
+    .grid-2col > * {
+        min-width: 0;
+    }
+    .filter-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .filter-tab {
+        flex: none;
     }
 }
 
@@ -1246,7 +1307,7 @@ body {
 }
 
 .thumb-violet {
-    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    background: linear-gradient(135deg, #0b6b66, #2a9d8f);
 }
 
 .thumb-dark {
@@ -1312,7 +1373,7 @@ body {
 .badge-flagged,
 .badge-pending-review {
     background: #fff1e8;
-    color: #d97706;
+    color: #9a4a00;
 }
 
 .badge-rejected {
@@ -1476,7 +1537,7 @@ body {
 
 .preview-product-meta {
     font-size: 13px;
-    color: #7b8694;
+    color: #5f6b67;
     margin-top: 4px;
 }
 
@@ -1497,7 +1558,7 @@ body {
 .preview-detail-item span {
     display: block;
     font-size: 12px;
-    color: #8b8f95;
+    color: #5f6b67;
     margin-bottom: 4px;
 }
 
@@ -1741,7 +1802,7 @@ body {
     height: 22px;
     padding: 0 6px;
     border-radius: 999px;
-    background: #e67e22;
+    background: #b45309;
     color: #fff;
     font-size: 11px;
     font-weight: 700;
@@ -1749,7 +1810,7 @@ body {
 }
 
 .tab-switch.active .tab-badge {
-    background: #e67e22;
+    background: #b45309;
 }
 
 /* ── Action Button Colors ── */
@@ -1899,7 +1960,7 @@ body {
 .status-badge.cancelled { background: #fee2e2; color: #991b1b; }
 
 /* ---------- shop orders: next-step buttons, live status and toasts (shop/orders.html) */
-.nav-badge { margin-left: auto; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: #e67e22; color: #fff; font-size: 12px; font-weight: 700; text-align: center; }
+.nav-badge { margin-left: auto; min-width: 20px; padding: 1px 6px; border-radius: 999px; background: #b45309; color: #fff; font-size: 12px; font-weight: 700; text-align: center; }
 .nav-badge[hidden] { display: none; }
 .live-pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: #f1f3f2; color: #3d4744; font-size: 13px; font-weight: 600; }
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #8a9490; }

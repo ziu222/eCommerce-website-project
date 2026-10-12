@@ -118,7 +118,7 @@
                     <button class="filter-tab" type="button" data-status="cancelled">Cancelled</button>
                 </div>
                 <div class="product-filter-row">
-                    <select class="filter-select" id="shopFilter">
+                    <select class="filter-select" id="shopFilter" aria-label="Filter by shop">
                         <option value="all">All Shops</option>
                     </select>
                     <input type="date" class="filter-select" id="dateFromFilter" aria-label="From date">
@@ -129,7 +129,7 @@
             <div class="toolbar-right toolbar-right-wrap">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="orderSearchInput" placeholder="Search by order, customer, or shop...">
+                    <input type="text" id="orderSearchInput" aria-label="Search orders" placeholder="Search by order, customer, or shop...">
                 </div>
                 <button class="btn-reset" type="button" id="resetFiltersBtn">
                     <i class="fa-solid fa-rotate-left"></i> Reset filters
@@ -166,8 +166,8 @@
 <div class="modal-overlay" id="orderModal">
     <div class="modal-panel">
         <div class="modal-header">
-            <h3 id="orderModalTitle">Order Detail</h3>
-            <button class="modal-close" onclick="closeOrderModal()">&times;</button>
+            <h2 id="orderModalTitle">Order Detail</h2>
+            <button class="modal-close" aria-label="Close" onclick="closeOrderModal()">&times;</button>
         </div>
         <div class="modal-body" id="orderModalBody"></div>
         <div class="modal-footer">

@@ -370,7 +370,7 @@ html[data-motion="reduced"] .heart.pop .ms, html[data-motion="reduced"] .bell-li
 .footer-grid { display: grid; gap: 32px; padding-block: 56px 36px; }
 .footer-brand p { max-width: 36ch; margin-top: 14px; color: #9fada9; font-size: 15px; }
 .site-footer .brand, .site-footer .brand:hover { color: #fff; }
-.footer-col h4 { margin-bottom: 14px; color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.footer-col h2 { margin-bottom: 14px; line-height: 1.4; color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
 .footer-col ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .footer-col a { display: inline-block; padding: 6px 0; color: #c9d2d0; font-size: 15px; text-decoration: none; }
 .footer-col a:hover { color: #fff; text-decoration: underline; }

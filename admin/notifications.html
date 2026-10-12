@@ -83,22 +83,22 @@
     <!-- ── Tab: Send to Customers ──────────────────────────── -->
     <div class="tab-panel active" id="panel-customers">
         <div class="notif-form-card">
-            <h3><i class="fa-solid fa-paper-plane" style="margin-right:8px;color:var(--primary,#6366f1)"></i>Send to Customers</h3>
+            <h2><i class="fa-solid fa-paper-plane" style="margin-right:8px;color:var(--primary,#004c4c)"></i>Send to Customers</h2>
 
             <div class="form-group">
-                <label>Recipient</label>
+                <label for="cRecipient">Recipient</label>
                 <select id="cRecipient">
                     <option value="all">All Customers</option>
                     <option value="specific">Specific customers...</option>
                 </select>
             </div>
             <div id="cSpecificWrap" style="display:none;" class="form-group">
-                <label>Select customers <span style="color:#9ca3af;font-weight:400">(hold Ctrl/Cmd for multi)</span></label>
+                <label for="cSpecificList">Select customers <span style="color:#5f6b67;font-weight:400">(hold Ctrl/Cmd for multi)</span></label>
                 <select id="cSpecificList" class="select-multi" multiple></select>
             </div>
 
             <div class="form-group">
-                <label>Type</label>
+                <label for="cType">Type</label>
                 <select id="cType">
                     <option value="info">Info</option>
                     <option value="promo">Promo</option>
@@ -106,11 +106,11 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Title</label>
+                <label for="cTitle">Title</label>
                 <input type="text" id="cTitle" placeholder="Notification title">
             </div>
             <div class="form-group">
-                <label>Message</label>
+                <label for="cMessage">Message</label>
                 <textarea id="cMessage" placeholder="Write your message here..."></textarea>
             </div>
 
@@ -124,22 +124,22 @@
     <!-- ── Tab: Send to Shops ──────────────────────────────── -->
     <div class="tab-panel" id="panel-shops">
         <div class="notif-form-card">
-            <h3><i class="fa-solid fa-paper-plane" style="margin-right:8px;color:var(--primary,#6366f1)"></i>Send to Shops</h3>
+            <h2><i class="fa-solid fa-paper-plane" style="margin-right:8px;color:var(--primary,#004c4c)"></i>Send to Shops</h2>
 
             <div class="form-group">
-                <label>Recipient</label>
+                <label for="sRecipient">Recipient</label>
                 <select id="sRecipient">
                     <option value="all">All Shops</option>
                     <option value="specific">Specific shops...</option>
                 </select>
             </div>
             <div id="sSpecificWrap" style="display:none;" class="form-group">
-                <label>Select shops <span style="color:#9ca3af;font-weight:400">(hold Ctrl/Cmd for multi)</span></label>
+                <label for="sSpecificList">Select shops <span style="color:#5f6b67;font-weight:400">(hold Ctrl/Cmd for multi)</span></label>
                 <select id="sSpecificList" class="select-multi" multiple></select>
             </div>
 
             <div class="form-group">
-                <label>Type</label>
+                <label for="sType">Type</label>
                 <select id="sType">
                     <option value="info">Info</option>
                     <option value="promo">Promo</option>
@@ -147,11 +147,11 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Title</label>
+                <label for="sTitle">Title</label>
                 <input type="text" id="sTitle" placeholder="Notification title">
             </div>
             <div class="form-group">
-                <label>Message</label>
+                <label for="sMessage">Message</label>
                 <textarea id="sMessage" placeholder="Write your message here..."></textarea>
             </div>
 

@@ -149,16 +149,16 @@
                     <button class="filter-tab" type="button" data-filter="rejected">Rejected</button>
                 </div>
                 <div class="product-filter-row">
-                    <select class="filter-select" id="categoryFilter">
+                    <select class="filter-select" id="categoryFilter" aria-label="Filter by category">
                         <option value="all">All Categories</option>
                     </select>
-                    <select class="filter-select" id="shopFilter">
+                    <select class="filter-select" id="shopFilter" aria-label="Filter by shop">
                         <option value="all">All Shops</option>
                     </select>
                     <div class="price-range-group">
-                        <input type="number" id="minPriceInput" placeholder="Min $" min="0">
+                        <input type="number" id="minPriceInput" aria-label="Minimum price" placeholder="Min $" min="0">
                         <span>-</span>
-                        <input type="number" id="maxPriceInput" placeholder="Max $" min="0">
+                        <input type="number" id="maxPriceInput" aria-label="Maximum price" placeholder="Max $" min="0">
                     </div>
                 </div>
             </div>
@@ -166,7 +166,7 @@
             <div class="toolbar-right toolbar-right-wrap">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="productSearchInput" placeholder="Search by product or shop...">
+                    <input type="text" id="productSearchInput" aria-label="Search products" placeholder="Search by product or shop...">
                 </div>
                 <button class="btn-reset" type="button" id="resetFiltersBtn">
                     <i class="fa-solid fa-rotate-left"></i> Reset filters
@@ -293,8 +293,8 @@
 <div class="modal-overlay" id="productModal">
     <div class="modal-panel modal-panel-md">
         <div class="modal-header">
-            <h3 id="productModalTitle">Product Detail</h3>
-            <button class="modal-close" type="button" onclick="closeProductModal()">&times;</button>
+            <h2 id="productModalTitle">Product Detail</h2>
+            <button class="modal-close" aria-label="Close" type="button" onclick="closeProductModal()">&times;</button>
         </div>
         <div class="modal-body" id="productModalBody"></div>
         <div class="modal-footer" id="productModalFooter"></div>
@@ -318,8 +318,8 @@
 <div class="modal-overlay" id="reasonPromptModal">
     <div class="modal-panel modal-panel-sm reason-prompt-panel">
         <div class="modal-header">
-            <h3 id="reasonPromptTitle">Reason Required</h3>
-            <button class="modal-close" type="button" id="reasonPromptCloseBtn">&times;</button>
+            <h2 id="reasonPromptTitle">Reason Required</h2>
+            <button class="modal-close" aria-label="Close" type="button" id="reasonPromptCloseBtn">&times;</button>
         </div>
         <div class="modal-body">
             <p class="reason-prompt-description" id="reasonPromptDescription">Please provide a reason.</p>
