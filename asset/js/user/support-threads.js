@@ -10,7 +10,7 @@ var SupportThreads = (function () {
 
     var root, tabs, botBox, staffTab, botTab;
     var view = "list";            // list | new | thread
-    var current = null;           // { id, subject, status, lastId }
+    var current = null;           // { id, subject, topic, status, lastId }
     var pollTimer = null;
     var online = false;
 
@@ -47,6 +47,19 @@ var SupportThreads = (function () {
         if (staff) showList(); else stopPolling();
     }
 
+    // ---------- small pieces shared by the list and the conversation
+
+    var STATUS_LABEL = { open: "Waiting for staff", answered: "Staff replied", closed: "Closed" };
+
+    function tag(topicId) {
+        var t = Api.supportTopic(topicId);
+        return '<span class="sc-tag"><span class="ms" aria-hidden="true">' + t.ms + "</span>" + esc(t.label) + "</span>";
+    }
+
+    function pill(status) {
+        return '<span class="sc-pill sc-pill--' + status + '">' + esc(STATUS_LABEL[status] || status) + "</span>";
+    }
+
     // ---------- list of conversations
 
     async function showList() {
@@ -57,10 +70,11 @@ var SupportThreads = (function () {
             var threads = await Api.support.list();
             if (!threads.length) { showNew(); return; }
             var rows = threads.map(function (t) {
-                var label = { open: "Waiting for staff", answered: "Staff replied", closed: "Closed" }[t.status];
-                return '<button type="button" class="sc-thread" data-id="' + t.id + '">' +
-                    '<span class="sc-thread-main"><strong>' + esc(t.subject) + '</strong><span class="sc-thread-last">' + esc(t.lastMessage) + "</span></span>" +
-                    '<span class="sc-thread-meta">' + esc(label) + (t.unread ? ' <span class="sc-badge">' + t.unread + "</span>" : "") + "<br>" + esc(time(t.updatedAt)) + "</span></button>";
+                return '<button type="button" class="sc-thread' + (t.unread ? " is-unread" : "") + '" data-id="' + t.id + '">' +
+                    '<span class="sc-thread-top"><strong>' + esc(t.subject) + "</strong><time>" + esc(time(t.updatedAt)) + "</time></span>" +
+                    '<span class="sc-thread-last">' + esc(t.lastMessage) + "</span>" +
+                    '<span class="sc-thread-tags">' + tag(t.topic) + pill(t.status) +
+                    (t.unread ? '<span class="sc-badge" aria-label="' + t.unread + ' unread">' + t.unread + "</span>" : "") + "</span></button>";
             }).join("");
             root.innerHTML = '<div class="sc-messages"><div class="sc-threads">' + rows + '</div></div>' +
                 '<div class="sc-form"><button type="button" class="sc-send" id="scNewThread" style="flex:1;padding:11px;">New message to staff</button></div>';
@@ -78,7 +92,9 @@ var SupportThreads = (function () {
     async function refreshAvailability() {
         try { online = (await Api.support.availability()).online; } catch (e) { online = false; }
         var note = root.querySelector("#scAvail");
-        if (note) note.textContent = availabilityText();
+        if (!note) return;
+        note.dataset.online = String(online);
+        note.querySelector("#scAvailText").textContent = availabilityText();
     }
 
     function availabilityText() {
@@ -91,29 +107,43 @@ var SupportThreads = (function () {
         view = "new";
         stopPolling();
         var shared = window.SupportChat ? SupportChat.turns().filter(function (t) { return t.role === "user" || (t.reply && t.reply.text); }).length : 0;
-        root.innerHTML = '<div class="sc-notice" id="scAvail">' + esc(availabilityText()) + "</div>" +
-            '<form class="sc-messages" id="scNewForm" style="display:flex;flex-direction:column;gap:10px;">' +
-            '<label for="scNewBody"><strong>How can we help?</strong></label>' +
-            '<textarea class="sc-input" id="scNewBody" rows="5" maxlength="2000" style="max-height:none;" placeholder="Describe your question. Add your order number if it is about an order."></textarea>' +
+        // one radio per topic; the chosen one decides which position of our staff gets the message
+        var topics = Api.supportTopics.map(function (t) {
+            return '<label class="sc-topic"><input type="radio" name="scTopic" value="' + t.id + '"><span class="ms" aria-hidden="true">' + t.ms + "</span>" + esc(t.label) + "</label>";
+        }).join("");
+        root.innerHTML = '<p class="sc-avail" id="scAvail" data-online="false"><span class="sc-avail-dot" aria-hidden="true"></span><span id="scAvailText">' + esc(availabilityText()) + "</span></p>" +
+            '<form class="sc-messages sc-new" id="scNewForm">' +
+            '<fieldset class="sc-topics"><legend>What do you need help with?</legend><div class="sc-topic-grid">' + topics + "</div></fieldset>" +
+            '<label for="scNewBody" class="sc-label">Your message</label>' +
+            '<textarea class="sc-input sc-new-body" id="scNewBody" rows="3" maxlength="2000" placeholder="Describe your question."></textarea>' +
             (shared ? '<p class="sc-source">Your chat with the assistant will be shared with our staff so you do not have to repeat yourself.</p>' : "") +
             '<p class="sc-error" id="scNewError" role="alert" hidden></p>' +
-            '<div style="display:flex;gap:8px;"><button type="submit" class="sc-send" style="flex:1;padding:11px;">Send to staff</button>' +
+            '<div class="sc-new-actions"><button type="submit" class="sc-send">Send to staff</button>' +
             '<button type="button" class="sc-action" id="scNewCancel">Back</button></div></form>';
         var body = root.querySelector("#scNewBody");
         if (prefill) body.value = prefill;
-        body.focus();
+        // choosing a topic tells the customer what to include
+        root.querySelectorAll('input[name="scTopic"]').forEach(function (r) {
+            r.addEventListener("change", function () {
+                body.placeholder = Api.supportTopic(r.value).placeholder;
+                root.querySelector("#scNewError").hidden = true;
+            });
+        });
+        root.querySelector('input[name="scTopic"]').focus();
         root.querySelector("#scNewCancel").addEventListener("click", function () { showList(); });
         root.querySelector("#scNewForm").addEventListener("submit", async function (e) {
             e.preventDefault();
             var text = body.value.trim();
             var err = root.querySelector("#scNewError");
-            if (!text) { err.textContent = "Please write a message."; err.hidden = false; return; }
+            var chosen = root.querySelector('input[name="scTopic"]:checked');
+            if (!chosen) { err.textContent = "Choose what you need help with."; err.hidden = false; root.querySelector('input[name="scTopic"]').focus(); return; }
+            if (!text) { err.textContent = "Please write a message."; err.hidden = false; body.focus(); return; }
             var transcript = window.SupportChat ? SupportChat.turns().slice(-10).map(function (t) {
                 return { role: t.role, content: String(t.role === "user" ? t.content : t.reply.text).slice(0, 1000) };
             }).filter(function (t) { return t.content; }) : [];
             while (transcript.length && transcript[0].role !== "user") transcript.shift();
             try {
-                var created = await Api.support.create(text, transcript);
+                var created = await Api.support.create(text, transcript, chosen.value);
                 showThread(created.id);
             } catch (ex) {
                 err.textContent = ex.message || "Could not send your message.";
@@ -135,12 +165,12 @@ var SupportThreads = (function () {
     async function showThread(id) {
         view = "thread";
         stopPolling();
-        root.innerHTML = '<div class="sc-notice" id="scThreadHead"></div><div class="sc-messages" id="scThreadMsgs" aria-live="polite"></div>' +
+        root.innerHTML = '<div class="sc-thread-head" id="scThreadHead" aria-live="polite"></div><div class="sc-messages" id="scThreadMsgs" aria-live="polite"></div>' +
             '<form class="sc-form" id="scReplyForm"><textarea class="sc-input" id="scReplyBody" rows="1" maxlength="2000" placeholder="Write a reply…" aria-label="Your reply"></textarea>' +
             '<button type="submit" class="sc-send">Send</button></form>' +
             '<div class="sc-form" style="padding-top:0;"><button type="button" class="sc-action" id="scBack">← All conversations</button></div>';
         root.querySelector("#scBack").addEventListener("click", function () { showList(); });
-        current = { id: id, subject: "", status: "open", lastId: 0 };
+        current = { id: id, subject: "", topic: "other", status: "open", lastId: 0 };
 
         var body = root.querySelector("#scReplyBody");
         root.querySelector("#scReplyForm").addEventListener("submit", async function (e) {
@@ -168,9 +198,12 @@ var SupportThreads = (function () {
         var el = root.querySelector("#scThreadHead");
         if (!el) return;
         var form = root.querySelector("#scReplyForm");
-        var labels = { open: "Waiting for our staff to reply.", answered: "Our staff replied. You can answer here.", closed: "This conversation is closed. Start a new one if you still need help." };
-        el.textContent = error || (current.subject ? current.subject + " - " : "") + (labels[status || current.status] || "");
-        if (form) form.hidden = (status || current.status) === "closed";
+        var st = status || current.status;
+        var notes = { open: "Waiting for our staff to reply.", answered: "Our staff replied. You can answer here.", closed: "This conversation is closed. Start a new one if you still need help." };
+        el.innerHTML = (current.subject ? '<p class="sc-thread-title">' + esc(current.subject) + "</p>" : "") +
+            '<div class="sc-thread-tags">' + tag(current.topic) + pill(st) + "</div>" +
+            '<p class="sc-thread-note' + (error ? " is-error" : "") + '">' + esc(error || notes[st] || "") + "</p>";
+        if (form) form.hidden = st === "closed";
     }
 
     async function poll(first) {
@@ -179,6 +212,7 @@ var SupportThreads = (function () {
             var data = await Api.support.get(current.id, current.lastId);
             if (view !== "thread") return;
             current.subject = data.thread.subject;
+            current.topic = data.thread.topic;
             current.status = data.thread.status;
             var msgs = root.querySelector("#scThreadMsgs");
             if (!msgs) return;

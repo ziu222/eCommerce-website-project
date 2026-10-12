@@ -217,13 +217,14 @@ describe('support conversations', () => {
     });
   });
 
+  // what one open page would receive over server-sent events
+  function listen(userId: number, groups: LiveGroup[] = []) {
+    const got: { type: string; data: Record<string, unknown> }[] = [];
+    const sub = live.stream(userId, 60_000, groups).subscribe((e) => got.push(e as never));
+    return { got, stop: () => sub.unsubscribe() };
+  }
+
   describe('live updates', () => {
-    // what one open page would receive over server-sent events
-    function listen(userId: number, groups: LiveGroup[] = []) {
-      const got: { type: string; data: Record<string, unknown> }[] = [];
-      const sub = live.stream(userId, 60_000, groups).subscribe((e) => got.push(e as never));
-      return { got, stop: () => sub.unsubscribe() };
-    }
 
     it('tells staff about new conversations, messages and closing, and the customer about staff replies and closing', async () => {
       const staff = listen(999, ['support-staff']);
@@ -247,6 +248,75 @@ describe('support conversations', () => {
     it('opens the staff stream only for support staff', async () => {
       await (await customer()).get('/api/admin/support/stream').expect(403);
       await request(server()).get('/api/admin/support/stream').expect(401);
+    });
+  });
+
+  describe('topics', () => {
+    // earlier tests filled the five-waiting-conversations limit of the seeded customers
+    beforeAll(async () => {
+      await prisma.supportThread.deleteMany();
+    });
+
+    const orders = () => login('cskh_orders', '123'); // handles: orders
+    const billing = () => login('cskh_billing', '123'); // handles: returns, payments
+    const lead = agent; // cskh_user: no topics, sees everything
+    const ids = (rows: { id: number }[]) => rows.map((r) => r.id);
+
+    it('keeps the topic the customer chose, defaults to other, and refuses an unknown one', async () => {
+      const a = await open(customer(), 'Where is my parcel?', { topic: 'orders' });
+      const b = await open(customer(), 'A question without a topic');
+      const c = await customer();
+      const own = (await c.get('/api/support/threads').expect(200)).body as { id: number; topic: string }[];
+      expect(own.find((x) => x.id === a.id)?.topic).toBe('orders');
+      expect(own.find((x) => x.id === b.id)?.topic).toBe('other');
+      expect((await c.get(`/api/support/threads/${a.id}`).expect(200)).body.thread.topic).toBe('orders');
+      await c.post('/api/support/threads').send({ message: 'x', topic: 'weather' }).expect(400);
+    });
+
+    it('lets each position see its own topics, and the lead see everything', async () => {
+      const o = await open(customer(), 'Parcel is late', { topic: 'orders' });
+      const r = await open(customer(), 'I want a refund', { topic: 'returns' });
+      const p = await open(customer(), 'Does it have a warranty?', { topic: 'products' });
+      const mine = async (who: Promise<ReturnType<typeof request.agent>>) => ids((await (await who).get('/api/admin/support/threads?topic=mine').expect(200)).body);
+
+      const ordersDesk = await mine(orders());
+      expect(ordersDesk).toContain(o.id);
+      expect(ordersDesk).not.toContain(r.id);
+      expect(ordersDesk).not.toContain(p.id);
+      expect(await mine(billing())).toEqual(expect.arrayContaining([r.id]));
+      expect(await mine(billing())).not.toContain(o.id);
+      expect(await mine(lead())).toEqual(expect.arrayContaining([o.id, r.id, p.id]));
+
+      const one = ids((await (await lead()).get('/api/admin/support/threads?topic=products&status=open').expect(200)).body);
+      expect(one).toContain(p.id);
+      expect(one).not.toContain(o.id);
+      await (await lead()).get('/api/admin/support/threads?topic=weather').expect(400);
+    });
+
+    it('counts the waiting conversations of every topic and says which topics the viewer handles', async () => {
+      await open(customer('tranthib'), 'Card was charged twice', { topic: 'payments' });
+      const s = (await (await billing()).get('/api/admin/support/summary').expect(200)).body;
+      expect(s.mine).toEqual(['returns', 'payments']);
+      expect(s.byTopic.payments).toBeGreaterThanOrEqual(1);
+      expect(Object.keys(s.byTopic).sort()).toEqual(['account', 'orders', 'other', 'payments', 'products', 'returns']);
+      expect((await (await lead()).get('/api/admin/support/summary').expect(200)).body.mine).toEqual([]);
+    });
+
+    it('moves a conversation to another position, tells the staff pages, and refuses closed or unknown targets', async () => {
+      const t = await open(customer('levanc'), 'My login does not work', { topic: 'orders' });
+      const staff = listen(999, ['support-staff']);
+      const desk = await billing();
+      await desk.post(`/api/admin/support/threads/${t.id}/topic`).send({ topic: 'account' }).expect(200);
+      expect(staff.got.map((e) => [e.data.threadId, e.data.kind])).toEqual([[t.id, 'topic']]);
+      staff.stop();
+      expect(ids((await (await login('cskh_product', '123')).get('/api/admin/support/threads?topic=mine').expect(200)).body)).toContain(t.id);
+      expect((await (await customer('levanc')).get(`/api/support/threads/${t.id}`).expect(200)).body.thread.topic).toBe('account');
+
+      await desk.post(`/api/admin/support/threads/${t.id}/topic`).send({ topic: 'weather' }).expect(400);
+      await (await customer()).post(`/api/admin/support/threads/${t.id}/topic`).send({ topic: 'orders' }).expect(403);
+      await desk.post('/api/admin/support/threads/999999/topic').send({ topic: 'orders' }).expect(404);
+      await desk.post(`/api/admin/support/threads/${t.id}/close`).expect(201);
+      await desk.post(`/api/admin/support/threads/${t.id}/topic`).send({ topic: 'orders' }).expect(409);
     });
   });
 });

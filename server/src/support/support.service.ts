@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import type { Prisma, SupportStatus } from '../generated/prisma/client.js';
 import { LiveService } from '../notifications/live.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import type { CreateThreadDto, StaffThreadsQuery } from './dto/support.dto.js';
+import { SUPPORT_TOPICS, type CreateThreadDto, type StaffThreadsQuery, type SupportTopicName } from './dto/support.dto.js';
 
 /** A customer may have this many conversations waiting for staff at once. */
 const MAX_WAITING_PER_CUSTOMER = 5;
@@ -36,7 +36,7 @@ export class SupportService {
    * Live updates: every support page hears about each conversation; the customer hears about staff replies
    * and closing. Events only say what changed; pages fetch the messages they are missing.
    */
-  private tell(threadId: number, kind: 'new' | 'message' | 'closed', customerId?: number): void {
+  private tell(threadId: number, kind: 'new' | 'message' | 'closed' | 'topic', customerId?: number): void {
     this.live.emit({ group: 'support-staff', type: 'support', data: { threadId, kind } });
     if (customerId !== undefined) this.live.emit({ userId: customerId, type: 'support', data: { threadId, kind } });
   }
@@ -58,12 +58,13 @@ export class SupportService {
       data: {
         customerId,
         subject: dto.message.split('\n')[0].slice(0, 80),
+        topic: dto.topic ?? 'other',
         botTranscript: dto.transcript?.length ? JSON.stringify(dto.transcript) : null,
         messages: { create: { authorType: 'customer', authorId: customerId, body: dto.message } },
       },
     });
     this.tell(thread.id, 'new');
-    return { id: thread.id, subject: thread.subject, status: thread.status };
+    return { id: thread.id, subject: thread.subject, topic: thread.topic, status: thread.status };
   }
 
   async listOwn(customerId: number) {
@@ -75,6 +76,7 @@ export class SupportService {
     return threads.map((t) => ({
       id: t.id,
       subject: t.subject,
+      topic: t.topic,
       status: t.status,
       updatedAt: t.updatedAt,
       unread: t.messages.filter((m) => m.authorType === 'agent' && m.id > t.customerReadMessageId).length,
@@ -98,7 +100,7 @@ export class SupportService {
     if (newest > thread.customerReadMessageId) {
       await this.prisma.supportThread.update({ where: { id }, data: { customerReadMessageId: newest } });
     }
-    return { thread: { id: thread.id, subject: thread.subject, status: thread.status }, messages };
+    return { thread: { id: thread.id, subject: thread.subject, topic: thread.topic, status: thread.status }, messages };
   }
 
   async customerReply(customerId: number, id: number, body: string) {
@@ -115,9 +117,19 @@ export class SupportService {
 
   // ---- staff side
 
-  async listForStaff(q: StaffThreadsQuery) {
+  /** The topics a staff member handles; empty means all of them. */
+  private async topicsOf(staffId: number): Promise<SupportTopicName[]> {
+    const u = await this.prisma.user.findUnique({ where: { id: staffId }, select: { supportTopics: true } });
+    return u?.supportTopics ?? [];
+  }
+
+  async listForStaff(staffId: number, q: StaffThreadsQuery) {
+    const mine = q.topic === 'mine' ? await this.topicsOf(staffId) : [];
     const threads = await this.prisma.supportThread.findMany({
-      where: q.status ? { status: q.status } : {},
+      where: {
+        ...(q.status && { status: q.status }),
+        ...(q.topic === 'mine' ? (mine.length ? { topic: { in: mine } } : {}) : q.topic && { topic: q.topic }),
+      },
       // Customers who have waited longest come first; other lists show the latest activity first.
       orderBy: [{ updatedAt: q.status === 'open' ? 'asc' : 'desc' }, { id: 'asc' }],
       take: 200,
@@ -126,6 +138,7 @@ export class SupportService {
     return threads.map((t) => ({
       id: t.id,
       subject: t.subject,
+      topic: t.topic,
       status: t.status,
       customer: t.customer,
       assignedTo: t.assignedTo?.name ?? null,
@@ -135,12 +148,16 @@ export class SupportService {
     }));
   }
 
-  async summary(): Promise<{ open: number; answered: number }> {
-    const [open, answered] = await Promise.all([
+  /** Waiting and answered totals, the waiting count of every topic, and the topics of this staff member. */
+  async summary(staffId: number) {
+    const [open, answered, grouped, mine] = await Promise.all([
       this.prisma.supportThread.count({ where: { status: 'open' } }),
       this.prisma.supportThread.count({ where: { status: 'answered' } }),
+      this.prisma.supportThread.groupBy({ by: ['topic'], where: { status: 'open' }, _count: { _all: true } }),
+      this.topicsOf(staffId),
     ]);
-    return { open, answered };
+    const byTopic = Object.fromEntries(SUPPORT_TOPICS.map((t) => [t, grouped.find((g) => g.topic === t)?._count._all ?? 0]));
+    return { open, answered, byTopic, mine };
   }
 
   async getForStaff(id: number, after = 0) {
@@ -149,6 +166,7 @@ export class SupportService {
     return {
       id: thread.id,
       subject: thread.subject,
+      topic: thread.topic,
       status: thread.status,
       customer: thread.customer,
       assignedTo: thread.assignedTo?.name ?? null,
@@ -162,6 +180,16 @@ export class SupportService {
     if (!thread) throw new NotFoundException('Conversation not found');
     if (thread.status === 'closed') throw new ConflictException('This conversation is closed');
     return this.addMessage(id, 'agent', agentId, body, 'answered');
+  }
+
+  /** A customer may pick the wrong topic; staff move the conversation to the right position. */
+  async setTopic(id: number, topic: SupportTopicName): Promise<{ topic: SupportTopicName }> {
+    const thread = await this.prisma.supportThread.findUnique({ where: { id }, select: { status: true } });
+    if (!thread) throw new NotFoundException('Conversation not found');
+    if (thread.status === 'closed') throw new ConflictException('This conversation is closed');
+    await this.prisma.supportThread.update({ where: { id }, data: { topic } });
+    this.tell(id, 'topic');
+    return { topic };
   }
 
   async close(id: number): Promise<void> {
