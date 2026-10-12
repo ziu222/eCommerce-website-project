@@ -59,6 +59,21 @@ describe('shop and admin product management', () => {
       await request(server()).get(`/api/products/${res.body.id}`).expect(200);
     });
 
+    it('saves the product page details and shows them publicly, refusing a malformed block', async () => {
+      const details = {
+        overview: 'A compact gadget for long trips.',
+        features: [{ title: 'Long battery', body: 'Lasts a full day of use.', icon: 'battery_charging_full' }],
+        specGroups: [{ group: 'Battery', items: [['Life', 'up to 20 h']] }],
+        inTheBox: ['Gadget', 'USB-C cable'],
+      };
+      const shop = await apple();
+      const res = await shop.post('/api/shop/products').send({ ...draft, details }).expect(201);
+      expect(res.body.details).toEqual(details);
+      expect((await request(server()).get(`/api/products/${res.body.id}`).expect(200)).body.details).toEqual(details);
+      await shop.post('/api/shop/products').send({ ...draft, details: { features: [{ title: 'x', body: 'y', icon: 'rocket' }] } }).expect(400);
+      await shop.post('/api/shop/products').send({ ...draft, details: { inTheBox: Array(11).fill('cable') } }).expect(400);
+    });
+
     it('refuses fields a shop must not set and invalid values', async () => {
       const shop = await apple();
       await shop.post('/api/shop/products').send({ ...draft, adminStatus: 'approved' }).expect(400);

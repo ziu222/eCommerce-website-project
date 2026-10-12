@@ -490,7 +490,7 @@ var UI = (function () {
     // Elements that match REVEAL rise in as they scroll into view. The marker is removed once the
     // animation is done so hover effects on the same element work normally. Under "reduce motion" the CSS keeps only the fade.
 
-    var REVEAL = ".page-head, main > section:not(.hero), .card, .pcard, .promise li, .how li, .facts li, .cat-tile, .order, .help-band, .detail-media, .detail-info > *, .auth-panel > *";
+    var REVEAL = ".page-head, main > section:not(.hero), .card, .pcard, .promise li, .how li, .facts li, .cat-tile, .order, .help-band, .detail-media, .detail-info > *, .pd-section > h2, .pd-overview p, .tech-tile, .spec-group, .box-list li, .auth-panel > *";
 
     function initMotion() {
         var header = document.getElementById("site-header");

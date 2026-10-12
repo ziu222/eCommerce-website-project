@@ -118,6 +118,8 @@ model Product {
   stock             Int           @default(0)
   description       String        @default("")
   specs             Json?
+  /// rich product page content: overview, technology features, grouped specs, box contents
+  details           Json?
   adminStatus       ProductStatus @default(pending)
   adminNote         String        @default("")
   reviewedBy        String?

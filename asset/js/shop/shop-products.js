@@ -100,6 +100,67 @@ function showModalError(message) {
     el.style.display = message ? "" : "none";
 }
 
+// ---------- product page content: plain text in the form, structured `details` on the API
+
+var FEATURE_ICONS = [
+    [/batter|charg/i, "battery_charging_full"], [/camera|lens|photo|video/i, "camera"],
+    [/display|screen/i, "display_settings"], [/sound|audio|speaker|noise|mic/i, "graphic_eq"],
+    [/chip|processor|memory|ram/i, "memory"], [/water|dust|resist/i, "water_drop"],
+    [/wi-?fi|bluetooth|5g|wireless|connect/i, "wifi"], [/game|gaming/i, "sports_esports"],
+    [/secur|privacy|protect/i, "shield"], [/fast|speed|refresh/i, "speed"]
+];
+
+function featureIcon(title, old) {
+    var same = (old || []).find(function (f) { return f.title === title; });
+    if (same) return same.icon;
+    for (var i = 0; i < FEATURE_ICONS.length; i++) if (FEATURE_ICONS[i][0].test(title)) return FEATURE_ICONS[i][1];
+    return "bolt";
+}
+
+function fillDetails(d) {
+    d = d || {};
+    document.getElementById("modalOverview").value = d.overview || "";
+    document.getElementById("modalFeatures").value = (d.features || []).map(function (f) { return f.title + " | " + f.body; }).join("\n");
+    document.getElementById("modalSpecs").value = (d.specGroups || []).map(function (g) {
+        return "## " + g.group + "\n" + g.items.map(function (it) { return it[0] + ": " + it[1]; }).join("\n");
+    }).join("\n\n");
+    document.getElementById("modalBox").value = (d.inTheBox || []).join("\n");
+}
+
+function lines(id) {
+    return document.getElementById(id).value.split("\n").map(function (s) { return s.trim(); }).filter(Boolean);
+}
+
+// throws a message the form shows when a line does not follow the format
+function readDetails(old) {
+    var d = {};
+    var overview = document.getElementById("modalOverview").value.trim();
+    if (overview) d.overview = overview;
+
+    var features = lines("modalFeatures").map(function (l) {
+        var at = l.indexOf("|");
+        if (at < 1) throw "Technology lines need a title, then | and the text.";
+        var title = l.slice(0, at).trim();
+        return { title: title, body: l.slice(at + 1).trim(), icon: featureIcon(title, old && old.features) };
+    });
+    if (features.length) d.features = features;
+
+    var groups = [];
+    lines("modalSpecs").forEach(function (l) {
+        if (l.indexOf("##") === 0) { groups.push({ group: l.replace(/^#+/, "").trim(), items: [] }); return; }
+        var at = l.indexOf(":");
+        if (at < 1) throw "Specification lines need a label, then : and the value (\"" + l + "\").";
+        if (!groups.length) groups.push({ group: "General", items: [] });
+        groups[groups.length - 1].items.push([l.slice(0, at).trim(), l.slice(at + 1).trim()]);
+    });
+    groups = groups.filter(function (g) { return g.items.length; });
+    if (groups.length) d.specGroups = groups;
+
+    var box = lines("modalBox");
+    if (box.length) d.inTheBox = box;
+    return d;
+}
+
 function openModal(id) {
     editingId = id || null;
     showModalError("");
@@ -119,6 +180,8 @@ function openModal(id) {
     document.getElementById("modalDescription").value        = p ? p.description : "";
     document.getElementById("modalImageUrl").value           = p ? p.image : "";
     setPreview(p ? p.image : "");
+    fillDetails(p && p.details);
+    document.getElementById("pageContent").open = false;
     document.getElementById("productModal").classList.add("show");
 }
 
@@ -166,6 +229,14 @@ async function saveModal() {
     if (!(data.price > 0)) { showModalError("Enter a price above zero."); return; }
     if (!(data.stock >= 0)) { showModalError("Stock cannot be negative."); return; }
     if (data.oldPrice && data.oldPrice <= data.price) { showModalError("The old price must be higher than the price."); return; }
+    var current = editingId ? productCache.find(function (x) { return x.id === editingId; }) : null;
+    try {
+        data.details = readDetails(current && current.details);
+    } catch (msg) {
+        document.getElementById("pageContent").open = true;
+        showModalError(msg);
+        return;
+    }
 
     try {
         if (editingId) {

@@ -14,6 +14,8 @@ export async function runSeed(prisma: PrismaClient): Promise<void> {
   const users = load<any[]>('users.json');
   const legacy = load<any[]>('products.legacy.json');
   const modern = load<any[]>('products.modern.json');
+  // product page content (overview, technology, grouped specs, box contents), keyed by product name
+  const details = load<Record<string, unknown>>('product-details.json');
   const orders = load<any[]>('orders.json');
   const coupons = load<any[]>('coupons.json');
   const notifications = load<any[]>('notifications.json');
@@ -35,6 +37,7 @@ export async function runSeed(prisma: PrismaClient): Promise<void> {
   ];
   for (const p of products) {
     const { createdAt, ...rest } = p;
+    rest.details = details[p.name] ?? null;
     const reviewed = rest.adminStatus !== 'pending';
     const data = {
       ...rest,
