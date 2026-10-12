@@ -46,7 +46,7 @@
         .badge-active   { background: #d1fae5; color: #065f46; }
         .badge-banned   { background: #fee2e2; color: #991b1b; }
         .badge-level1   { background: #dbeafe; color: #1e40af; }
-        .badge-level2   { background: #ede9fe; color: #5b21b6; }
+        .badge-level2   { background: #e6f0f0; color: #004c4c; }
 
         /* ── Header row ─────────────────────────────────────── */
         .section-header {
@@ -92,7 +92,7 @@
             transition: border-color .15s;
         }
         .form-group input:focus,
-        .form-group select:focus { border-color: var(--primary, #6366f1); outline: none; }
+        .form-group select:focus { border-color: var(--primary, #004c4c); outline: none; }
         .modal-error {
             color: #dc2626; font-size: 13px; margin-bottom: 12px;
             display: none;
@@ -105,7 +105,7 @@
         }
         .btn-submit-modal {
             padding: 8px 20px;
-            background: var(--primary, #6366f1); color: #fff;
+            background: var(--primary, #004c4c); color: #fff;
             border: none; border-radius: 7px; cursor: pointer; font-size: 14px; font-weight: 600;
         }
         .btn-submit-modal:hover { opacity: .88; }
@@ -113,7 +113,7 @@
         .btn-create-admin {
             display: flex; align-items: center; gap: 7px;
             padding: 8px 18px;
-            background: var(--primary, #6366f1); color: #fff;
+            background: var(--primary, #004c4c); color: #fff;
             border: none; border-radius: 8px; cursor: pointer;
             font-size: 13.5px; font-weight: 600;
         }
@@ -215,7 +215,7 @@
                 <tbody id="bodyCustomers"></tbody>
             </table>
         </div>
-        <p class="empty-state" id="emptyCustomers" style="display:none; color:#9ca3af; text-align:center; padding:32px 0;">
+        <p class="empty-state" id="emptyCustomers" style="display:none; color:#5f6b67; text-align:center; padding:32px 0;">
             No customers yet.
         </p>
     </div>
@@ -248,7 +248,7 @@
                 <tbody id="bodyShops"></tbody>
             </table>
         </div>
-        <p class="empty-state" id="emptyShops" style="display:none; color:#9ca3af; text-align:center; padding:32px 0;">
+        <p class="empty-state" id="emptyShops" style="display:none; color:#5f6b67; text-align:center; padding:32px 0;">
             No shops yet.
         </p>
     </div>
@@ -277,7 +277,7 @@
                 <tbody id="bodyAdmins"></tbody>
             </table>
         </div>
-        <p class="empty-state" id="emptyAdmins" style="display:none; color:#9ca3af; text-align:center; padding:32px 0;">
+        <p class="empty-state" id="emptyAdmins" style="display:none; color:#5f6b67; text-align:center; padding:32px 0;">
             No admins found.
         </p>
     </div>
@@ -302,7 +302,7 @@
                 <tbody id="bodyBanned"></tbody>
             </table>
         </div>
-        <p class="empty-state" id="emptyBanned" style="display:none; color:#9ca3af; text-align:center; padding:32px 0;">
+        <p class="empty-state" id="emptyBanned" style="display:none; color:#5f6b67; text-align:center; padding:32px 0;">
             No banned users.
         </p>
     </div>
@@ -327,7 +327,7 @@
             <input type="text" id="caUsername" placeholder="nguyenvana" autocomplete="off">
         </div>
         <div class="form-group">
-            <label for="caPassword">Password <span style="color:#9ca3af;font-weight:400">(min 6 chars)</span></label>
+            <label for="caPassword">Password <span style="color:#5f6b67;font-weight:400">(min 6 chars)</span></label>
             <input type="password" id="caPassword" autocomplete="new-password">
         </div>
         <div class="form-group">
@@ -370,7 +370,7 @@
             <input type="text" id="csUsername" placeholder="mystore" autocomplete="off">
         </div>
         <div class="form-group">
-            <label for="csPassword">Password <span style="color:#9ca3af;font-weight:400">(min 6 chars)</span></label>
+            <label for="csPassword">Password <span style="color:#5f6b67;font-weight:400">(min 6 chars)</span></label>
             <input type="password" id="csPassword" autocomplete="new-password">
         </div>
         <div class="form-group">
@@ -391,8 +391,8 @@
 <div class="modal-overlay" id="shopViewModal">
     <div class="modal-panel modal-panel-sm">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-store" style="margin-right:8px;color:#004c4c;"></i> Shop Details</h3>
-            <button class="modal-close" type="button" id="shopViewCloseBtn">&times;</button>
+            <h2><i class="fa-solid fa-store" style="margin-right:8px;color:#004c4c;"></i> Shop Details</h2>
+            <button class="modal-close" aria-label="Close" type="button" id="shopViewCloseBtn">&times;</button>
         </div>
         <div class="modal-body" style="padding-top:16px;">
             <div class="modal-detail-row">

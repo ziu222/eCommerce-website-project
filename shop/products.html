@@ -87,7 +87,7 @@
         <div class="toolbar-right">
             <div class="search-box">
                 <i class="fa-solid fa-magnifying-glass"></i>
-                <input type="text" id="productSearch" placeholder="Search products...">
+                <input type="text" id="productSearch" aria-label="Search your products" placeholder="Search products...">
             </div>
             <button class="btn-primary" type="button" id="btnNewProduct">
                 <i class="fa-solid fa-plus"></i> New Product
@@ -122,20 +122,20 @@
 <div class="modal-overlay" id="productModal">
     <div class="modal-panel">
         <div class="modal-header">
-            <h3 id="modalTitle">New Product</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 id="modalTitle">New Product</h2>
+            <button class="modal-close" aria-label="Close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
             <p class="form-hint" id="reviewHint" style="display:none;margin:0 0 12px;font-size:13px;color:#3d4744;">
                 Saving checks the listing again. Customers cannot see it for the few seconds the check takes.
             </p>
             <div class="form-group">
-                <label class="form-label">Name</label>
+                <label class="form-label" for="modalName">Name</label>
                 <input type="text" class="form-input" id="modalName" maxlength="200" placeholder="e.g. Galaxy Buds Pro" />
             </div>
             <div class="form-row-2">
                 <div class="form-group">
-                    <label class="form-label">Category</label>
+                    <label class="form-label" for="modalCategory">Category</label>
                     <select class="form-input" id="modalCategory">
                         <option value="smartphone">Smartphone</option>
                         <option value="laptops">Laptops</option>
@@ -146,22 +146,22 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Stock</label>
+                    <label class="form-label" for="modalStock">Stock</label>
                     <input type="number" class="form-input" id="modalStock" min="0" step="1" value="1" />
                 </div>
             </div>
             <div class="form-row-2">
                 <div class="form-group">
-                    <label class="form-label">Price ($)</label>
+                    <label class="form-label" for="modalPrice">Price ($)</label>
                     <input type="number" class="form-input" id="modalPrice" min="0.01" step="0.01" placeholder="e.g. 199" />
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Old Price ($, optional)</label>
+                    <label class="form-label" for="modalOldPrice">Old Price ($, optional)</label>
                     <input type="number" class="form-input" id="modalOldPrice" min="0" step="0.01" placeholder="shown struck through" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="form-label">Description</label>
+                <label class="form-label" for="modalDescription">Description</label>
                 <textarea class="form-input" id="modalDescription" rows="3" maxlength="5000"></textarea>
             </div>
             <details class="form-group" id="pageContent">
@@ -177,7 +177,7 @@
                 <textarea class="form-input" id="modalBox" rows="3"></textarea>
             </details>
             <div class="form-group">
-                <label class="form-label">Photo</label>
+                <label class="form-label" for="modalImageFile">Photo</label>
                 <div style="display:flex;gap:12px;align-items:center;">
                     <img id="imagePreview" alt="" style="width:64px;height:64px;object-fit:cover;border-radius:10px;background:#f1f3f5;" src="../asset/img/placeholder/audio.svg" />
                     <div style="flex:1;">
@@ -185,7 +185,7 @@
                         <div id="uploadStatus" style="font-size:12px;color:#666;margin-top:4px;">PNG, JPEG or WebP, up to 2 MB</div>
                     </div>
                 </div>
-                <input type="text" class="form-input" id="modalImageUrl" style="margin-top:8px;" placeholder="or paste an https:// image link" />
+                <input type="text" class="form-input" id="modalImageUrl" aria-label="Image link" style="margin-top:8px;" placeholder="or paste an https:// image link" />
             </div>
             <div id="modalError" role="alert" style="display:none;color:#b42318;font-size:13px;white-space:pre-line;line-height:1.5;"></div>
         </div>

@@ -12,7 +12,7 @@
     padding: 28px 32px;
     max-width: 640px;
 }
-.notif-form-card h3 {
+.notif-form-card h2 {
     font-size: 15px;
     font-weight: 700;
     margin: 0 0 20px;
@@ -42,7 +42,7 @@
 .form-group textarea { resize: vertical; min-height: 90px; }
 .form-group input:focus,
 .form-group select:focus,
-.form-group textarea:focus { border-color: var(--primary, #6366f1); outline: none; }
+.form-group textarea:focus { border-color: var(--primary, #004c4c); outline: none; }
 
 .select-multi { height: 120px; }
 
@@ -61,7 +61,7 @@
     align-items: center;
     gap: 8px;
     padding: 10px 24px;
-    background: var(--primary, #6366f1);
+    background: var(--primary, #004c4c);
     color: #fff;
     border: none;
     border-radius: 8px;

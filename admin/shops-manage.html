@@ -101,7 +101,7 @@
             <div class="toolbar-right">
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    <input type="text" id="searchInput" placeholder="Search shops...">
+                    <input type="text" id="searchInput" aria-label="Search shops" placeholder="Search shops...">
                 </div>
                 <button class="btn-primary" id="btnAddShop">
                     <i class="fa-solid fa-plus"></i> Add Shop
@@ -137,8 +137,8 @@
 <div class="modal-overlay" id="shopModal">
     <div class="modal-panel">
         <div class="modal-header">
-            <h3 id="modalTitle">Shop Details</h3>
-            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <h2 id="modalTitle">Shop Details</h2>
+            <button class="modal-close" aria-label="Close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body" id="modalBody"></div>
         <div class="modal-footer" id="modalFooter"></div>
@@ -148,8 +148,8 @@
 <div class="modal-overlay" id="formModal">
     <div class="modal-panel modal-panel-md">
         <div class="modal-header">
-            <h3 id="formModalTitle">Add Shop</h3>
-            <button class="modal-close" onclick="closeFormModal()">&times;</button>
+            <h2 id="formModalTitle">Add Shop</h2>
+            <button class="modal-close" aria-label="Close" onclick="closeFormModal()">&times;</button>
         </div>
         <div class="modal-body">
             <form id="shopForm" autocomplete="off">
