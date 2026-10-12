@@ -4,6 +4,7 @@ import { RequirePermission } from '../auth/permissions.decorator.js';
 import type { SessionUser } from '../auth/session-user.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { AiGate } from './ai-gate.js';
+import { ModerationAlerts } from './alerts.service.js';
 import { DecideFlagDto, FlagsQuery, KeywordDto, SettingsDto } from './dto/moderation.dto.js';
 import { FlagsService } from './flags.service.js';
 import { ModerationSettings } from './settings.service.js';
@@ -15,6 +16,7 @@ export class AdminModerationController {
     private readonly settings: ModerationSettings,
     private readonly gate: AiGate,
     private readonly prisma: PrismaService,
+    private readonly alerts: ModerationAlerts,
   ) {}
 
   /** Whether the AI check is running, what it cost today, and how long products wait for it. */
@@ -29,11 +31,18 @@ export class AdminModerationController {
     const oldest = waiting._min.firstQueuedAt;
     return {
       ai,
-      breakerOpenUntil: this.gate.breakerOpenUntil(),
+      breakerOpenUntil: await this.gate.breakerOpenUntil(),
       spentTodayUsd: spent / 1_000_000,
       queueDepth: waiting._count._all,
       oldestWaitingMinutes: oldest ? Math.floor((Date.now() - oldest.getTime()) / 60_000) : 0,
     };
+  }
+
+  /** Alerts about the AI check from the last 24 hours (paused after errors, budget reached). */
+  @Get('alerts')
+  @RequirePermission('products.view')
+  recentAlerts() {
+    return this.alerts.recent();
   }
 
   @Get('flags')
