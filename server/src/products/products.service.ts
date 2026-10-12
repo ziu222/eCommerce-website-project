@@ -29,6 +29,7 @@ export interface ProductDto {
   stock: number;
   description: string;
   specs: unknown;
+  details: unknown;
   adminStatus: string;
   adminNote: string;
   /** reasons from the automatic checks; only on the shop's and the admins' views */
@@ -92,6 +93,7 @@ export function toProductDto(p: WithShop, internal = false): ProductDto {
     stock: p.stock,
     description: p.description,
     specs: p.specs,
+    details: p.details ?? null,
     adminStatus: p.adminStatus,
     adminNote: p.adminNote,
     reviewedBy: p.reviewedBy,
@@ -187,9 +189,9 @@ export class ProductsService {
   /** The rules run first: a blocked listing is refused and nothing is saved. */
   async create(shopId: number, dto: CreateProductDto): Promise<ProductDto> {
     await this.penalties.assertCan(shopId, 'createProduct');
-    const checks = await this.moderation.precheck(shopId, { ...dto, description: dto.description ?? '' });
+    const checks = await this.moderation.precheck(shopId, { ...dto, description: listingText(dto.description, dto.details) });
     if (checks.block.length) throw new ListingBlockedException(checks.block);
-    const row = await this.prisma.product.create({ data: { ...dto, shopId, adminStatus: 'pending' } });
+    const row = await this.prisma.product.create({ data: { ...dto, details: asJson(dto.details), shopId, adminStatus: 'pending' } });
     await this.moderation.decide(row.id, checks.flag, null);
     return this.own(row.id);
   }
@@ -199,12 +201,18 @@ export class ProductsService {
     const current = await this.prisma.product.findFirst({ where: { id, shopId } });
     if (!current) throw new NotFoundException('Product not found');
     await this.penalties.assertCan(shopId, 'editProduct');
-    const next = { name: current.name, description: current.description, price: Number(current.price), imageUrl: current.imageUrl, category: current.category, ...dto };
+    const next = {
+      name: dto.name ?? current.name,
+      price: dto.price ?? Number(current.price),
+      imageUrl: dto.imageUrl ?? current.imageUrl,
+      category: dto.category ?? current.category,
+      description: listingText(dto.description ?? current.description, dto.details ?? (current.details as ProductDetails | null)),
+    };
     const checks = await this.moderation.precheck(shopId, next, id);
     if (checks.block.length) throw new ListingBlockedException(checks.block);
     await this.prisma.product.update({
       where: { id },
-      data: { ...dto, adminStatus: 'pending', adminNote: '', reviewedBy: null, reviewedAt: null },
+      data: { ...dto, details: asJson(dto.details), adminStatus: 'pending', adminNote: '', reviewedBy: null, reviewedAt: null },
     });
     await this.moderation.decide(id, checks.flag, current.adminStatus);
     return this.own(id);
@@ -281,6 +289,25 @@ export class ProductsService {
     await this.notifications.notify(decisionNotice(updated, current.adminStatus === 'suspended' && to === 'approved' ? 'restored' : to, note));
     return toProductDto(updated, true);
   }
+}
+
+type ProductDetails = { overview?: string; features?: { title: string; body: string }[]; specGroups?: { group: string; items: [string, string][] }[]; inTheBox?: string[] };
+
+/** A validated DTO as plain JSON for a Json column (undefined leaves the column as it is). */
+function asJson(v: unknown): Prisma.InputJsonValue | undefined {
+  return v === undefined ? undefined : (JSON.parse(JSON.stringify(v)) as Prisma.InputJsonValue);
+}
+
+/** All the text a shop wrote for a listing, for the rules and the AI. */
+export function listingText(description: string | undefined, details: ProductDetails | null | undefined): string {
+  const d = details ?? {};
+  return [
+    description ?? '',
+    d.overview ?? '',
+    ...(d.features ?? []).map((f) => `${f.title}. ${f.body}`),
+    ...(d.specGroups ?? []).flatMap((g) => g.items.map(([k, v]) => `${k}: ${v}`)),
+    ...(d.inTheBox ?? []),
+  ].filter(Boolean).join('\n');
 }
 
 /** What the shop is told when an admin decides on one of its products. */

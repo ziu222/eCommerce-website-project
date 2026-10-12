@@ -66,6 +66,11 @@ describe('listing moderation', () => {
       expect(await prisma.product.count()).toBe(before);
     });
 
+    it('checks the product page details too, so a banned word cannot hide there', async () => {
+      const res = await (await apple()).post('/api/shop/products').send(listing({ details: { overview: 'Same quality as the brand, hang fake loai 1.' } })).expect(400);
+      expect(res.body.reasons[0].code).toBe('keyword');
+    });
+
     it('refuses a phone number in the description', async () => {
       const res = await (await apple()).post('/api/shop/products').send(listing({ description: 'Great headphones, call 0912 345 678 for a better price.' })).expect(400);
       expect(res.body.reasons.map((r: { code: string }) => r.code)).toContain('offplatform');
