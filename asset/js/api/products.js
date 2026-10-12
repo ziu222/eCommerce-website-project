@@ -18,6 +18,7 @@ Api.products = (function () {
             stock: p.stock,
             description: p.description,
             specs: p.specs || {},
+            details: p.details || null,
             adminStatus: p.adminStatus,
             adminNote: p.adminNote || "",
             moderationReasons: p.moderationReasons || [],
@@ -119,6 +120,7 @@ Api.shopProducts = (function () {
             description: data.description
         };
         if (data.oldPrice) body.oldPrice = data.oldPrice;
+        if (data.details) body.details = data.details;
         return body;
     }
 
