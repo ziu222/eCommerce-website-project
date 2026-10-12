@@ -93,8 +93,13 @@ export class AssistantService {
     const policies = await this.knowledge.search(question);
     if (!policies.length) return { type: 'text', text: copy.unsure, sources: [], actions: [staffAction] };
 
+    // the model gets each policy in the customer's language only, so it cannot echo the other half
+    const written = await this.writer.write(question, history, policies.map((p) => ({ ...p, body: policyText(p, vietnamese) })),
+      vietnamese ? 'Vietnamese' : 'English',
+    );
+    // the word search found policies, but none of them answers this question: no sources to show
+    if (written && !written.covered) return { type: 'text', text: written.text, sources: [], actions: [staffAction] };
     const sources = policies.map((p) => ({ slug: p.slug, title: p.title }));
-    const written = await this.writer.write(question, history, policies);
-    return { type: 'text', text: written ?? policyText(policies[0], vietnamese), sources, actions: [staffAction] };
+    return { type: 'text', text: written?.text ?? policyText(policies[0], vietnamese), sources, actions: [staffAction] };
   }
 }
