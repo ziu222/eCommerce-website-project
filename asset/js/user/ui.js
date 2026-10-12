@@ -162,7 +162,17 @@ var UI = (function () {
         live = new EventSource("/api/notifications/stream");
         var dropped = false;
         live.addEventListener("error", function () { dropped = true; });
-        live.addEventListener("open", function () { if (dropped) { dropped = false; refreshBell(); } });
+        live.addEventListener("open", function () {
+            if (!dropped) return;
+            dropped = false;
+            refreshBell();
+            // anything listening (the support chat) fetches what it missed while offline
+            document.dispatchEvent(new CustomEvent("live:resync"));
+        });
+        // a support conversation changed (staff replied or closed it); the chat widget fetches the details
+        live.addEventListener("support", function (e) {
+            document.dispatchEvent(new CustomEvent("support:change", { detail: JSON.parse(e.data) }));
+        });
         live.addEventListener("order", function (e) {
             var d = JSON.parse(e.data);
             toast("Order #" + d.orderId + " " + (LIVE_NOTE[d.status] || "changed to " + d.status), d.status === "cancelled" ? "error" : "success");

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query, Sse, UseGuards } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { CurrentUser } from '../auth/current-user.decorator.js';
 import { RequirePermission } from '../auth/permissions.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import type { SessionUser } from '../auth/session-user.js';
+import { LiveService } from '../notifications/live.service.js';
 import { AfterQuery, CreateThreadDto, MessageDto, StaffThreadsQuery } from './dto/support.dto.js';
 import { PresenceService } from './presence.service.js';
 import { SupportService } from './support.service.js';
@@ -13,6 +14,7 @@ export class SupportController {
   constructor(
     private readonly support: SupportService,
     private readonly presence: PresenceService,
+    private readonly live: LiveService,
   ) {}
 
   /** Whether any staff member is at their desk right now (shown to customers before they write). */
@@ -59,6 +61,7 @@ export class StaffSupportController {
   constructor(
     private readonly support: SupportService,
     private readonly presence: PresenceService,
+    private readonly live: LiveService,
   ) {}
 
   @Get('threads')
@@ -89,6 +92,13 @@ export class StaffSupportController {
   @RequirePermission('support.reply')
   close(@Param('id', ParseIntPipe) id: number) {
     return this.support.close(id);
+  }
+
+  /** Live updates for the support inbox (server-sent events): which conversation changed and how. */
+  @Sse('stream')
+  @RequirePermission('support.view')
+  stream(@CurrentUser() user: SessionUser) {
+    return this.live.stream(user.id, undefined, ['support-staff']);
   }
 
   /** Staff screens call this every half minute while open. */

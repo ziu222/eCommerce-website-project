@@ -3,8 +3,9 @@
 
 var SupportThreads = (function () {
 
-    var POLL_THREAD_MS = 4000;
-    var POLL_UNREAD_MS = 30000;
+    // staff replies arrive live (support:change from ui.js); polling is only the fallback
+    var POLL_THREAD_MS = 20000;
+    var POLL_UNREAD_MS = 60000;
     var esc = Api.escapeHtml;
 
     var root, tabs, botBox, staffTab, botTab;
@@ -224,6 +225,14 @@ var SupportThreads = (function () {
         staffTab.addEventListener("click", function () { showTab("staff"); });
         refreshUnread(true);
         setInterval(refreshUnread, POLL_UNREAD_MS);
+
+        function catchUp(threadId) {
+            refreshUnread(true);
+            if (view === "thread" && current && (threadId === undefined || current.id === threadId)) poll(true);
+            else if (view === "list") showList();
+        }
+        document.addEventListener("support:change", function (e) { catchUp(e.detail.threadId); });
+        document.addEventListener("live:resync", function () { catchUp(); });
     }
 
     // Called by the bot's "Talk to staff" button.
