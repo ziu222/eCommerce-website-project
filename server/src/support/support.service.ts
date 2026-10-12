@@ -1,5 +1,6 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import type { Prisma, SupportStatus } from '../generated/prisma/client.js';
+import { LiveService } from '../notifications/live.service.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import type { CreateThreadDto, StaffThreadsQuery } from './dto/support.dto.js';
 
@@ -26,7 +27,19 @@ function toMessage(m: MessageRow, who: Map<number, string>) {
 
 @Injectable()
 export class SupportService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly live: LiveService,
+  ) {}
+
+  /**
+   * Live updates: every support page hears about each conversation; the customer hears about staff replies
+   * and closing. Events only say what changed; pages fetch the messages they are missing.
+   */
+  private tell(threadId: number, kind: 'new' | 'message' | 'closed', customerId?: number): void {
+    this.live.emit({ group: 'support-staff', type: 'support', data: { threadId, kind } });
+    if (customerId !== undefined) this.live.emit({ userId: customerId, type: 'support', data: { threadId, kind } });
+  }
 
   private async messagesAfter(threadId: number, after = 0) {
     const rows = await this.prisma.supportMessage.findMany({ where: { threadId, id: { gt: after } }, orderBy: { id: 'asc' } });
@@ -49,6 +62,7 @@ export class SupportService {
         messages: { create: { authorType: 'customer', authorId: customerId, body: dto.message } },
       },
     });
+    this.tell(thread.id, 'new');
     return { id: thread.id, subject: thread.subject, status: thread.status };
   }
 
@@ -151,23 +165,26 @@ export class SupportService {
   }
 
   async close(id: number): Promise<void> {
-    const thread = await this.prisma.supportThread.findUnique({ where: { id }, select: { status: true } });
+    const thread = await this.prisma.supportThread.findUnique({ where: { id }, select: { status: true, customerId: true } });
     if (!thread) throw new NotFoundException('Conversation not found');
     // The status in the WHERE keeps two staff members from "closing" the same conversation twice.
     const { count } = await this.prisma.supportThread.updateMany({ where: { id, status: { not: 'closed' } }, data: { status: 'closed', updatedAt: new Date() } });
     if (!count) throw new ConflictException('This conversation is already closed');
+    this.tell(id, 'closed', thread.customerId);
   }
 
   // ---- shared
 
   private async addMessage(threadId: number, authorType: 'customer' | 'agent', authorId: number, body: string, status: SupportStatus) {
-    const [message] = await this.prisma.$transaction([
+    const [message, thread] = await this.prisma.$transaction([
       this.prisma.supportMessage.create({ data: { threadId, authorType, authorId, body } }),
       this.prisma.supportThread.update({
         where: { id: threadId },
         data: { status, updatedAt: new Date(), ...(authorType === 'agent' && { assignedToId: authorId }) },
       }),
     ]);
+    // the customer only needs to hear about staff replies; their own messages are already on their screen
+    this.tell(threadId, 'message', authorType === 'agent' ? thread.customerId : undefined);
     const who = await names(this.prisma, [authorId]);
     return toMessage(message, who);
   }

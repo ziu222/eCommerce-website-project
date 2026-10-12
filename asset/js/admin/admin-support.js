@@ -1,12 +1,13 @@
 // admin-support.js — the support inbox for CSKH staff: waiting conversations, reading, replying, closing.
-// The list and the open conversation refresh by themselves, and a heartbeat tells customers someone is online.
+// The list and the open conversation update live, and a heartbeat tells customers someone is online.
 
 Auth.requirePermission("support.view");
 
 (function () {
 
-    var LIST_POLL_MS = 10000;
-    var THREAD_POLL_MS = 4000;
+    // changes arrive live over /api/admin/support/stream; polling is only the fallback
+    var LIST_POLL_MS = 60000;
+    var THREAD_POLL_MS = 20000;
     var HEARTBEAT_MS = 30000;
     var esc = Api.escapeHtml;
 
@@ -153,6 +154,34 @@ Auth.requirePermission("support.view");
         }
     }
 
+    // ---------- live updates
+
+    var listTimer = null;
+    // several events can land at once (a reply also changes the list); refresh the list once
+    function soonLoadList() {
+        clearTimeout(listTimer);
+        listTimer = setTimeout(loadList, 300);
+    }
+
+    function listenLive() {
+        if (!window.EventSource) return;
+        var es = new EventSource("/api/admin/support/stream");
+        var dropped = false;
+        es.addEventListener("error", function () { dropped = true; });
+        es.addEventListener("open", function () {
+            if (!dropped) return;
+            dropped = false;
+            // events sent while offline are not replayed
+            soonLoadList();
+            refreshThread(false, true);
+        });
+        es.addEventListener("support", function (e) {
+            var d = JSON.parse(e.data);
+            soonLoadList();
+            if (d.threadId === openId) refreshThread(false, true);
+        });
+    }
+
     // ---------- start-up
 
     function init() {
@@ -178,6 +207,7 @@ Auth.requirePermission("support.view");
         el("btnClose").addEventListener("click", closeThread);
 
         loadList();
+        listenLive();
         setInterval(function () { if (!document.hidden) loadList(); }, LIST_POLL_MS);
         setInterval(function () { refreshThread(false); }, THREAD_POLL_MS);
 

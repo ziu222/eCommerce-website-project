@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AuthModule } from '../src/auth/auth.module.js';
+import { LiveService, type LiveGroup } from '../src/notifications/live.service.js';
 import { PrismaModule } from '../src/prisma/prisma.module.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
 import { runSeed } from '../src/seed/seed.js';
@@ -11,6 +12,7 @@ import { SupportModule } from '../src/support/support.module.js';
 describe('support conversations', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  let live: LiveService;
   const server = () => app.getHttpServer();
 
   async function login(identifier: string, password: string) {
@@ -34,6 +36,7 @@ describe('support conversations', () => {
     configureApp(app);
     await app.init();
     prisma = moduleRef.get(PrismaService);
+    live = moduleRef.get(LiveService);
     await prisma.$executeRawUnsafe('TRUNCATE "User", "Product", "Order", "Coupon", "Notification" RESTART IDENTITY CASCADE');
     await runSeed(prisma);
   }, 120000);
@@ -211,6 +214,39 @@ describe('support conversations', () => {
       await (await agent()).post('/api/admin/support/presence').expect(204);
       expect((await guest.get('/api/support/availability').expect(200)).body).toEqual({ online: true });
       await (await login('pm_user', '123')).post('/api/admin/support/presence').expect(403);
+    });
+  });
+
+  describe('live updates', () => {
+    // what one open page would receive over server-sent events
+    function listen(userId: number, groups: LiveGroup[] = []) {
+      const got: { type: string; data: Record<string, unknown> }[] = [];
+      const sub = live.stream(userId, 60_000, groups).subscribe((e) => got.push(e as never));
+      return { got, stop: () => sub.unsubscribe() };
+    }
+
+    it('tells staff about new conversations, messages and closing, and the customer about staff replies and closing', async () => {
+      const staff = listen(999, ['support-staff']);
+      const owner = listen(2);
+      const stranger = listen(3);
+      const t = await open();
+      await (await customer()).post(`/api/support/threads/${t.id}/messages`).send({ body: 'Any update?' }).expect(201);
+      await (await agent()).post(`/api/admin/support/threads/${t.id}/messages`).send({ body: 'Please send us a photo.' }).expect(201);
+      await (await agent()).post(`/api/admin/support/threads/${t.id}/close`).expect(201);
+      expect(staff.got.map((e) => [e.type, e.data.threadId, e.data.kind])).toEqual([
+        ['support', t.id, 'new'],
+        ['support', t.id, 'message'],
+        ['support', t.id, 'message'],
+        ['support', t.id, 'closed'],
+      ]);
+      expect(owner.got.map((e) => [e.type, e.data.threadId, e.data.kind])).toEqual([['support', t.id, 'message'], ['support', t.id, 'closed']]);
+      expect(stranger.got).toEqual([]);
+      [staff, owner, stranger].forEach((l) => l.stop());
+    });
+
+    it('opens the staff stream only for support staff', async () => {
+      await (await customer()).get('/api/admin/support/stream').expect(403);
+      await request(server()).get('/api/admin/support/stream').expect(401);
     });
   });
 });
