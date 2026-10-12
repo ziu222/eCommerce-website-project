@@ -13,7 +13,7 @@ describe('support assistant', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   const writerCalls: { question: string; slugs: string[] }[] = [];
-  let writerAnswer: string | null = null;
+  let writerAnswer: { text: string; covered: boolean } | null = null;
   const server = () => app.getHttpServer();
 
   const ask = (content: string, history: { role: 'user' | 'assistant'; content: string }[] = []) =>
@@ -67,12 +67,18 @@ describe('support assistant', () => {
     });
 
     it('lets the model phrase the answer when one is configured, and hands it only the matching policies', async () => {
-      writerAnswer = 'You have 30 days.';
+      writerAnswer = { text: 'You have 30 days.', covered: true };
       const res = await ask('Can I return something after 3 weeks?').expect(201);
       expect(res.body.text).toBe('You have 30 days.');
       expect(writerCalls).toHaveLength(1);
       expect(writerCalls[0].slugs).toContain('returns');
       expect(writerCalls[0].slugs.length).toBeLessThanOrEqual(3);
+    });
+
+    it('shows no sources when the model finds the matched policies do not answer the question', async () => {
+      writerAnswer = { text: 'Mình chưa chắc, cửa hàng chỉ nhận COD và ví.', covered: false };
+      const res = await ask('có trả góp không').expect(201);
+      expect(res.body).toMatchObject({ type: 'text', text: writerAnswer.text, sources: [], actions: ['login'] });
     });
 
     it('falls back to the policy text when the model gives nothing', async () => {
