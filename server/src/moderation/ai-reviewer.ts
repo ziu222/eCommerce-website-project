@@ -10,10 +10,15 @@ export interface AiVerdict {
   inputTokens: number;
   outputTokens: number;
   latencyMs: number;
+  /** whether the photo went to the model with the text */
+  imageChecked: boolean;
 }
 
 /** The AI could not give a usable answer: timeout, HTTP error, or a reply that is not the agreed JSON. */
 export class AiUnavailable extends Error {}
+
+/** OpenAI refused the request because it could not use the photo (bad link, not an image, too large). */
+class ImageRefused extends AiUnavailable {}
 
 // ponytail: list prices for gpt-4o-mini in micro-dollars per token; check OpenAI's pricing page if the model changes
 const PRICE_MICROS = { input: 0.15, output: 0.6 };
@@ -40,13 +45,27 @@ const SCHEMA = {
   },
 };
 
-/** One OpenAI call that judges a listing against the marketplace rules. */
+/** OpenAI can only see photos it can download; local asset paths and plain http stay text only. */
+const canSee = (url: string) => url.toLowerCase().startsWith('https://');
+
+/** One OpenAI call that judges a listing (its text, and its photo when there is one) against the marketplace rules. */
 @Injectable()
 export class AiReviewer {
   async review(
     listing: ListingInput,
-    opts: { rules: string; model: string; timeoutMs: number },
+    opts: { rules: string; model: string; timeoutMs: number; checkImage?: boolean },
   ): Promise<AiVerdict> {
+    const withImage = !!opts.checkImage && canSee(listing.imageUrl);
+    try {
+      return await this.call(listing, opts, withImage);
+    } catch (e) {
+      // a photo OpenAI cannot download is the seller's problem, not an outage: judge the text alone
+      if (withImage && e instanceof ImageRefused) return this.call(listing, opts, false);
+      throw e;
+    }
+  }
+
+  private async call(listing: ListingInput, opts: { rules: string; model: string; timeoutMs: number }, withImage: boolean): Promise<AiVerdict> {
     const started = Date.now();
     const system =
       'You review product listings for EC SHOP, an electronics marketplace in Vietnam. Judge the listing only against these rules:\n' +
@@ -55,7 +74,11 @@ export class AiReviewer {
       // gpt-4o-mini compares numbers poorly; the rules already check prices against the category median
       'Do not judge the price; another check does that. ' +
       'Answer "clean" when nothing breaks the rules, "suspect" when something might, and "severe" only for clearly prohibited or counterfeit goods. ' +
-      'Give one short reason per problem, written for the seller, in English.';
+      'Give one short reason per problem, written for the seller, in English.' +
+      (withImage
+        ? ' Also look at the photo: it must show the product named in the title, in the stated category. ' +
+          'Flag a photo of a different product (misleading), phone numbers, links or chat handles written on the photo (offplatform), and prohibited goods.'
+        : '');
     const user =
       `<listing>\nCategory: ${listing.category}\nTitle: ${listing.name}\nDescription: ${listing.description}\n</listing>`;
 
@@ -71,7 +94,10 @@ export class AiReviewer {
           response_format: { type: 'json_schema', json_schema: { name: 'listing_review', strict: true, schema: SCHEMA } },
           messages: [
             { role: 'system', content: system },
-            { role: 'user', content: user },
+            {
+              role: 'user',
+              content: withImage ? [{ type: 'text', text: user }, { type: 'image_url', image_url: { url: listing.imageUrl, detail: 'low' } }] : user,
+            },
           ],
         }),
         signal: AbortSignal.timeout(opts.timeoutMs),
@@ -79,7 +105,10 @@ export class AiReviewer {
     } catch (e) {
       throw new AiUnavailable(`request failed: ${(e as Error).name}`);
     }
-    if (!res.ok) throw new AiUnavailable(`HTTP ${res.status}`);
+    if (!res.ok) {
+      if (withImage && res.status === 400 && /image/i.test(await res.text().catch(() => ''))) throw new ImageRefused();
+      throw new AiUnavailable(`HTTP ${res.status}`);
+    }
 
     const body = (await res.json().catch(() => null)) as {
       choices?: { message?: { content?: string } }[];
@@ -106,6 +135,7 @@ export class AiReviewer {
       inputTokens: body?.usage?.prompt_tokens ?? 0,
       outputTokens: body?.usage?.completion_tokens ?? 0,
       latencyMs: Date.now() - started,
+      imageChecked: withImage,
     };
   }
 }

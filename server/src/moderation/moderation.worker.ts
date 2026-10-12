@@ -121,7 +121,7 @@ export class ModerationWorker implements OnModuleInit, OnModuleDestroy {
     for (const wait of [0, ...this.retryDelaysMs]) {
       if (wait) await sleep(wait);
       try {
-        const v = await this.reviewer.review(listing, { rules: s.listingRules, model: s.aiModel, timeoutMs: s.aiTimeoutMs });
+        const v = await this.reviewer.review(listing, { rules: s.listingRules, model: s.aiModel, timeoutMs: s.aiTimeoutMs, checkImage: s.aiImageCheck });
         await this.gate.success();
         return v;
       } catch (e) {

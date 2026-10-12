@@ -32,6 +32,7 @@ export class KeywordDto {
 export class SettingsDto {
   @IsOptional() @IsBoolean() aiEnabled?: boolean;
   @IsOptional() @IsString() @MaxLength(60) aiModel?: string;
+  @IsOptional() @IsBoolean() aiImageCheck?: boolean;
   @IsOptional() @IsNumber() @Min(0) aiDailyBudgetUsd?: number;
   @IsOptional() @IsInt() @Min(1000) @Max(60000) aiTimeoutMs?: number;
   @IsOptional() @IsInt() @Min(1) breakerFailures?: number;

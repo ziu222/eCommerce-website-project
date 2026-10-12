@@ -299,6 +299,7 @@ Auth.requirePermission("products.view");
         { title: "AI check", icon: "fa-robot", fields: [
             ["aiEnabled", "Run the AI check", "bool", "Off: the rules decide alone."],
             ["aiModel", "Model", "text"],
+            ["aiImageCheck", "Check the photo too", "bool", "The AI also looks at https photos: the right product, no contact details on it."],
             ["aiDailyBudgetUsd", "Daily budget (USD)", "num", "When spent, the backup standard applies until midnight."],
             ["aiTimeoutMs", "Timeout (ms)", "num"],
             ["breakerFailures", "Pause after this many failures in a row", "num"],
