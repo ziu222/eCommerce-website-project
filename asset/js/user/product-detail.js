@@ -101,11 +101,15 @@
         function add() {
             for (var i = 0; i < qty; i++) addToCart(p.id);
         }
+        var resetBtn = null;
         document.getElementById("btnAddCart").addEventListener("click", function () {
             add();
             var self = this;
-            self.innerHTML = '<span class="ms">check</span>Added';
-            setTimeout(function () { self.innerHTML = '<span class="ms">add_shopping_cart</span>Add to cart'; }, 1400);
+            // "Cart to tick" by Josh Duckworth (LottieFiles), recoloured: asset/lottie/cart-tick.json
+            self.innerHTML = '<span class="anim btn-anim" data-lottie="cart-tick" data-speed="1.4"><span class="ms">check</span></span>Added';
+            clearTimeout(resetBtn);
+            resetBtn = setTimeout(function () { self.innerHTML = '<span class="ms">add_shopping_cart</span>Add to cart'; }, 1800);
+            flyToCart();
             UI.toast(qty > 1 ? qty + " items added to your cart" : "Added to your cart");
         });
         document.getElementById("btnBuyNow").addEventListener("click", function () {
@@ -117,7 +121,37 @@
         renderStory(p);
     }
 
-    // ---------- the story below the buy box
+    // ---------- motion (Motion 11, loaded by the page; everything still works without it)
+
+    var M = window.Motion;
+    var EASE_OUT = [0.22, 1, 0.36, 1];
+
+    function moving() { return !!M && UI.motion() === "full"; }
+
+    // A copy of the product photo arcs from the gallery into the bag in the header, which then bumps.
+    function flyToCart() {
+        var img = document.querySelector(".detail-media img");
+        var bag = document.getElementById("cart-btn");
+        if (!moving() || !img || !bag) return;
+        var a = img.getBoundingClientRect(), b = bag.getBoundingClientRect();
+        if (b.width === 0 || a.bottom < 0) return;
+        var size = Math.min(a.width, a.height) * 0.5;
+        var ghost = img.cloneNode();
+        ghost.className = "fly-ghost";
+        ghost.removeAttribute("alt");
+        ghost.style.cssText = "left:" + (a.left + (a.width - size) / 2) + "px;top:" + (a.top + (a.height - size) / 2) + "px;width:" + size + "px;height:" + size + "px";
+        document.body.appendChild(ghost);
+        setTimeout(function () { ghost.remove(); }, 1500); // never left behind if the flight stalls
+        var dx = b.left + b.width / 2 - (a.left + a.width / 2);
+        var dy = b.top + b.height / 2 - (a.top + a.height / 2);
+        M.animate(ghost, { x: [0, dx * 0.45, dx], y: [0, Math.min(dy, 0) - 80, dy], scale: [1, 0.6, 0.08], opacity: [1, 1, 0.6] },
+            { duration: 0.75, ease: [EASE_OUT, [0.55, 0, 0.9, 0.4]] }).then(function () {
+            ghost.remove();
+            M.animate(bag, { scale: [1, 1.28, 1] }, { type: "spring", bounce: 0.5, duration: 0.5 });
+        });
+    }
+
+    // ---------- the story below the buy box: one panel at a time, switched by tabs
 
     function overviewHtml(p, d) {
         if (!d.overview) return "";
@@ -127,22 +161,19 @@
             var cut = paras[0].search(/\.\s/);
             if (cut > 40 && cut < paras[0].length - 40) paras = [paras[0].slice(0, cut + 1), paras[0].slice(cut + 2)];
         }
-        return '<section class="pd-section pd-overview" id="overview" aria-labelledby="ovTitle">' +
-            '<h2 id="ovTitle">About the ' + esc(p.name) + "</h2>" +
-            paras.map(function (t, i) { return "<p" + (i === 0 ? ' class="lead"' : "") + ">" + esc(t) + "</p>"; }).join("") +
-            "</section>";
+        return '<div class="pd-overview"><h2>About the ' + esc(p.name) + "</h2>" +
+            paras.map(function (t, i) { return "<p" + (i === 0 ? ' class="lead"' : "") + ">" + esc(t) + "</p>"; }).join("") + "</div>";
     }
 
     function technologyHtml(d) {
         var f = d.features || [];
         if (!f.length) return "";
-        return '<section class="pd-section" id="technology" aria-labelledby="techTitle">' +
-            '<h2 id="techTitle">The technology inside</h2>' +
+        return "<h2>The technology inside</h2>" +
             '<div class="tech tech--' + Math.min(f.length, 3) + '">' + f.slice(0, 3).map(function (x, i) {
                 return '<article class="tech-tile tech-tile--' + (i + 1) + '">' +
                     '<span class="tech-icon"><span class="ms">' + esc(x.icon || "info") + "</span></span>" +
                     "<h3>" + esc(x.title) + "</h3><p>" + esc(x.body) + "</p></article>";
-            }).join("") + "</div></section>";
+            }).join("") + "</div>";
     }
 
     function specsHtml(p, d) {
@@ -150,25 +181,22 @@
             // no grouped specs yet: show the short key specs as one group
             Object.keys(p.specs || {}).length ? [{ group: "Key specifications", items: Object.keys(p.specs).map(function (k) { return [k.replace(/_/g, " "), p.specs[k]]; }) }] : [];
         if (!groups.length) return "";
-        return '<section class="pd-section" id="specifications" aria-labelledby="specTitle">' +
-            '<h2 id="specTitle">Specifications</h2>' +
+        return "<h2>Specifications</h2>" +
             '<div class="spec-groups">' + groups.map(function (g) {
                 return '<div class="spec-group"><h3><span class="ms" aria-hidden="true">' + groupIcon(g.group) + "</span>" + esc(g.group) + "</h3><dl>" +
                     g.items.map(function (it) { return "<div><dt>" + esc(it[0]) + "</dt><dd>" + esc(it[1]) + "</dd></div>"; }).join("") +
                     "</dl></div>";
             }).join("") + "</div>" +
-            '<p class="spec-note"><span class="ms" aria-hidden="true">info</span>Specifications are for reference and can differ by region, model year or configuration. Check with the seller before you buy.</p>' +
-            "</section>";
+            '<p class="spec-note"><span class="ms" aria-hidden="true">info</span>Specifications are for reference and can differ by region, model year or configuration. Check with the seller before you buy.</p>';
     }
 
     function boxHtml(p, d) {
         var items = d.inTheBox || [];
         if (!items.length) return "";
-        return '<section class="pd-section" id="in-the-box" aria-labelledby="boxTitle">' +
-            '<h2 id="boxTitle">In the box</h2>' +
+        return "<h2>In the box</h2>" +
             '<ul class="box-list">' + items.map(function (it, i) {
                 return '<li style="--i:' + i + '"><span class="ms" aria-hidden="true">' + (i === 0 ? "inventory_2" : "check") + "</span>" + esc(it) + "</li>";
-            }).join("") + "</ul></section>";
+            }).join("") + "</ul>";
     }
 
     function renderStory(p) {
@@ -181,44 +209,115 @@
         ].filter(function (x) { return x[2]; });
         var host = document.getElementById("pd-more");
         if (!parts.length) { host.innerHTML = ""; return; }
+        var start = Math.max(0, parts.findIndex(function (x) { return "#" + x[0] === location.hash; }));
+        var single = parts.length === 1;
         host.innerHTML =
-            (parts.length > 1 ? '<nav class="pd-nav" aria-label="Product sections"><div class="pd-nav-track">' +
-                parts.map(function (x, i) { return '<a href="#' + x[0] + '"' + (i === 0 ? ' aria-current="true"' : "") + ">" + x[1] + "</a>"; }).join("") +
-                '<span class="pd-nav-bar" aria-hidden="true"></span></div></nav>' : "") +
-            parts.map(function (x) { return x[2]; }).join("");
-        if (parts.length > 1) followSections(host);
+            (single ? "" : '<div class="pd-tabs" role="tablist" aria-label="Product details">' +
+                parts.map(function (x, i) {
+                    return '<button type="button" role="tab" class="pd-tab" id="pd-tab-' + x[0] + '" aria-controls="pd-panel-' + x[0] + '" aria-selected="' + (i === start) + '"' +
+                        (i === start ? "" : ' tabindex="-1"') + ">" + x[1] + "</button>";
+                }).join("") + '<span class="pd-tab-bar" aria-hidden="true"></span></div>') +
+            '<div class="pd-stage">' + parts.map(function (x, i) {
+                return '<section class="pd-panel" id="pd-panel-' + x[0] + '"' + (single ? "" : ' role="tabpanel" aria-labelledby="pd-tab-' + x[0] + '" tabindex="0"') +
+                    (i === start ? "" : " hidden") + ">" + x[2] + "</section>";
+            }).join("") + "</div>";
+        if (!single) tabsFor(host, parts.map(function (x) { return x[0]; }), start);
     }
 
-    // The section tabs mark the section in view; the bar slides under the current tab.
-    function followSections(host) {
-        var links = Array.prototype.slice.call(host.querySelectorAll(".pd-nav a"));
-        var bar = host.querySelector(".pd-nav-bar");
+    // The pieces of a panel that come in one after another when it opens.
+    var PANEL_ITEMS = ".pd-panel > h2, .pd-overview p, .tech-tile, .spec-group, .spec-note, .box-list li";
+
+    // Tabs switch the panel in place: the bar springs to the chosen tab, the new panel slides in from
+    // the side of its tab, the stage eases to the new height and the panel's pieces rise in one by one.
+    function tabsFor(host, ids, current) {
+        var tabs = Array.prototype.slice.call(host.querySelectorAll(".pd-tab"));
+        var panels = Array.prototype.slice.call(host.querySelectorAll(".pd-panel"));
+        var bar = host.querySelector(".pd-tab-bar");
+        var stage = host.querySelector(".pd-stage");
+        var list = host.querySelector(".pd-tabs");
+        var running = [];
+
         // on phones the site header carries a search row, so it is taller than --nav-h
         var hdr = document.querySelector(".site-nav");
-        function fit() { if (hdr) host.style.setProperty("--hdr-h", hdr.offsetHeight + "px"); }
+        function fit() {
+            if (hdr) host.style.setProperty("--hdr-h", hdr.offsetHeight + "px");
+            moveBar(false);
+        }
+
+        function moveBar(animate) {
+            var t = tabs[current];
+            var from = { left: bar.style.left || "0px", width: bar.style.width || "0px" };
+            var to = { left: t.offsetLeft + "px", width: t.offsetWidth + "px" };
+            // the bar is placed first, so it ends in the right spot even if no frame ever plays
+            bar.style.left = to.left;
+            bar.style.width = to.width;
+            if (animate && moving()) {
+                M.animate(bar, { left: [from.left, to.left], width: [from.width, to.width] }, { type: "spring", bounce: 0.22, duration: 0.5 });
+            }
+            // keep the chosen tab visible on narrow screens without scrolling the page
+            if (t.offsetLeft < list.scrollLeft || t.offsetLeft + t.offsetWidth > list.scrollLeft + list.clientWidth) list.scrollLeft = t.offsetLeft - 16;
+        }
+
+        // a second click while a switch is still playing jumps the old one to its end first
+        function settle() {
+            running.forEach(function (a) { a.stop(); });
+            running = [];
+            panels.forEach(function (el, i) {
+                el.hidden = i !== current;
+                el.style.opacity = "";
+                el.style.transform = "";
+            });
+            stage.style.height = "";
+            stage.classList.remove("is-entering");
+            stage.querySelectorAll(PANEL_ITEMS).forEach(function (el) { el.style.opacity = ""; el.style.transform = ""; });
+        }
+
+        function select(i, focus) {
+            if (i === current) return;
+            settle();
+            var from = panels[current], to = panels[i], dir = i > current ? 1 : -1;
+            current = i;
+            tabs.forEach(function (t, k) {
+                t.setAttribute("aria-selected", String(k === i));
+                if (k === i) t.removeAttribute("tabindex"); else t.setAttribute("tabindex", "-1");
+            });
+            if (focus) tabs[i].focus();
+            moveBar(true);
+            history.replaceState(null, "", "#" + ids[i]);
+
+            // when the tabs are stuck under the header, start the new panel right below them
+            var past = stage.getBoundingClientRect().top - ((hdr ? hdr.offsetHeight : 64) + list.offsetHeight);
+            if (past < 0) window.scrollTo(0, window.scrollY + past);
+
+            // the panel changes at once; the motion only plays on top, so a paused or missing
+            // animation can never leave the wrong panel showing
+            var h0 = stage.offsetHeight;
+            from.hidden = true;
+            to.hidden = false;
+            if (!moving()) return;
+            var h1 = stage.offsetHeight;
+            stage.classList.add("is-entering");
+            var grow = M.animate(stage, { height: [h0 + "px", h1 + "px"] }, { duration: 0.38, ease: EASE_OUT });
+            var rise = M.animate(to.querySelectorAll(PANEL_ITEMS), { opacity: [0, 1], y: [14, 0] }, { duration: 0.42, ease: EASE_OUT, delay: M.stagger(0.045, { startDelay: 0.04 }) });
+            running.push(grow, rise, M.animate(to, { opacity: [0, 1], x: [24 * dir, 0] }, { duration: 0.34, ease: EASE_OUT }));
+            grow.then(function () { if (panels[current] === to) stage.style.height = ""; });
+            rise.then(function () { if (panels[current] === to) stage.classList.remove("is-entering"); });
+        }
+
+        tabs.forEach(function (t, i) {
+            t.addEventListener("click", function () { select(i, false); });
+        });
+        // arrow keys move along the tabs (and open them), Home and End jump to the ends
+        list.addEventListener("keydown", function (e) {
+            var k = { ArrowRight: current + 1, ArrowLeft: current - 1, Home: 0, End: tabs.length - 1 }[e.key];
+            if (k === undefined) return;
+            e.preventDefault();
+            select((k + tabs.length) % tabs.length, true);
+        });
+
         fit();
         window.addEventListener("resize", fit);
-        function mark(id) {
-            links.forEach(function (a) {
-                var on = a.getAttribute("href") === "#" + id;
-                if (on) {
-                    a.setAttribute("aria-current", "true");
-                    bar.style.width = a.offsetWidth + "px";
-                    bar.style.transform = "translateX(" + a.offsetLeft + "px)";
-                    // keep the current tab visible on narrow screens without scrolling the page
-                    var track = a.parentNode;
-                    if (a.offsetLeft < track.scrollLeft || a.offsetLeft + a.offsetWidth > track.scrollLeft + track.clientWidth) track.scrollLeft = a.offsetLeft - 16;
-                } else {
-                    a.removeAttribute("aria-current");
-                }
-            });
-        }
-        mark(links[0].getAttribute("href").slice(1));
-        if (!window.IntersectionObserver) return;
-        var io = new IntersectionObserver(function (entries) {
-            entries.forEach(function (e) { if (e.isIntersecting) mark(e.target.id); });
-        }, { rootMargin: "-35% 0px -55% 0px" });
-        links.forEach(function (a) { io.observe(document.getElementById(a.getAttribute("href").slice(1))); });
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     }
 
     // ---------- report a listing (customers only; three reports send it to the moderation queue)
