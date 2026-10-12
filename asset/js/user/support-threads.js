@@ -67,7 +67,7 @@ var SupportThreads = (function () {
             root.querySelectorAll(".sc-thread").forEach(function (b) {
                 b.addEventListener("click", function () { showThread(Number(b.dataset.id)); });
             });
-            root.querySelector("#scNewThread").addEventListener("click", showNew);
+            root.querySelector("#scNewThread").addEventListener("click", function () { showNew(); });
         } catch (e) {
             root.innerHTML = '<div class="sc-messages"><p>Could not load your conversations. Please try again.</p></div>';
         }
@@ -227,9 +227,13 @@ var SupportThreads = (function () {
         setInterval(refreshUnread, POLL_UNREAD_MS);
 
         function catchUp(threadId) {
+            if (view === "thread" && current && (threadId === undefined || current.id === threadId)) {
+                // reading the thread marks it seen, so count what is unread only after that
+                poll(true).then(function () { refreshUnread(true); });
+                return;
+            }
             refreshUnread(true);
-            if (view === "thread" && current && (threadId === undefined || current.id === threadId)) poll(true);
-            else if (view === "list") showList();
+            if (view === "list") showList();
         }
         document.addEventListener("support:change", function (e) { catchUp(e.detail.threadId); });
         document.addEventListener("live:resync", function () { catchUp(); });
