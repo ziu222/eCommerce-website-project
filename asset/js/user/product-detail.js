@@ -153,6 +153,8 @@
 
     // ---------- the story below the buy box: one panel at a time, switched by tabs
 
+    // The overview: the opening sentence as the headline, the rest as body copy, the technology
+    // titles as quick highlights, and a card with the first line of each spec group.
     function overviewHtml(p, d) {
         if (!d.overview) return "";
         var paras = d.overview.split(/\n\s*\n/).filter(Boolean);
@@ -161,8 +163,27 @@
             var cut = paras[0].search(/\.\s/);
             if (cut > 40 && cut < paras[0].length - 40) paras = [paras[0].slice(0, cut + 1), paras[0].slice(cut + 2)];
         }
-        return '<div class="pd-overview"><h2>About the ' + esc(p.name) + "</h2>" +
-            paras.map(function (t, i) { return "<p" + (i === 0 ? ' class="lead"' : "") + ">" + esc(t) + "</p>"; }).join("") + "</div>";
+        // a short opening sentence makes a better headline than "About the ..."
+        var head = paras[0].length <= 140 ? paras.shift() : "About the " + p.name;
+        var points = (d.features || []).slice(0, 4).map(function (f) {
+            return '<li><span class="ms" aria-hidden="true">check</span>' + esc(f.title) + "</li>";
+        }).join("");
+        var nums = (d.specGroups && d.specGroups.length ? d.specGroups.map(function (g) {
+                // the first line of each group that says more than yes or no
+                return g.items.find(function (it) { return !/^(yes|no)$/i.test(it[1]); }) || [];
+            }) :
+            Object.keys(p.specs || {}).map(function (k) { return [k.replace(/_/g, " "), p.specs[k]]; }))
+            .filter(function (x) { return x[1]; }).slice(0, 4);
+        return '<div class="pd-overview"><div class="ov-copy">' +
+            '<p class="ov-kicker">' + esc(UI.categoryLabel(p.category)) + (p.shop && p.shop.shopName ? " · " + esc(p.shop.shopName) : "") + "</p>" +
+            '<h2 class="ov-head">' + esc(head) + "</h2>" +
+            paras.map(function (x) { return '<p class="ov-body">' + esc(x) + "</p>"; }).join("") +
+            (points ? '<ul class="ov-points">' + points + "</ul>" : "") + "</div>" +
+            (nums.length ? '<aside class="ov-card" aria-label="Key numbers"><p class="ov-card-title">Key numbers</p><dl>' +
+                nums.map(function (n) { return "<div><dt>" + esc(n[0]) + "</dt><dd>" + esc(n[1]) + "</dd></div>"; }).join("") + "</dl>" +
+                (d.specGroups && d.specGroups.length ? '<button type="button" class="ov-more" data-tab="specifications">See all specifications<span class="ms" aria-hidden="true">arrow_forward</span></button>' : "") +
+                "</aside>" : "") +
+            "</div>";
     }
 
     function technologyHtml(d) {
@@ -225,7 +246,7 @@
     }
 
     // The pieces of a panel that come in one after another when it opens.
-    var PANEL_ITEMS = ".pd-panel > h2, .pd-overview p, .tech-tile, .spec-group, .spec-note, .box-list li";
+    var PANEL_ITEMS = ".pd-panel > h2, .ov-copy > *, .ov-points li, .ov-card, .tech-tile, .spec-group, .spec-note, .box-list li";
 
     // Tabs switch the panel in place: the bar springs to the chosen tab, the new panel slides in from
     // the side of its tab, the stage eases to the new height and the panel's pieces rise in one by one.
@@ -306,6 +327,12 @@
 
         tabs.forEach(function (t, i) {
             t.addEventListener("click", function () { select(i, false); });
+        });
+        // links inside a panel that open another tab ("See all specifications")
+        stage.addEventListener("click", function (e) {
+            var go = e.target.closest("[data-tab]");
+            var i = go ? ids.indexOf(go.dataset.tab) : -1;
+            if (i >= 0) select(i, true);
         });
         // arrow keys move along the tabs (and open them), Home and End jump to the ends
         list.addEventListener("keydown", function (e) {
