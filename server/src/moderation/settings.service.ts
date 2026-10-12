@@ -6,6 +6,8 @@ import { PrismaService } from '../prisma/prisma.service.js';
 export const DEFAULT_SETTINGS = {
   aiEnabled: true,
   aiModel: 'gpt-4o-mini',
+  // send the listing photo with the text (https photos only); about $0.0004 more per check
+  aiImageCheck: true,
   aiDailyBudgetUsd: 2,
   aiTimeoutMs: 10_000,
   breakerFailures: 5,

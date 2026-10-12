@@ -23,8 +23,8 @@ describe('listing moderation with the AI check', () => {
   const server = () => app.getHttpServer();
   const savedKey = process.env.OPENAI_API_KEY;
 
-  let answer: () => Promise<Omit<AiVerdict, 'model' | 'latencyMs'>> = async () => ({ verdict: 'clean', reasons: [], inputTokens: 600, outputTokens: 30 });
-  const reviewer = { review: vi.fn(async () => ({ ...(await answer()), model: 'test', latencyMs: 5 })) };
+  let answer: () => Promise<Omit<AiVerdict, 'model' | 'latencyMs' | 'imageChecked'>> = async () => ({ verdict: 'clean', reasons: [], inputTokens: 600, outputTokens: 30 });
+  const reviewer = { review: vi.fn(async () => ({ ...(await answer()), model: 'test', latencyMs: 5, imageChecked: false })) };
   const failing = async (): Promise<never> => {
     throw new AiUnavailable('down');
   };
@@ -83,6 +83,8 @@ describe('listing moderation with the AI check', () => {
     expect(p.adminStatus).toBe('pending');
     await request(server()).get(`/api/products/${p.id}`).expect(404);
     await drain();
+    // the photo check is on by default
+    expect(reviewer.review).toHaveBeenLastCalledWith(expect.objectContaining({ imageUrl: expect.any(String) }), expect.objectContaining({ checkImage: true }));
     expect(await product(p.id)).toMatchObject({ adminStatus: 'approved', provisional: false });
     const check = await prisma.moderationCheck.findFirstOrThrow({ where: { productId: p.id, layer: 'ai' } });
     expect(check).toMatchObject({ outcome: 'clean', inputTokens: 600, costMicros: 108 });
