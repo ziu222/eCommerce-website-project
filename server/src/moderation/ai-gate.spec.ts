@@ -1,10 +1,16 @@
 import { AiGate } from './ai-gate.js';
 import { DEFAULT_SETTINGS } from './settings.service.js';
 
-function gate(spentMicros: number, patch: Partial<typeof DEFAULT_SETTINGS> = {}) {
-  const prisma = { moderationCheck: { aggregate: vi.fn().mockResolvedValue({ _sum: { costMicros: spentMicros } }) } };
+// the breaker itself is shared through Postgres; test/ai-gate.e2e-spec.ts covers it against a real database
+function gate(spentMicros: number, patch: Partial<typeof DEFAULT_SETTINGS> = {}, budgetAlreadySent = false) {
+  const prisma = {
+    moderationCheck: { aggregate: vi.fn().mockResolvedValue({ _sum: { costMicros: spentMicros } }) },
+    aiBreaker: { findUnique: vi.fn().mockResolvedValue(null) },
+    $queryRaw: vi.fn().mockResolvedValue(budgetAlreadySent ? [] : [{ id: 1 }]),
+  };
   const settings = { get: vi.fn().mockResolvedValue({ ...DEFAULT_SETTINGS, ...patch }) };
-  return new AiGate(prisma as never, settings as never);
+  const alerts = { send: vi.fn() };
+  return { g: new AiGate(prisma as never, settings as never, alerts as never), alerts };
 }
 
 describe('AI gate', () => {
@@ -18,26 +24,18 @@ describe('AI gate', () => {
   });
 
   it('is off without a key or when switched off', async () => {
-    expect(await gate(0, { aiEnabled: false }).state()).toBe('off');
+    expect(await gate(0, { aiEnabled: false }).g.state()).toBe('off');
     delete process.env.OPENAI_API_KEY;
-    expect(await gate(0).state()).toBe('off');
+    expect(await gate(0).g.state()).toBe('off');
   });
 
-  it('is up under the budget and stops at the budget', async () => {
-    expect(await gate(1_999_999).state()).toBe('up');
-    expect(await gate(2_000_000).state()).toBe('budget');
-  });
-
-  it('opens the breaker after the set number of failures in a row, and a success resets the count', async () => {
-    const g = gate(0, { breakerFailures: 3 });
-    await g.failure();
-    await g.failure();
-    g.success();
-    await g.failure();
-    await g.failure();
-    expect(await g.state()).toBe('up');
-    await g.failure();
-    expect(await g.state()).toBe('paused');
-    expect(g.breakerOpenUntil()).toBeInstanceOf(Date);
+  it('is up under the budget and stops at the budget, alerting only when the day is claimed', async () => {
+    expect(await gate(1_999_999).g.state()).toBe('up');
+    const first = gate(2_000_000);
+    expect(await first.g.state()).toBe('budget');
+    expect(first.alerts.send).toHaveBeenCalledWith('budget', { budgetUsd: 2 });
+    const later = gate(2_000_000, {}, true);
+    expect(await later.g.state()).toBe('budget');
+    expect(later.alerts.send).not.toHaveBeenCalled();
   });
 });

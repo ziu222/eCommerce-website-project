@@ -480,3 +480,13 @@ model PenaltyAppeal {
 
   @@index([status, createdAt])
 }
+
+/// The AI circuit breaker, one row shared by every server instance (id is always 1).
+model AiBreaker {
+  id             Int       @id @default(1)
+  failures       Int       @default(0)
+  openUntil      DateTime?
+  /// local date (YYYY-MM-DD) of the last "budget reached" alert, so it goes out once a day
+  budgetAlertDay String?
+  updatedAt      DateTime  @updatedAt
+}

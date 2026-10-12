@@ -122,7 +122,7 @@ export class ModerationWorker implements OnModuleInit, OnModuleDestroy {
       if (wait) await sleep(wait);
       try {
         const v = await this.reviewer.review(listing, { rules: s.listingRules, model: s.aiModel, timeoutMs: s.aiTimeoutMs });
-        this.gate.success();
+        await this.gate.success();
         return v;
       } catch (e) {
         if (!(e instanceof AiUnavailable)) throw e;
