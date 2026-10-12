@@ -2,6 +2,7 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { AuthModule } from '../src/auth/auth.module.js';
+import { AiGate } from '../src/moderation/ai-gate.js';
 import { AiReviewer, AiUnavailable, type AiVerdict } from '../src/moderation/ai-reviewer.js';
 import { ModerationModule } from '../src/moderation/moderation.module.js';
 import { ModerationService } from '../src/moderation/moderation.service.js';
@@ -17,6 +18,8 @@ describe('listing moderation with the AI check', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let worker: ModerationWorker;
+  let gate: AiGate;
+  const alerts = (title: string) => prisma.notification.count({ where: { type: 'ai_alert', title } });
   const server = () => app.getHttpServer();
   const savedKey = process.env.OPENAI_API_KEY;
 
@@ -60,10 +63,11 @@ describe('listing moderation with the AI check', () => {
     await app.init();
     prisma = moduleRef.get(PrismaService);
     worker = moduleRef.get(ModerationWorker);
+    gate = moduleRef.get(AiGate);
     worker.retryDelaysMs = [0, 0];
     // the tests drive the worker themselves
     moduleRef.get(ModerationService).kick = () => {};
-    await prisma.$executeRawUnsafe('TRUNCATE "User", "Product", "Order", "Coupon", "Notification", "BannedKeyword", "ModerationSetting" RESTART IDENTITY CASCADE');
+    await prisma.$executeRawUnsafe('TRUNCATE "User", "Product", "Order", "Coupon", "Notification", "BannedKeyword", "ModerationSetting", "AiBreaker" RESTART IDENTITY CASCADE');
     await runSeed(prisma);
     await settings({ breakerFailures: 100 });
   }, 120000);
@@ -153,6 +157,25 @@ describe('listing moderation with the AI check', () => {
       await create();
       await drain();
       expect(reviewer.review.mock.calls.length).toBe(calls);
+      expect(await alerts('AI check paused')).toBe(1);
+    });
+
+    it('opens the shared breaker once when many failures land at the same time', async () => {
+      await prisma.aiBreaker.deleteMany();
+      await prisma.notification.deleteMany({ where: { type: 'ai_alert' } });
+      await settings({ breakerFailures: 5 });
+      await Promise.all(Array.from({ length: 12 }, () => gate.failure()));
+      expect(await gate.state()).toBe('paused');
+      expect(await alerts('AI check paused')).toBe(1);
+      await gate.success();
+      expect((await prisma.aiBreaker.findUniqueOrThrow({ where: { id: 1 } })).failures).toBe(0);
+    });
+
+    it('lists the AI alerts of the last day for viewers only', async () => {
+      await prisma.notification.create({ data: { targetRole: 'admin', type: 'ai_alert', source: 'moderation', sentBy: 'system', title: 'AI budget reached', message: 'old', createdAt: new Date(Date.now() - 2 * 86_400_000) } });
+      const body = (await (await login('ba_user', '123')).get('/api/admin/moderation/alerts').expect(200)).body;
+      expect(body.items.map((a: { title: string }) => a.title)).toEqual(['AI check paused']);
+      await (await apple()).get('/api/admin/moderation/alerts').expect(403);
     });
   });
 
@@ -162,5 +185,16 @@ describe('listing moderation with the AI check', () => {
     const health = (await (await staff()).get('/api/admin/moderation/health').expect(200)).body;
     expect(['budget', 'paused']).toContain(health.ai);
     expect(health.spentTodayUsd).toBeGreaterThanOrEqual(5);
+  });
+
+  it('sends the budget alert once a day', async () => {
+    await prisma.aiBreaker.deleteMany();
+    await prisma.notification.deleteMany({ where: { type: 'ai_alert' } });
+    expect(await gate.state()).toBe('budget');
+    expect(await gate.state()).toBe('budget');
+    expect(await alerts('AI budget reached')).toBe(1);
+    await prisma.aiBreaker.update({ where: { id: 1 }, data: { budgetAlertDay: '2000-01-01' } });
+    await gate.state();
+    expect(await alerts('AI budget reached')).toBe(2);
   });
 });

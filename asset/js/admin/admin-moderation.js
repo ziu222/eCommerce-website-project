@@ -61,11 +61,24 @@ Auth.requirePermission("products.view");
             strip.dataset.state = h.ai;
             document.getElementById("aiTitle").textContent = copy[0];
             document.getElementById("aiDetail").textContent = copy[1];
+            loadAlerts();
         } catch (e) {
             strip.dataset.state = "paused";
             document.getElementById("aiTitle").textContent = "Could not read the moderation status";
             document.getElementById("aiDetail").textContent = e.message;
         }
+    }
+
+    // what went wrong with the AI check in the last day (paused after errors, budget reached)
+    async function loadAlerts() {
+        var box = document.getElementById("aiAlerts");
+        var items = (await Api.moderation.alerts()).items;
+        box.hidden = !items.length;
+        box.innerHTML = items.map(function (a) {
+            var at = new Date(a.createdAt);
+            return '<div class="ai-alert"><time datetime="' + at.toISOString() + '">' + at.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }) + "</time>" +
+                "<div><strong>" + esc(a.title) + "</strong><span>" + esc(a.message) + "</span></div></div>";
+        }).join("");
     }
 
     async function loadCounts() {

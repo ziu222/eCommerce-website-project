@@ -13,6 +13,7 @@ Api.moderation = (function () {
     return {
         // admin
         health: function () { return Api.request("GET", "/admin/moderation/health"); },
+        alerts: function () { return Api.request("GET", "/admin/moderation/alerts"); },
         flags: function (params) { return Api.request("GET", "/admin/moderation/flags" + qs(params)); },
         decide: function (id, decision, note, points) {
             return Api.request("POST", "/admin/moderation/flags/" + id + "/decide", { decision: decision, note: note || undefined, points: points || undefined });
