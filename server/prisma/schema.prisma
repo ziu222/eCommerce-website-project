@@ -75,6 +75,8 @@ model User {
   passwordHash    String
   role            Role
   adminRole       AdminRole?
+  /// topics a CSKH position handles; empty means every topic (a lead or generalist)
+  supportTopics   SupportTopic[] @default([])
   status          String      @default("active")
   avatar          String?
   coverPhoto      String?
@@ -264,6 +266,16 @@ enum SupportStatus {
   closed
 }
 
+/// What a customer needs help with; each CSKH position handles some topics.
+enum SupportTopic {
+  orders // orders and delivery
+  returns // returns and refunds
+  payments // payments and the wallet
+  products // product questions and warranty
+  account // the customer's account
+  other
+}
+
 enum SupportAuthor {
   customer
   agent
@@ -277,6 +289,7 @@ model SupportThread {
   assignedToId          Int?
   assignedTo            User?            @relation("ThreadAgent", fields: [assignedToId], references: [id])
   subject               String
+  topic                 SupportTopic     @default(other)
   status                SupportStatus    @default(open)
   botTranscript         String?
   customerReadMessageId Int              @default(0)
@@ -285,6 +298,7 @@ model SupportThread {
   messages              SupportMessage[]
 
   @@index([status, updatedAt])
+  @@index([topic, status])
   @@index([customerId])
 }
 

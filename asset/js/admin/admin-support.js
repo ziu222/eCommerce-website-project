@@ -12,6 +12,9 @@ Auth.requirePermission("support.view");
     var esc = Api.escapeHtml;
 
     var statusFilter = "open";
+    var topicFilter = null;  // "mine" | "all" | a topic id; chosen from the first summary
+    var mineTopics = [];     // the topics of this staff member; empty means every topic
+    var byTopic = {};        // waiting conversations per topic
     var openId = null;       // id of the conversation on the right
     var lastMessageId = 0;
     var canReply = Auth.hasPermission("support.reply");
@@ -24,9 +27,14 @@ Auth.requirePermission("support.view");
 
     // ---------- list
 
+    function topicTag(id) {
+        var t = Api.supportTopic(id);
+        return '<span class="support-tag"><i class="fa-solid ' + t.fa + '" aria-hidden="true"></i>' + esc(t.label) + "</span>";
+    }
+
     async function loadList() {
         try {
-            var threads = await Api.adminSupport.list(statusFilter || undefined);
+            var threads = await Api.adminSupport.list(statusFilter || undefined, topicFilter && topicFilter !== "all" ? topicFilter : undefined);
             renderList(threads);
         } catch (e) {
             el("threadList").innerHTML = "";
@@ -41,7 +49,27 @@ Auth.requirePermission("support.view");
             var s = await Api.adminSupport.summary();
             el("countOpen").textContent = s.open;
             el("countAnswered").textContent = s.answered;
+            mineTopics = s.mine;
+            byTopic = s.byTopic;
+            // a position that handles some topics starts on them; the lead and generalists start on everything
+            if (topicFilter === null) topicFilter = mineTopics.length ? "mine" : "all";
+            renderTopicFilter(s.open);
         } catch (e) { /* counts are decoration */ }
+    }
+
+    function renderTopicFilter(totalOpen) {
+        var sum = function (ids) { return ids.reduce(function (n, id) { return n + (byTopic[id] || 0); }, 0); };
+        var chips = [];
+        if (mineTopics.length) chips.push(["mine", "My topics", sum(mineTopics)]);
+        chips.push(["all", "All topics", totalOpen]);
+        Api.supportTopics.forEach(function (t) { chips.push([t.id, t.label, byTopic[t.id] || 0]); });
+        el("topicFilter").innerHTML = chips.map(function (c) {
+            return '<button type="button" class="support-topic-chip" data-topic="' + c[0] + '" aria-pressed="' + (topicFilter === c[0]) + '">' + esc(c[1]) +
+                (c[2] ? ' <span class="support-count">' + c[2] + "</span>" : "") + "</button>";
+        }).join("");
+        el("topicFilter").querySelectorAll(".support-topic-chip").forEach(function (b) {
+            b.addEventListener("click", function () { topicFilter = b.dataset.topic; loadList(); });
+        });
     }
 
     function renderList(threads) {
@@ -53,7 +81,7 @@ Auth.requirePermission("support.view");
             return '<button type="button" class="support-item" data-id="' + t.id + '"' + (t.id === openId ? ' aria-current="true"' : "") + ">" +
                 '<span class="support-item-top"><span class="support-item-name">' + esc(t.customer.name) + "</span>" +
                 '<span class="support-item-time">' + esc(time(t.updatedAt)) + "</span></span>" +
-                '<span class="support-item-subject">' + esc(t.subject) + "</span>" +
+                '<span class="support-item-subject">' + esc(t.subject) + "</span>" + topicTag(t.topic) +
                 '<span class="support-item-last">' + esc(last) + "</span></button>";
         }).join("");
         box.querySelectorAll(".support-item").forEach(function (b) {
@@ -76,6 +104,7 @@ Auth.requirePermission("support.view");
         badge.textContent = label;
         badge.className = "badge " + ({ open: "badge-pending", answered: "badge-confirmed", closed: "badge-cancelled" }[status] || "");
         var closed = status === "closed";
+        el("threadTopic").disabled = closed || !canReply;
         el("replyForm").hidden = closed || !canReply;
         el("btnClose").hidden = closed || !canReply;
     }
@@ -106,6 +135,7 @@ Auth.requirePermission("support.view");
             meta.dataset.customer = t.customer.name;
             meta.textContent = t.customer.name + " · " + t.customer.email + (t.assignedTo ? " · handled by " + t.assignedTo : "");
             setStatus(t.status);
+            el("threadTopic").value = t.topic;
 
             if (first) {
                 el("botBox").hidden = !t.botTranscript.length;
@@ -140,6 +170,19 @@ Auth.requirePermission("support.view");
             alert(e.message);
         } finally {
             el("btnReply").disabled = false;
+        }
+    }
+
+    // the customer may have picked the wrong topic: moving the conversation hands it to the right position
+    async function changeTopic() {
+        var select = el("threadTopic");
+        if (!openId) return;
+        try {
+            await Api.adminSupport.setTopic(openId, select.value);
+            await loadList();
+        } catch (e) {
+            alert(e.message);
+            refreshThread(false, true);
         }
     }
 
@@ -205,8 +248,11 @@ Auth.requirePermission("support.view");
             if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendReply(); }
         });
         el("btnClose").addEventListener("click", closeThread);
+        el("threadTopic").innerHTML = Api.supportTopics.map(function (t) { return '<option value="' + t.id + '">' + esc(t.label) + "</option>"; }).join("");
+        el("threadTopic").addEventListener("change", changeTopic);
 
-        loadList();
+        // the first summary decides which topics to start on, then the list loads
+        loadCounts().then(loadList);
         listenLive();
         setInterval(function () { if (!document.hidden) loadList(); }, LIST_POLL_MS);
         setInterval(function () { refreshThread(false); }, THREAD_POLL_MS);

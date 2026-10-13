@@ -5,7 +5,7 @@ import { RequirePermission } from '../auth/permissions.decorator.js';
 import { Roles } from '../auth/roles.decorator.js';
 import type { SessionUser } from '../auth/session-user.js';
 import { LiveService } from '../notifications/live.service.js';
-import { AfterQuery, CreateThreadDto, MessageDto, StaffThreadsQuery } from './dto/support.dto.js';
+import { AfterQuery, CreateThreadDto, MessageDto, StaffThreadsQuery, TopicDto } from './dto/support.dto.js';
 import { PresenceService } from './presence.service.js';
 import { SupportService } from './support.service.js';
 
@@ -66,14 +66,14 @@ export class StaffSupportController {
 
   @Get('threads')
   @RequirePermission('support.view')
-  list(@Query() query: StaffThreadsQuery) {
-    return this.support.listForStaff(query);
+  list(@CurrentUser() user: SessionUser, @Query() query: StaffThreadsQuery) {
+    return this.support.listForStaff(user.id, query);
   }
 
   @Get('summary')
   @RequirePermission('support.view')
-  summary() {
-    return this.support.summary();
+  summary(@CurrentUser() user: SessionUser) {
+    return this.support.summary(user.id);
   }
 
   @Get('threads/:id')
@@ -86,6 +86,14 @@ export class StaffSupportController {
   @RequirePermission('support.reply')
   reply(@CurrentUser() user: SessionUser, @Param('id', ParseIntPipe) id: number, @Body() dto: MessageDto) {
     return this.support.agentReply(user.id, id, dto.body);
+  }
+
+  /** Moves a conversation to another topic (and so to another position). */
+  @Post('threads/:id/topic')
+  @HttpCode(200)
+  @RequirePermission('support.reply')
+  setTopic(@Param('id', ParseIntPipe) id: number, @Body() dto: TopicDto) {
+    return this.support.setTopic(id, dto.topic);
   }
 
   @Post('threads/:id/close')

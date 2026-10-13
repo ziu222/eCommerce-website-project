@@ -173,7 +173,14 @@
 
 .sc-staff { display: none; flex: 1; flex-direction: column; min-height: 0; }
 .sc-staff.sc-open { display: flex; }
-.sc-notice { padding: 12px 16px; background: var(--warn-soft, #fdf0d8); border-bottom: 1px solid #f0dca0; color: var(--warn, #8a4b00); font-size: 13px; }
+/* the Staff tab is a doorway to the Support page */
+.sc-door { display: grid; align-content: start; gap: 12px; padding: 20px 16px; }
+.sc-door-title { margin: 0; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink, #151b1a); }
+.sc-door-text { margin: 0; color: var(--ink-2, #44504d); font-size: 14px; line-height: 1.55; }
+.sc-door .sc-send, .sc-door .sc-action { justify-content: center; min-height: 44px; text-decoration: none; }
+.sc-door .sc-send { display: inline-flex; align-items: center; margin-top: 4px; }
+.sc-door .sc-action { gap: 8px; }
+.sc-door .sc-badge[hidden] { display: none; }
 .sc-bot { display: flex; flex: 1; flex-direction: column; min-height: 0; }
 .sc-bot.sc-hidden { display: none; }
 

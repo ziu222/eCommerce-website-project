@@ -208,5 +208,52 @@
     "avatar": "",
     "createdAt": "2025-01-03",
     "adminRole": "support"
+  },
+  {
+    "id": 16,
+    "name": "Support Orders",
+    "username": "cskh_orders",
+    "email": "cskh.orders@ecshop.com",
+    "password": "123",
+    "role": "admin",
+    "status": "active",
+    "avatar": "",
+    "createdAt": "2025-01-03",
+    "adminRole": "support",
+    "supportTopics": [
+      "orders"
+    ]
+  },
+  {
+    "id": 17,
+    "name": "Support Billing",
+    "username": "cskh_billing",
+    "email": "cskh.billing@ecshop.com",
+    "password": "123",
+    "role": "admin",
+    "status": "active",
+    "avatar": "",
+    "createdAt": "2025-01-03",
+    "adminRole": "support",
+    "supportTopics": [
+      "returns",
+      "payments"
+    ]
+  },
+  {
+    "id": 18,
+    "name": "Support Product",
+    "username": "cskh_product",
+    "email": "cskh.product@ecshop.com",
+    "password": "123",
+    "role": "admin",
+    "status": "active",
+    "avatar": "",
+    "createdAt": "2025-01-03",
+    "adminRole": "support",
+    "supportTopics": [
+      "products",
+      "account"
+    ]
   }
 ]

@@ -51,6 +51,7 @@
             <button class="filter-tab" type="button" data-status="closed">Closed</button>
             <button class="filter-tab" type="button" data-status="">All</button>
         </div>
+        <div class="support-topics" id="topicFilter" role="group" aria-label="Filter by topic"></div>
         <div class="support-items" id="threadList"></div>
         <p class="support-empty" id="listEmpty" hidden>No conversations here.</p>
     </section>
@@ -68,6 +69,8 @@
                     <p class="support-meta" id="threadMeta"></p>
                 </div>
                 <div class="support-thread-actions">
+                    <label for="threadTopic" class="support-sr">Topic</label>
+                    <select id="threadTopic" class="support-topic-select" title="Move this conversation to another position"></select>
                     <span class="badge" id="threadStatus"></span>
                     <button type="button" class="btn-danger" id="btnClose"><i class="fa-solid fa-check"></i> Close</button>
                 </div>

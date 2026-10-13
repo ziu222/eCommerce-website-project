@@ -32,6 +32,20 @@
     text-align: center;
 }
 
+/* topic filter: one chip per topic, with how many conversations wait in it */
+.support-topics { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border-bottom: 1px solid #eef1f3; }
+.support-topic-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 11px; border: 1px solid #d5dde2; border-radius: 999px; background: #fff; color: #2c3a37; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 0.15s, border-color 0.15s; }
+.support-topic-chip:hover { border-color: #0a6e6e; background: #f5f9f9; }
+.support-topic-chip[aria-pressed="true"] { border-color: #0a6e6e; background: #0a6e6e; color: #fff; }
+.support-topic-chip[aria-pressed="true"] .support-count { background: rgba(255, 255, 255, 0.22); color: #fff; }
+.support-topic-chip:focus-visible { outline: 3px solid #f5b942; outline-offset: 2px; }
+.support-topic-chip .support-count { margin-left: 0; }
+.support-tag { display: inline-flex; align-items: center; gap: 5px; margin: 4px 0; padding: 2px 9px 2px 7px; border-radius: 999px; background: #eef3f3; color: #2c3a37; font-size: 12px; font-weight: 600; }
+.support-tag i { color: #0a6e6e; font-size: 11px; }
+.support-topic-select { height: 36px; padding: 0 10px; border: 1px solid #d5dde2; border-radius: 8px; background: #fff; color: #1f2933; font: inherit; font-size: 13px; }
+.support-topic-select:focus-visible { outline: 3px solid #f5b942; outline-offset: 2px; }
+.support-topic-select:disabled { background: #f3f5f6; color: #5b6773; }
+
 .support-items { flex: 1; overflow-y: auto; }
 .support-item {
     display: block;
@@ -51,8 +65,8 @@
 .support-item-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px; }
 .support-item-name { font-weight: 600; }
 .support-item-time { color: #5b6773; font-size: 12px; white-space: nowrap; }
-.support-item-subject { overflow: hidden; color: #1f2933; text-overflow: ellipsis; white-space: nowrap; }
-.support-item-last { overflow: hidden; color: #5b6773; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.support-item-subject { display: block; overflow: hidden; color: #1f2933; text-overflow: ellipsis; white-space: nowrap; }
+.support-item-last { display: block; overflow: hidden; color: #5b6773; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .support-empty { padding: 24px; color: #5b6773; text-align: center; }
 
 .support-placeholder {
